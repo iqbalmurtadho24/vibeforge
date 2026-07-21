@@ -1,3 +1,5 @@
+<img width="2816" height="1536" alt="Gemini_Generated_Image_6v8hra6v8hra6v8h" src="https://github.com/user-attachments/assets/97316596-8376-43b5-b5d3-c4bf913841e4" />
+
 # 🔥 Vibeforge
 
 *Tempa aplikasi Anda dari dokumen ke kode jadi — dengan bantuan AI.*
