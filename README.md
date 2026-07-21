@@ -35,13 +35,15 @@ cd C:\xampp\htdocs
 >
 > Di PowerShell, pindah drive cukup dengan `cd D:\laragon\www` langsung (beda dengan Command Prompt/`cmd.exe` yang butuh `cd /d D:\laragon\www`).
 
-Lalu unduh Vibeforge (ganti `username` dengan akun GitHub Anda sendiri):
+Lalu unduh Vibeforge — command ini bisa langsung di-copy-paste apa adanya, *cukup ganti `<nama-aplikasi-anda>`* dengan nama project Anda sendiri (contoh: `toko-online-saya`):
 
 ```bash
-npx degit username/vibeforge nama-aplikasi-saya
-cd nama-aplikasi-saya
+npx degit iqbalmurtadho24/vibeforge <nama-aplikasi-anda>
+cd <nama-aplikasi-anda>
 code .
 ```
+
+> ⚠️ Bagian `iqbalmurtadho24/vibeforge` *JANGAN diubah* — itu alamat resmi repo Vibeforge. Yang perlu Anda ganti hanya `<nama-aplikasi-anda>` (termasuk tanda `<` `>`-nya, jangan ikut disalin).
 
 Folder yang muncul adalah salinan bersih Vibeforge — *tanpa riwayat git*, siap dipakai sebagai project baru.
 
@@ -99,15 +101,39 @@ atau tekan `Shift+Tab` di dalam sesi yang sedang berjalan. Ini hanya mengurangi 
 
 ---
 
+## Troubleshooting (Windows)
+
+Tiga error paling umum yang biasa muncul di Windows, beserta solusinya:
+
+*❌ `git : The term 'git' is not recognized...`*
+Git belum ada di PATH sistem. Kalau pakai Laragon: klik kanan ikon tray Laragon → *Tools* → *PATH* → *Add Laragon to PATH*, lalu tutup dan buka ulang terminal/VS Code. Kalau masih gagal, install [Git for Windows](https://git-scm.com/download/win) langsung (pilih opsi default saat instalasi, itu sudah otomatis menambahkan ke PATH).
+
+*❌ `npx : File ...npx.ps1 cannot be loaded because running scripts is disabled on this system`*
+
+Ini *khusus terjadi di PowerShell* — bukan di Command Prompt (`cmd.exe`). Cek dulu terminal mana yang Anda pakai: kalau prompt-nya diawali `PS C:\...>` berarti PowerShell (kemungkinan ini yang kena error di atas); kalau cuma `C:\...>` tanpa `PS`, berarti Command Prompt, dan error ini *tidak akan muncul* di sana sama sekali (jadi tidak perlu langkah di bawah ini).
+
+Kalau Anda memang di PowerShell, jalankan perintah berikut *di PowerShell itu sendiri* (perintah ini adalah cmdlet PowerShell — tidak akan dikenali kalau dicoba di Command Prompt):
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+Ketik `Y` saat diminta konfirmasi. Setelah ini, `npx`, `npm`, dan tool berbasis Node.js lain akan berjalan normal di PowerShell.
+
+> 💡 Kalau tidak mau ubah setting apa pun, alternatifnya: pakai Command Prompt saja untuk perintah `npx degit` (buka lewat Start Menu → ketik `cmd`), atau di dalam PowerShell jalankan `cmd /c "npx degit ..."` untuk satu baris itu saja.
+
+*❌ `Cannot find path 'C:\laragon\www' because it does not exist`*
+Laragon/XAMPP Anda mungkin terinstal di drive lain (bukan `C:`). Klik kanan ikon tray Laragon → klik *"www"* untuk membuka folder aslinya di File Explorer dan lihat drive yang benar di address bar (misal `D:\laragon\www`), lalu sesuaikan command `cd` Anda.
+
+---
+
 ## Setelah selesai
 
 Buka aplikasi Anda di:
 
 ```
-http://nama-aplikasi-saya.test/
+http://<nama-aplikasi-anda>.test/
 ```
 
-(sesuai nama folder project, mengikuti konvensi Auto Virtual Host Laragon — atau URL sesuai konfigurasi XAMPP Anda).
+(ganti `<nama-aplikasi-anda>` dengan nama folder project yang Anda pakai di Langkah 1 — mengikuti konvensi Auto Virtual Host Laragon, atau URL sesuai konfigurasi XAMPP Anda).
 
 ---
 
