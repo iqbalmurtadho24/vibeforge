@@ -1,0 +1,967 @@
+﻿<?php
+/**
+ * Client Shell
+ *
+ * Shell for client/creator role.
+ */
+
+defined('APP_ENTRY') or define('APP_ENTRY', true);
+
+require_once __DIR__ . '/../../include/config.php';
+require_once __DIR__ . '/../../include/helper.php';
+
+// Initialize session
+initSession();
+
+// Handle language change
+if (!empty($_GET['lang']) && in_array($_GET['lang'], getAvailableLocaleCodes(), true)) {
+    $_SESSION['language'] = $_GET['lang'];
+}
+
+// Detect/set language
+$currentLang = $_SESSION['language'] ?? detectLanguage();
+$_SESSION['language'] = $currentLang;
+$isRtl = isRtlLanguage();
+
+// Generate CSRF token
+$csrfToken = generateCsrfToken();
+
+// Check authentication and role
+$isLoggedIn = isLoggedIn();
+$user = getCurrentUser();
+$userRole = $user['role'] ?? null;
+$userId = $user['id'] ?? null;
+
+// Validasi role: hanya 'client' yang boleh akses
+if (!$isLoggedIn || $userRole !== 'client') {
+    header('Location: /login/');
+    exit;
+}
+
+// Get theme preference
+$themePreference = 'dark';
+$users = loadJsonFile('users.json');
+foreach ($users as $u) {
+    if ($u['id'] === $userId) {
+        $themePreference = $u['theme_preference'] ?? 'dark';
+        break;
+    }
+}
+
+$isDev = APP_ENV !== 'production';
+$userName = escape($user['name'] ?? 'User');
+$userInitial = strtoupper(substr($userName, 0, 2));
+$userEmail = escape($user['email'] ?? 'client@example.com');
+?>
+<!DOCTYPE html>
+<html lang="<?= $currentLang ?>" dir="<?= $isRtl ? 'rtl' : 'ltr' ?>" class="<?= $themePreference === 'light' ? '' : 'dark' ?>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><?= $userName ?> - <?= APP_DISPLAY_NAME ?></title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='28' height='24' viewBox='0 0 28 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='7' width='3' height='10' rx='1.5' fill='%23FFC107' /%3E%3Crect x='6' y='4' width='3' height='16' rx='1.5' fill='%23FFC107' /%3E%3Crect x='12' y='0' width='3' height='24' rx='1.5' fill='%23FFC107' /%3E%3Crect x='18' y='4' width='3' height='16' rx='1.5' fill='%23FFC107' /%3E%3Crect x='24' y='7' width='3' height='10' rx='1.5' fill='%23FFC107' /%3E%3C/svg%3E">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#FFC107',
+                            dark: '#0A0A0C', // Slightly darker for main bg
+                            card: '#121215', // Sidebar & Cards
+                            surface: '#1A1A1D', // Hover states
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow: hidden; /* Prevent body scroll, handle scroll in containers */
+        }
+        
+        /* Custom Scrollbar for sleek look */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(140, 140, 140, 0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 193, 7, 0.5); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* Range Slider Styling for Audio Player */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent; outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 12px; width: 12px; border-radius: 50%;
+            background: #FFC107; cursor: pointer; margin-top: -4px;
+            box-shadow: 0 0 5px rgba(255, 193, 7, 0.5); opacity: 0; transition: opacity 0.2s, transform 0.1s;
+        }
+        input[type=range]:hover::-webkit-slider-thumb { opacity: 1; transform: scale(1.2); }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: rgba(140, 140, 140, 0.3); border-radius: 2px;
+        }
+        .progress-bar {
+            background: linear-gradient(to right, #FFC107 var(--progress, 0%), rgba(140, 140, 140, 0.3) var(--progress, 0%));
+        }
+
+        /* SPA Animations */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sidebar Collapse Logic */
+        #desktop-sidebar { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-collapsed { width: 80px !important; }
+        .sidebar-collapsed .sidebar-text, .sidebar-collapsed .sidebar-header-text, .sidebar-collapsed .premium-banner {
+            display: none; opacity: 0;
+        }
+        .sidebar-collapsed .sidebar-logo-icon { display: flex !important; justify-content: center; width: 100%; }
+        .sidebar-collapsed .sidebar-header { justify-content: center; padding: 0; }
+        .sidebar-collapsed .nav-btn { justify-content: center; padding-left: 0; padding-right: 0; }
+        .sidebar-collapsed .nav-btn i { font-size: 1.5rem; margin: 0; }
+        
+        /* Glassmorphism utilities */
+        .glass { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        
+        /* Ad Overlay */
+        #ad-overlay { transition: opacity 0.3s, visibility 0.3s; }
+        .ad-visible { opacity: 1 !important; visibility: visible !important; }
+
+        /* Language Selector Dropdown */
+        .lang-dropdown {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+        .lang-selector:hover .lang-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* RTL Support */
+        [dir="rtl"] { direction: rtl; text-align: right; }
+        [dir="rtl"] .ms-auto { margin-left: auto; margin-right: 0; }
+        [dir="rtl"] .me-auto { margin-right: auto; margin-left: 0; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-brand-dark dark:text-white font-sans antialiased h-screen flex flex-col">
+
+    <!-- App Container -->
+    <div class="flex flex-1 overflow-hidden h-[calc(100vh-90px)]">
+        
+        <!-- Desktop Sidebar -->
+        <aside id="desktop-sidebar" class="hidden md:flex flex-col w-64 bg-white dark:bg-brand-card border-r border-gray-200 dark:border-gray-800/60 z-20 shrink-0">
+            <!-- Header / Logo -->
+            <div class="sidebar-header h-20 flex items-center justify-between px-6 shrink-0 border-b border-transparent transition-all">
+                <a href="#" class="sidebar-header-text flex items-center gap-3">
+                    <svg width="24" height="20" viewBox="0 0 28 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
+                        <rect x="6" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
+                        <rect x="12" y="0" width="3" height="24" rx="1.5" fill="#FFC107" />
+                        <rect x="18" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
+                        <rect x="24" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
+                    </svg>
+                    <span class="font-sans font-light text-xl tracking-[0.2em] mt-1"><?= APP_DISPLAY_NAME ?></span>
+                </a>
+                <a href="#" class="sidebar-logo-icon hidden">
+                    <svg width="28" height="24" viewBox="0 0 28 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
+                        <rect x="6" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
+                        <rect x="12" y="0" width="3" height="24" rx="1.5" fill="#FFC107" />
+                        <rect x="18" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
+                        <rect x="24" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
+                    </svg>
+                </a>
+                <button onclick="toggleSidebar()" class="text-gray-400 hover:text-brand-gold transition-colors focus:outline-none" title="Collapse Sidebar">
+                    <i id="sidebar-toggle-icon" class="ph ph-caret-left text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                <p class="sidebar-text text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2 mt-2"><?= t('client.main_menu') ?></p>
+                <button onclick="navigate('home')" id="nav-desktop-home" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl text-sm font-medium transition-all text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-brand-surface group">
+                    <i class="ph-fill ph-house text-2xl text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors shrink-0"></i> 
+                    <span class="sidebar-text whitespace-nowrap"><?= t('client.home') ?></span>
+                </button>
+                <button onclick="navigate('explore')" id="nav-desktop-explore" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl text-sm font-medium transition-all text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-brand-surface group">
+                    <i class="ph ph-compass text-2xl text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors shrink-0"></i>
+                    <span class="sidebar-text whitespace-nowrap"><?= t('client.explore') ?></span>
+                </button>
+                <button onclick="navigate('library')" id="nav-desktop-library" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl text-sm font-medium transition-all text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-brand-surface group">
+                    <i class="ph ph-books text-2xl text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors shrink-0"></i> 
+                    <span class="sidebar-text whitespace-nowrap"><?= t('client.library') ?></span>
+                </button>
+
+                <div class="sidebar-text my-4 border-t border-gray-200 dark:border-gray-800/60 mx-3"></div>
+
+                <p class="sidebar-text text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2"><?= t('client.others') ?></p>
+                <button onclick="navigate('premium')" id="nav-desktop-premium" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl text-sm font-medium transition-all text-gray-600 dark:text-gray-300 hover:text-brand-gold dark:hover:text-brand-gold hover:bg-gray-100 dark:hover:bg-brand-surface group">
+                    <i class="ph-fill ph-crown text-2xl text-brand-gold shrink-0"></i> 
+                    <span class="sidebar-text whitespace-nowrap text-brand-gold font-bold"><?= t('client.premium') ?></span>
+                </button>
+                <button onclick="navigate('profile')" id="nav-desktop-profile" class="nav-btn w-full flex items-center gap-4 px-3 py-3 rounded-xl text-sm font-medium transition-all text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-brand-surface group">
+                    <i class="ph ph-user-circle text-2xl text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors shrink-0"></i> 
+                    <span class="sidebar-text whitespace-nowrap"><?= t('client.profile') ?></span>
+                </button>
+            </nav>
+
+            <!-- Upsell Banner in Sidebar -->
+            <div class="premium-banner p-4 mt-auto">
+                <div class="bg-gradient-to-br from-brand-surface to-[#222228] border border-gray-800 rounded-2xl p-4 text-center cursor-pointer hover:border-brand-gold/50 transition-colors" onclick="navigate('premium')">
+                    <p class="text-xs text-gray-400 mb-1"><?= t('client.free_upgrade') ?></p>
+                    <h4 class="font-bold text-white text-sm mb-2"><?= t('client.premium_member') ?></h4>
+                    <span class="inline-block px-4 py-1.5 bg-white text-black text-xs font-bold rounded-full hover:scale-105 transition-transform"><?= t('client.learn_more') ?></span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col relative bg-gray-50 dark:bg-brand-dark overflow-hidden">
+            
+            <!-- Top Header (Sticky/Absolute overlapping content) -->
+            <header class="absolute top-0 left-0 w-full h-16 sm:h-20 flex items-center justify-between px-4 sm:px-8 z-10 glass bg-white/70 dark:bg-brand-dark/70 border-b border-transparent transition-colors duration-300" id="main-header">
+                
+                <!-- Mobile Only: Logo -->
+                <div class="md:hidden flex items-center gap-2">
+                    <svg width="20" height="16" viewBox="0 0 28 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
+                        <rect x="6" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
+                        <rect x="12" y="0" width="3" height="24" rx="1.5" fill="#FFC107" />
+                        <rect x="18" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
+                        <rect x="24" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
+                    </svg>
+                    <span class="font-sans font-light text-lg tracking-[0.1em] mt-1"><?= APP_DISPLAY_NAME ?></span>
+                </div>
+
+                <!-- Navigation History Arrows (Desktop) -->
+                <div class="hidden md:flex items-center gap-2">
+                    <button class="w-8 h-8 rounded-full bg-black/10 dark:bg-black/40 flex items-center justify-center text-gray-500 hover:text-white transition-colors cursor-not-allowed opacity-50"><i class="ph-bold ph-caret-left"></i></button>
+                    <button class="w-8 h-8 rounded-full bg-black/10 dark:bg-black/40 flex items-center justify-center text-gray-500 hover:text-white transition-colors cursor-not-allowed opacity-50"><i class="ph-bold ph-caret-right"></i></button>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center gap-3 sm:gap-4 ms-auto">
+                    <!-- Global Search Button -->
+                    <button onclick="navigate('explore')" class="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-[#1A1A1D] hover:scale-105 transition-transform shadow-sm">
+                        <i class="ph-bold ph-magnifying-glass text-lg"></i>
+                    </button>
+
+                    <!-- Language Selector -->
+                    <div class="relative lang-selector">
+                        <button class="flex items-center gap-1.5 px-2 py-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800 transition-colors" aria-label="Change Language">
+                            <img src="<?= escape(getAvailableLanguages()[$currentLang]['flag'] ?? '/assets/flags/_default.svg') ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="<?= $currentLang ?>" class="w-6 h-4 rounded-sm shadow-sm object-cover">
+                            <i class="ph ph-caret-down text-xs text-gray-400 hidden sm:block"></i>
+                        </button>
+                        <div class="lang-dropdown absolute right-0 mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 min-w-[140px] z-50">
+                            <?php foreach (getAvailableLanguages() as $code => $lang): ?>
+                            <a href="?lang=<?= $code ?>" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors <?= $currentLang === $code ? 'text-brand-gold' : 'text-gray-700 dark:text-gray-300' ?>">
+                                <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-5 h-3.5 rounded-sm"> <?= escape($lang['name']) ?>
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggleBtn" onclick="toggleTheme()" class="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-[#1A1A1D] hover:scale-105 transition-transform shadow-sm">
+                        <i class="ph-fill ph-sun text-xl hidden dark:block text-brand-gold"></i>
+                        <i class="ph-fill ph-moon text-xl block dark:hidden text-gray-600"></i>
+                    </button>
+
+                    <!-- Profile Shortcut -->
+                    <button onclick="navigate('profile')" class="flex items-center gap-2 bg-white dark:bg-[#1A1A1D] p-1 pr-3 sm:pr-4 rounded-full hover:scale-105 transition-transform shadow-sm border border-gray-100 dark:border-gray-800">
+                        <img src="https://i.pravatar.cc/150?img=68" alt="Profile" class="w-8 h-8 rounded-full object-cover">
+                        <span class="text-xs font-bold hidden sm:block"><?= $userName ?></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dynamic Content Container -->
+            <!-- Adding padding top to account for absolute header, and padding bottom for mobile nav/player -->
+            <div id="dynamic-content" class="flex-1 overflow-y-auto pt-16 sm:pt-20 pb-28 sm:pb-8 px-4 sm:px-8 custom-scrollbar relative">
+                <!-- Content injected via JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Persistent Music Player -->
+    <div class="fixed bottom-[64px] md:bottom-0 left-0 w-full h-[90px] bg-white dark:bg-[#0A0A0C] border-t border-gray-200 dark:border-gray-800 px-4 flex items-center justify-between z-40 transition-colors duration-300">
+        
+        <!-- Now Playing Info -->
+        <div class="flex items-center gap-3 w-1/3 min-w-[150px]">
+            <div class="relative w-14 h-14 rounded-md overflow-hidden shrink-0 group cursor-pointer bg-gray-200 dark:bg-gray-800 shadow-md">
+                <img id="player-cover" src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=150&q=80" alt="Cover" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <i class="ph ph-arrows-out-simple text-white text-xl"></i>
+                </div>
+            </div>
+            <div class="min-w-0 hidden sm:block">
+                <h4 id="player-title" class="text-sm font-bold text-gray-900 dark:text-white truncate hover:underline cursor-pointer">Al-Kahfi (Ayat 1-110)</h4>
+                <p id="player-artist" class="text-xs text-gray-500 hover:text-gray-300 truncate hover:underline cursor-pointer">Misyari Rasyid</p>
+            </div>
+            <button class="hidden lg:block text-gray-400 hover:text-brand-gold ml-2 transition-colors"><i class="ph ph-heart text-xl"></i></button>
+        </div>
+
+        <!-- Central Controls & Progress -->
+        <div class="flex flex-col items-center justify-center w-full max-w-[45%] md:w-1/3 player-group">
+            <div class="flex items-center gap-4 sm:gap-6 mb-1.5">
+                <button class="text-gray-400 hover:text-gray-900 dark:hover:text-white hidden sm:block transition-colors"><i class="ph ph-shuffle text-lg"></i></button>
+                <button class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><i class="ph-fill ph-skip-back text-2xl"></i></button>
+                <button id="main-play-btn" class="w-10 h-10 rounded-full bg-brand-gold text-black flex items-center justify-center hover:scale-105 hover:bg-yellow-400 transition-all shadow-[0_0_15px_rgba(255,193,7,0.3)]">
+                    <i class="ph-fill ph-play text-xl ml-1" id="play-icon"></i>
+                </button>
+                <button class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><i class="ph-fill ph-skip-forward text-2xl"></i></button>
+                <button class="text-gray-400 hover:text-gray-900 dark:hover:text-white hidden sm:block transition-colors"><i class="ph ph-repeat text-lg"></i></button>
+            </div>
+            <div class="w-full flex items-center gap-2 text-[10px] sm:text-xs text-gray-500 font-medium font-mono">
+                <span id="time-current">0:00</span>
+                <input type="range" id="progress-slider" min="0" max="100" value="0" class="progress-bar flex-1 h-1" style="--progress: 0%">
+                <span id="time-total">--:--</span>
+            </div>
+        </div>
+
+        <!-- Extra Controls (Volume & Queue) -->
+        <div class="flex items-center justify-end gap-3 w-1/3 min-w-[150px] hidden md:flex">
+            <button class="text-gray-400 hover:text-white transition-colors"><i class="ph ph-microphone-stage text-lg"></i></button>
+            <button class="text-gray-400 hover:text-white transition-colors"><i class="ph ph-list-dashes text-lg"></i></button>
+            <button class="text-gray-400 hover:text-white transition-colors"><i class="ph ph-speaker-high text-lg"></i></button>
+            <div class="w-24 flex items-center player-group">
+                <input type="range" min="0" max="100" value="80" class="progress-bar w-full h-1" style="--progress: 80%">
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-white dark:bg-[#0A0A0C]/95 glass border-t border-gray-200 dark:border-gray-800 pb-safe z-50">
+        <div class="flex justify-around items-center h-16 px-1">
+            <button onclick="navigate('home')" id="nav-mobile-home" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white w-1/4 transition-colors">
+                <i class="ph-fill ph-house text-2xl nav-icon"></i>
+                <span class="text-[10px] font-medium"><?= t('client.home') ?></span>
+            </button>
+            <button onclick="navigate('explore')" id="nav-mobile-explore" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white w-1/4 transition-colors">
+                <i class="ph ph-compass text-2xl nav-icon"></i>
+                <span class="text-[10px] font-medium"><?= t('client.explore') ?></span>
+            </button>
+            <button onclick="navigate('library')" id="nav-mobile-library" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white w-1/4 transition-colors">
+                <i class="ph ph-books text-2xl nav-icon"></i>
+                <span class="text-[10px] font-medium"><?= t('client.library') ?></span>
+            </button>
+            <button onclick="navigate('premium')" id="nav-mobile-premium" class="flex flex-col items-center gap-1 text-gray-400 hover:text-brand-gold w-1/4 transition-colors">
+                <i class="ph ph-crown text-2xl nav-icon"></i>
+                <span class="text-[10px] font-medium"><?= t('client.premium') ?></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Fullscreen Ad Overlay (Hidden by default) -->
+    <div id="ad-overlay" class="fixed inset-0 z-[100] bg-black/90 glass flex flex-col items-center justify-center opacity-0 visibility-hidden" style="visibility: hidden;">
+        <div class="text-center p-8 max-w-md w-full bg-[#121215] border border-gray-800 rounded-3xl shadow-2xl transform scale-95 transition-transform duration-300" id="ad-modal">
+            <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-gold animate-pulse">
+                <i class="ph-fill ph-speaker-high text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2"><?= t('client.ad_title') ?></h2>
+            <p class="text-gray-400 text-sm mb-8"><?= t('client.resume_soon') ?></p>
+            
+            <!-- Progress bar simulation -->
+            <div class="w-full bg-gray-800 rounded-full h-1.5 mb-6 overflow-hidden">
+                <div id="ad-progress" class="bg-brand-gold h-1.5 rounded-full w-0 transition-all duration-100 ease-linear"></div>
+            </div>
+
+            <button onclick="navigate('premium'); hideAd()" class="w-full py-3 bg-brand-gold text-black font-bold rounded-full hover:bg-yellow-500 transition-colors">
+                <?= t('client.learn_premium') ?>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Inject _i18n as JS object from PHP values before the script tag
+// so it works in template literals.
+window._q18n = {
+    premiumMember: <?= json_encode(t('client.premium_member')) ?>,
+    freePlan: <?= json_encode(t('client.free_plan')) ?>,
+    premiumActive: <?= json_encode(t('client.premium_active')) ?>,
+    freeUpgrade: <?= json_encode(t('client.free_upgrade')) ?>,
+    greetingMorning: <?= json_encode(t('client.greeting_morning')) ?>,
+    greetingAfternoon: <?= json_encode(t('client.greeting_afternoon')) ?>,
+    greetingEvening: <?= json_encode(t('client.greeting_evening')) ?>,
+    greetingNight: <?= json_encode(t('client.greeting_night')) ?>,
+    pageNotFound: <?= json_encode(t('client.page_not_found')) ?>,
+    curatedPlaylistDesc: <?= json_encode(t('client.curated_playlist_desc')) ?>,
+    versesDesc: <?= json_encode(t('client.verses_desc')) ?>,
+    dailyMix: <?= json_encode(t('client.daily_mix')) ?>,
+    selectedSurah: <?= json_encode(t('client.selected_surah')) ?>,
+};
+// --- State Management ---
+        let currentRoute = 'home';
+        let isSidebarCollapsed = false;
+        let isPlaying = false;
+        let isPremium = false; // Toggle this to test ad logic
+        let songsPlayedSinceLastAd = 0;
+        let playInterval;
+
+        // --- View Templates
+        const views = {
+            home: `
+                <div class="fade-in max-w-[1800px] mx-auto pb-6">
+                    <!-- Hero Greeting -->
+                    <div class="mb-8 mt-2">
+                        <h1 class="text-2xl sm:text-3xl font-bold font-heading mb-1 text-gray-900 dark:text-white" id="greetingText"><?= t('client.greeting_afternoon') ?></h1>
+                    </div>
+
+                    <!-- Quick Play Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-10">
+                        <!-- Quick Item 1 -->
+                        <div class="bg-white dark:bg-[#1A1A1D]/50 hover:bg-gray-100 dark:hover:bg-[#2A2A2D] rounded-md overflow-hidden flex items-center gap-4 transition-colors group cursor-pointer shadow-sm border border-transparent dark:border-gray-800/50" onclick="playSong('Surah Ar-Rahman', 'Mishary Alafasy', 'https://images.unsplash.com/photo-1609599006353-e629aaab31ce?auto=format&fit=crop&w=150&q=80')">
+                            <img src="https://images.unsplash.com/photo-1609599006353-e629aaab31ce?auto=format&fit=crop&w=150&q=80" class="w-12 h-12 sm:w-16 sm:h-16 object-cover shadow-[4px_0_10px_rgba(0,0,0,0.2)]">
+                            <h4 class="font-bold text-xs sm:text-sm truncate pr-2 text-gray-900 dark:text-white"><?= t('client.item_murottal_pagi') ?></h4>
+                            <div class="ml-auto mr-4 w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-black opacity-0 group-hover:opacity-100 shadow-md transform translate-y-1 group-hover:translate-y-0 transition-all shrink-0">
+                                <i class="ph-fill ph-play"></i>
+                            </div>
+                        </div>
+                        <!-- Quick Item 2 -->
+                        <div class="bg-white dark:bg-[#1A1A1D]/50 hover:bg-gray-100 dark:hover:bg-[#2A2A2D] rounded-md overflow-hidden flex items-center gap-4 transition-colors group cursor-pointer shadow-sm border border-transparent dark:border-gray-800/50" onclick="playSong('Kajian Hati', 'Ust. Hanan Attaki', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80')">
+                            <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80" class="w-12 h-12 sm:w-16 sm:h-16 object-cover shadow-[4px_0_10px_rgba(0,0,0,0.2)]">
+                            <h4 class="font-bold text-xs sm:text-sm truncate pr-2 text-gray-900 dark:text-white"><?= t('client.item_kajian_hati') ?></h4>
+                            <div class="ml-auto mr-4 w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-black opacity-0 group-hover:opacity-100 shadow-md transform translate-y-1 group-hover:translate-y-0 transition-all shrink-0">
+                                <i class="ph-fill ph-play"></i>
+                            </div>
+                        </div>
+                        <!-- Quick Item 3 -->
+                        <div class="bg-white dark:bg-[#1A1A1D]/50 hover:bg-gray-100 dark:hover:bg-[#2A2A2D] rounded-md overflow-hidden flex items-center gap-4 transition-colors group cursor-pointer shadow-sm border border-transparent dark:border-gray-800/50" onclick="playSong('Mix Nasyid 2000an', 'Various Artists', 'https://images.unsplash.com/photo-1519682577862-22b62b24e493?auto=format&fit=crop&w=150&q=80')">
+                            <img src="https://images.unsplash.com/photo-1519682577862-22b62b24e493?auto=format&fit=crop&w=150&q=80" class="w-12 h-12 sm:w-16 sm:h-16 object-cover shadow-[4px_0_10px_rgba(0,0,0,0.2)]">
+                            <h4 class="font-bold text-xs sm:text-sm truncate pr-2 text-gray-900 dark:text-white"><?= t('client.item_mix_nasyid') ?></h4>
+                            <div class="ml-auto mr-4 w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-black opacity-0 group-hover:opacity-100 shadow-md transform translate-y-1 group-hover:translate-y-0 transition-all shrink-0">
+                                <i class="ph-fill ph-play"></i>
+                            </div>
+                        </div>
+                        <!-- Quick Item 4 -->
+                        <div class="bg-white dark:bg-[#1A1A1D]/50 hover:bg-gray-100 dark:hover:bg-[#2A2A2D] rounded-md overflow-hidden flex items-center gap-4 transition-colors group cursor-pointer shadow-sm border border-transparent dark:border-gray-800/50 hidden sm:flex" onclick="playSong('Dzikir Petang', 'Ahmad Saud', 'https://images.unsplash.com/photo-1555529771-835f59bfc50c?auto=format&fit=crop&w=150&q=80')">
+                            <img src="https://images.unsplash.com/photo-1555529771-835f59bfc50c?auto=format&fit=crop&w=150&q=80" class="w-12 h-12 sm:w-16 sm:h-16 object-cover shadow-[4px_0_10px_rgba(0,0,0,0.2)]">
+                            <h4 class="font-bold text-xs sm:text-sm truncate pr-2 text-gray-900 dark:text-white"><?= t('client.item_dzikir_petang') ?></h4>
+                            <div class="ml-auto mr-4 w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-black opacity-0 group-hover:opacity-100 shadow-md transform translate-y-1 group-hover:translate-y-0 transition-all shrink-0">
+                                <i class="ph-fill ph-play"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Horizontal Section 1 -->
+                    <div class="mb-10">
+                        <div class="flex justify-between items-end mb-4">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white hover:underline cursor-pointer"><?= t('client.made_for') ?> <?= $userName ?></h2>
+                            <span class="text-xs sm:text-sm font-bold text-gray-500 hover:text-brand-gold cursor-pointer transition-colors uppercase tracking-wider"><?= t('common.see_all') ?></span>
+                        </div>
+                        <div class="flex gap-4 sm:gap-6 overflow-x-auto hide-scrollbar pb-4 snap-x">
+                            ${generateCardsHtml(5, <?= json_encode(t('client.daily_mix')) ?>, <?= json_encode(t('client.curated_playlist_desc')) ?>, true)}
+                        </div>
+                    </div>
+
+                    <!-- Horizontal Section 2 -->
+                    <div class="mb-10">
+                        <div class="flex justify-between items-end mb-4">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white hover:underline cursor-pointer"><?= t('client.selected_murottal') ?></h2>
+                        </div>
+                        <div class="flex gap-4 sm:gap-6 overflow-x-auto hide-scrollbar pb-4 snap-x">
+                            ${generateCardsHtml(5, <?= json_encode(t('client.selected_surah')) ?>, <?= json_encode(t('client.verses_desc')) ?>, false)}
+                        </div>
+                    </div>
+                </div>
+            `,
+            explore: `
+                <div class="fade-in max-w-[1800px] mx-auto pb-6">
+                    <!-- Search Header Area -->
+                    <div class="mb-8">
+                        <div class="relative w-full max-w-md mx-auto sm:mx-0">
+                            <input type="text" placeholder="<?= t('client.search_placeholder') ?>" class="w-full bg-white dark:bg-[#1A1A1D] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white rounded-full py-3 sm:py-4 pl-12 pr-4 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors text-sm font-medium shadow-sm">
+                            <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-xl text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <h2 class="text-xl sm:text-2xl font-bold mb-6 text-gray-900 dark:text-white"><?= t('client.explore_all') ?></h2>
+                    
+                    <!-- Color Blocks Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
+                        <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-orange-500 to-red-600 p-4 relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform shadow-md">
+                            <h3 class="font-bold text-white text-lg sm:text-xl"><?= t('categories.podcast') ?></h3>
+                            <i class="ph-fill ph-headphones absolute -right-4 -bottom-4 text-[5rem] text-white/20 transform rotate-[15deg]"></i>
+                        </div>
+                        <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-4 relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform shadow-md">
+                            <h3 class="font-bold text-white text-lg sm:text-xl"><?= t('categories.nasyid') ?></h3>
+                            <i class="ph-fill ph-music-notes absolute -right-4 -bottom-4 text-[5rem] text-white/20 transform rotate-[15deg]"></i>
+                        </div>
+                        <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 p-4 relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform shadow-md">
+                            <h3 class="font-bold text-white text-lg sm:text-xl"><?= t('categories.murottal') ?></h3>
+                            <i class="ph-fill ph-book-open absolute -right-4 -bottom-4 text-[5rem] text-white/20 transform rotate-[15deg]"></i>
+                        </div>
+                        <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 p-4 relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform shadow-md">
+                            <h3 class="font-bold text-white text-lg sm:text-xl"><?= t('categories.kajian') ?></h3>
+                            <i class="ph-fill ph-microphone-stage absolute -right-4 -bottom-4 text-[5rem] text-white/20 transform rotate-[15deg]"></i>
+                        </div>
+                        <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 p-4 relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform shadow-md">
+                            <h3 class="font-bold text-white text-lg sm:text-xl"><?= t('categories.dzikir') ?></h3>
+                            <i class="ph-fill ph-heart absolute -right-4 -bottom-4 text-[5rem] text-white/20 transform rotate-[15deg]"></i>
+                        </div>
+                        <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 p-4 relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform shadow-md">
+                            <h3 class="font-bold text-white text-lg sm:text-xl"><?= t('categories.kids') ?></h3>
+                            <i class="ph-fill ph-baby absolute -right-4 -bottom-4 text-[5rem] text-white/20 transform rotate-[15deg]"></i>
+                        </div>
+                        <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-gray-700 to-gray-900 p-4 relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform shadow-md">
+                            <h3 class="font-bold text-white text-lg sm:text-xl"><?= t('categories.instrumental') ?></h3>
+                            <i class="ph-fill ph-piano absolute -right-4 -bottom-4 text-[5rem] text-white/20 transform rotate-[15deg]"></i>
+                        </div>
+                    </div>
+                </div>
+            `,
+            library: `
+                <div class="fade-in max-w-[1800px] mx-auto pb-6">
+                    <div class="flex items-center gap-6 mb-8">
+                        <div class="w-16 h-16 bg-gradient-to-br from-brand-gold to-yellow-600 rounded-xl flex items-center justify-center text-black shadow-lg">
+                            <i class="ph-fill ph-heart text-3xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white"><?= t('client.library') ?></h2>
+                            <p class="text-sm text-gray-500 mt-1"><?= t('client.library_stats') ?></p>
+                        </div>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <div class="flex gap-3 mb-6 overflow-x-auto hide-scrollbar">
+                        <button class="px-4 py-1.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-full text-sm font-medium whitespace-nowrap"><?= t('client.tab_playlist') ?></button>
+                        <button class="px-4 py-1.5 bg-white dark:bg-[#1A1A1D] border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-white hover:border-brand-gold rounded-full text-sm font-medium whitespace-nowrap transition-colors"><?= t('categories.podcast') ?></button>
+                        <button class="px-4 py-1.5 bg-white dark:bg-[#1A1A1D] border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-white hover:border-brand-gold rounded-full text-sm font-medium whitespace-nowrap transition-colors"><?= t('client.tab_artist') ?></button>
+                        <button class="px-4 py-1.5 bg-white dark:bg-[#1A1A1D] border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-white hover:border-brand-gold rounded-full text-sm font-medium whitespace-nowrap transition-colors"><?= t('client.tab_downloads') ?></button>
+                    </div>
+
+                    <!-- List View -->
+                    <div class="flex flex-col gap-2">
+                        <!-- List Item Liked Songs -->
+                        <div class="flex items-center gap-4 p-2 sm:p-3 rounded-xl hover:bg-white dark:hover:bg-[#1A1A1D] group cursor-pointer border border-transparent dark:hover:border-gray-800 transition-colors" onclick="playSong(<?= json_encode(t('client.liked_songs')) ?>, <?= json_encode($userName) ?>, '')">
+                            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-md flex items-center justify-center text-white shrink-0">
+                                <i class="ph-fill ph-heart text-xl"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-sm text-gray-900 dark:text-white truncate"><?= t('client.liked_songs') ?></h4>
+                                <p class="text-xs text-gray-500"><?= t('client.liked_songs_count') ?></p>
+                            </div>
+                            <button class="w-10 h-10 rounded-full bg-brand-gold text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all shadow-md shrink-0">
+                                <i class="ph-fill ph-play ml-1"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- List Item Saved Podcast -->
+                        <div class="flex items-center gap-4 p-2 sm:p-3 rounded-xl hover:bg-white dark:hover:bg-[#1A1A1D] group cursor-pointer border border-transparent dark:hover:border-gray-800 transition-colors">
+                            <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80" class="w-12 h-12 rounded-md object-cover shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-sm text-gray-900 dark:text-white truncate"><?= t('client.saved_podcast_title') ?></h4>
+                                <p class="text-xs text-gray-500"><?= t('client.saved_podcast_author') ?></p>
+                            </div>
+                        </div>
+
+                        <!-- Add New Playlist -->
+                        <div class="flex items-center gap-4 p-2 sm:p-3 rounded-xl hover:bg-white dark:hover:bg-[#1A1A1D] group cursor-pointer border border-transparent dark:hover:border-gray-800 transition-colors">
+                            <div class="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-md flex items-center justify-center text-gray-500 group-hover:text-brand-gold transition-colors shrink-0">
+                                <i class="ph-bold ph-plus text-xl"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-sm text-gray-900 dark:text-white"><?= t('client.create_playlist') ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            premium: `
+                <div class="fade-in max-w-4xl mx-auto pb-10 text-center">
+                    <h1 class="text-3xl sm:text-5xl font-black mb-4 text-gray-900 dark:text-white"><?= t('client.listen_unlimited') ?></h1>
+                    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-10 max-w-lg mx-auto"><?= t('client.premium_ad_desc') ?></p>
+
+                    <button id="premiumUpgradeBtn" onclick="upgradePremium()" class="px-8 sm:px-12 py-4 bg-gray-900 dark:bg-white text-white dark:text-black font-bold rounded-full hover:scale-105 transition-transform text-sm sm:text-base shadow-xl mb-12">
+
+                    </button>
+
+                    <div class="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto text-left">
+                        <!-- Free Tier -->
+                        <div class="bg-white dark:bg-[#1A1A1D] p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800">
+                            <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white"><?= t('client.free_tier_name') ?></h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-gray-400 mt-1"></i> <span class="text-sm text-gray-600 dark:text-gray-300"><?= t('client.free_bullet1') ?></span></li>
+                                <li class="flex items-start gap-3"><i class="ph-bold ph-x text-red-500 mt-1"></i> <span class="text-sm text-gray-600 dark:text-gray-300"><?= t('client.free_bullet2') ?></span></li>
+                                <li class="flex items-start gap-3"><i class="ph-bold ph-x text-red-500 mt-1"></i> <span class="text-sm text-gray-600 dark:text-gray-300"><?= t('client.free_bullet3') ?></span></li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Premium Tier -->
+                        <div class="bg-gradient-to-br from-[#1A1A1D] to-[#2A2A2D] p-6 sm:p-8 rounded-2xl border border-brand-gold/50 shadow-[0_0_30px_rgba(255,193,7,0.1)] relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-gold/10 rounded-full blur-2xl"></div>
+                            <h3 class="text-xl font-bold mb-1 text-white flex items-center gap-2"><i class="ph-fill ph-crown text-brand-gold"></i> Premium</h3>
+                            <p class="text-xs text-brand-gold mb-4"><?= t('client.premium_price') ?></p>
+                            <ul class="space-y-4 relative z-10">
+                                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-brand-gold mt-1"></i> <span class="text-sm text-gray-300"><?= t('client.premium_features') ?></span></li>
+                                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-brand-gold mt-1"></i> <span class="text-sm text-gray-300"><?= t('client.premium_bullet2') ?></span></li>
+                                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-brand-gold mt-1"></i> <span class="text-sm text-gray-300"><?= t('client.premium_bullet3') ?></span></li>
+                                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-brand-gold mt-1"></i> <span class="text-sm text-gray-300"><?= t('client.premium_bullet4') ?></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `,
+            profile: `
+                <div class="fade-in max-w-4xl mx-auto pb-10">
+                    <!-- Profile Header -->
+                    <div class="flex flex-col sm:flex-row items-center sm:items-end gap-6 mb-10 pb-8 border-b border-gray-200 dark:border-gray-800">
+                        <div class="relative group cursor-pointer shadow-2xl rounded-full">
+                            <img src="https://i.pravatar.cc/150?img=68" class="w-32 h-32 sm:w-48 sm:h-48 rounded-full object-cover border-4 border-white dark:border-brand-dark">
+                            <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="ph ph-camera text-white text-3xl"></i>
+                            </div>
+                        </div>
+                        <div class="text-center sm:text-left flex-1">
+                            <p class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1"><?= t('client.profile_heading') ?></p>
+                            <h1 class="text-4xl sm:text-6xl font-black mb-3 text-gray-900 dark:text-white font-heading"><?= $userName ?></h1>
+                            <div class="flex items-center justify-center sm:justify-start gap-2 text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                <span><?= t('client.following_count') ?></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings List -->
+                    <h3 class="font-bold text-lg mb-4 text-gray-900 dark:text-white"><?= t('client.settings_prefs') ?></h3>
+                    <div class="bg-white dark:bg-[#1A1A1D] rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm mb-8">
+                        <div class="divide-y divide-gray-100 dark:divide-gray-800/60">
+                            
+                            <!-- Premium Status -->
+                            <div class="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#222228] transition-colors cursor-pointer" onclick="navigate('premium')">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-500">
+                                        <i class="ph-fill ph-crown text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-900 dark:text-white"><?= t('client.subscription_status') ?></p>
+                                    </div>
+                                </div>
+                                <i class="ph ph-caret-right text-gray-400"></i>
+                            </div>
+
+                            <!-- Become Creator CTA -->
+                            <div class="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#222228] transition-colors cursor-pointer group" onclick="alert('<?= t('client.redirecting_studio_prefix') ?> <?= $userName ?> <?= t('client.redirecting_studio_suffix') ?>')">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-brand-gold/10 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-black transition-colors">
+                                        <i class="ph-fill ph-microphone-stage text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-900 dark:text-white group-hover:text-brand-gold transition-colors">Beralih ke <?= $userName ?> Studio</p>
+                                        <p class="text-sm text-gray-500"><?= t('client.creator_cta_desc') ?></p>
+                                    </div>
+                                </div>
+                                <i class="ph ph-arrow-up-right text-gray-400 group-hover:text-brand-gold"></i>
+                            </div>
+
+                            <!-- Quality Setting -->
+                            <div class="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#222228] transition-colors cursor-pointer">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400">
+                                        <i class="ph-fill ph-speaker-high text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-900 dark:text-white"><?= t('client.audio_quality') ?></p>
+                                        <p class="text-sm text-gray-500"><?= t('client.audio_quality_auto') ?></p>
+                                    </div>
+                                </div>
+                                <i class="ph ph-caret-right text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logout Button -->
+                    <a href="/logout/" class="w-full sm:w-auto px-8 py-3 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 font-bold rounded-full border border-red-200 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors flex items-center justify-center gap-2 mx-auto">
+                        <i class="ph-bold ph-sign-out"></i> <?= t('auth.logout') ?>
+                    </a>
+                </div>
+            `
+        };
+
+        // --- Helper Functions ---
+        
+        function generateCardsHtml(count, titlePrefix, desc, isCircle) {
+            let html = '';
+            const images = [
+                'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=300&q=80',
+                'https://images.unsplash.com/photo-1555529771-835f59bfc50c?auto=format&fit=crop&w=300&q=80',
+                'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=300&q=80',
+                'https://images.unsplash.com/photo-1519682577862-22b62b24e493?auto=format&fit=crop&w=300&q=80',
+                'https://images.unsplash.com/photo-1609599006353-e629aaab31ce?auto=format&fit=crop&w=300&q=80'
+            ];
+
+            for(let i=0; i<count; i++) {
+                const imgClass = isCircle ? 'rounded-full aspect-square' : 'rounded-md aspect-square';
+                const imgSrc = images[i % images.length];
+                html += `
+                    <div class="w-[140px] sm:w-[160px] shrink-0 group cursor-pointer snap-start" onclick="playSong('${titlePrefix} ${i+1}', 'Curated Mix', '${imgSrc}')">
+                        <div class="relative ${imgClass} overflow-hidden mb-3 shadow-md bg-gray-200 dark:bg-gray-800">
+                            <img src="${imgSrc}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <button class="w-12 h-12 bg-brand-gold rounded-full flex items-center justify-center text-black shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                    <i class="ph-fill ph-play text-xl ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h4 class="font-bold text-sm text-gray-900 dark:text-white truncate group-hover:text-brand-gold transition-colors">${titlePrefix} ${i+1}</h4>
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-2">${desc}</p>
+                    </div>
+                `;
+            }
+            return html;
+        }
+
+        // --- Core Application Logic ---
+
+        const contentContainer = document.getElementById('dynamic-content');
+
+        function navigate(route) {
+            currentRoute = route;
+            contentContainer.innerHTML = views[route] || `<h1>${window._q18n.pageNotFound}</h1>`;
+            
+            updateNavActiveState('desktop', route);
+            updateNavActiveState('mobile', route);
+
+            // Dynamic greeting updates
+            if(route === 'home') {
+                const hour = new Date().getHours();
+                let greeting = window._q18n.greetingMorning;
+                if(hour >= 12 && hour < 15) greeting = window._q18n.greetingAfternoon;
+                else if(hour >= 15 && hour < 18) greeting = window._q18n.greetingEvening;
+                else if(hour >= 18) greeting = window._q18n.greetingNight;
+                document.getElementById('greetingText').textContent = greeting;
+            }
+        }
+
+        function updateNavActiveState(type, activeRoute) {
+            const routes = ['home', 'explore', 'library', 'premium', 'profile'];
+            routes.forEach(route => {
+                const btn = document.getElementById(`nav-${type}-${route}`);
+                if (!btn) return;
+
+                if (route === activeRoute) {
+                    if (type === 'desktop') {
+                        btn.classList.add('text-gray-900', 'dark:text-white', 'bg-gray-100', 'dark:bg-brand-surface');
+                        btn.classList.remove('text-gray-600', 'dark:text-gray-300');
+                        btn.querySelector('i').classList.add('text-gray-900', 'dark:text-white');
+                        if(route !== 'premium') btn.querySelector('i').classList.remove('text-gray-400');
+                    } else { // Mobile
+                        btn.classList.add('text-gray-900', 'dark:text-white');
+                        btn.classList.remove('text-gray-400');
+                        if(route === 'premium') {
+                            btn.classList.add('text-brand-gold');
+                            btn.classList.remove('text-white');
+                        }
+                    }
+                } else {
+                    if (type === 'desktop') {
+                        btn.classList.remove('text-gray-900', 'dark:text-white', 'bg-gray-100', 'dark:bg-brand-surface');
+                        btn.classList.add('text-gray-600', 'dark:text-gray-300');
+                        btn.querySelector('i').classList.remove('text-gray-900', 'dark:text-white');
+                        if(route !== 'premium') btn.querySelector('i').classList.add('text-gray-400');
+                    } else { // Mobile
+                        btn.classList.remove('text-gray-900', 'dark:text-white', 'text-brand-gold');
+                        btn.classList.add('text-gray-400');
+                    }
+                }
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('desktop-sidebar');
+            const icon = document.getElementById('sidebar-toggle-icon');
+
+            isSidebarCollapsed = !isSidebarCollapsed;
+
+            if(isSidebarCollapsed) {
+                sidebar.classList.add('sidebar-collapsed');
+                icon.classList.remove('ph-caret-left');
+                icon.classList.add('ph-caret-right');
+                icon.parentElement.title = 'Expand Sidebar';
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                icon.classList.remove('ph-caret-right');
+                icon.classList.add('ph-caret-left');
+                icon.parentElement.title = 'Collapse Sidebar';
+            }
+        }
+
+        const htmlElement = document.documentElement;
+        function initTheme() {
+            if (localStorage.theme === 'light') htmlElement.classList.remove('dark');
+            else { htmlElement.classList.add('dark'); localStorage.theme = 'dark'; }
+        }
+
+        function toggleTheme() {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
+        const playBtn = document.getElementById('main-play-btn');
+        const playIcon = document.getElementById('play-icon');
+        const progressSlider = document.getElementById('progress-slider');
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            updatePlayIcon();
+            
+            if(isPlaying) {
+                // Simulate progress
+                playInterval = setInterval(() => {
+                    let val = parseInt(progressSlider.value);
+                    if(val < 100) {
+                        progressSlider.value = val + 1;
+                        progressSlider.style.setProperty('--progress', `${val + 1}%`);
+                        
+                        // Fake time update
+                        let mins = Math.floor((val+1)*3/60);
+                        let secs = Math.floor((val+1)*3%60);
+                        document.getElementById('time-current').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                    } else {
+                        togglePlay(); // Stop when 100
+                    }
+                }, 1000);
+            } else {
+                clearInterval(playInterval);
+            }
+        }
+
+        function updatePlayIcon() {
+            if (isPlaying) {
+                playIcon.classList.remove('ph-play');
+                playIcon.classList.add('ph-pause');
+                playIcon.classList.remove('ml-1'); // adjust centering for pause icon
+            } else {
+                playIcon.classList.remove('ph-pause');
+                playIcon.classList.add('ph-play');
+                playIcon.classList.add('ml-1');
+            }
+        }
+
+        function playSong(title, artist, coverUrl) {
+            // Check Ad Logic for Free Users
+            if (!isPremium) {
+                songsPlayedSinceLastAd++;
+                if (songsPlayedSinceLastAd >= 3) { // Show ad every 3rd song click
+                    showAdModal(title, artist, coverUrl);
+                    return; // Stop song playback until ad finishes
+                }
+            }
+
+            // Normal Playback
+            executePlaySong(title, artist, coverUrl);
+        }
+
+        function executePlaySong(title, artist, coverUrl) {
+            document.getElementById('player-title').textContent = title;
+            document.getElementById('player-artist').textContent = artist;
+            if(coverUrl) document.getElementById('player-cover').src = coverUrl;
+            
+            // Reset Progress
+            progressSlider.value = 0;
+            progressSlider.style.setProperty('--progress', '0%');
+            document.getElementById('time-current').textContent = '0:00';
+            document.getElementById('time-total').textContent = '3:00'; // Mock duration
+
+            if(!isPlaying) togglePlay();
+        }
+
+        playBtn.addEventListener('click', togglePlay);
+
+        progressSlider.addEventListener('input', function() {
+            this.style.setProperty('--progress', this.value + '%');
+            let mins = Math.floor(this.value*3/60);
+            let secs = Math.floor(this.value*3%60);
+            document.getElementById('time-current').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        });
+
+        const adOverlay = document.getElementById('ad-overlay');
+        const adProgress = document.getElementById('ad-progress');
+
+        function showAdModal(nextTitle, nextArtist, nextCover) {
+            if(isPlaying) togglePlay(); // Pause current music
+            
+            adOverlay.classList.add('ad-visible');
+            
+            let progress = 0;
+            adProgress.style.width = '0%';
+            
+            const adTimer = setInterval(() => {
+                progress += 2; // Simulate 5 second ad (100% / 50 ticks)
+                adProgress.style.width = `${progress}%`;
+                
+                if(progress >= 100) {
+                    clearInterval(adTimer);
+                    hideAd();
+                    songsPlayedSinceLastAd = 0; // Reset counter
+                    executePlaySong(nextTitle, nextArtist, nextCover); // Resume song
+                }
+            }, 100); // Update every 100ms
+        }
+
+        function hideAd() {
+            adOverlay.classList.remove('ad-visible');
+            // If user clicked navigate premium, we still want to reset counter
+            songsPlayedSinceLastAd = 0; 
+        }
+
+        function upgradePremium() {
+            isPremium = !isPremium; // Toggle for demo purposes
+            navigate('premium'); // Re-render page
+            if(isPremium) {
+                alert(<?= json_encode(t('client.upgrade_success')) ?>);
+            }
+        }
+
+        // Header Scroll Effect
+        contentContainer.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            if (contentContainer.scrollTop > 10) {
+                header.classList.add('shadow-md', 'border-b', 'border-gray-200', 'dark:border-gray-800');
+                header.classList.remove('border-transparent');
+            } else {
+                header.classList.remove('shadow-md', 'border-b', 'border-gray-200', 'dark:border-gray-800');
+                header.classList.add('border-transparent');
+            }
+        });
+
+        // --- Initialization ---
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            navigate('home');
+        });
+
+    </script>
+</body>
+</html>

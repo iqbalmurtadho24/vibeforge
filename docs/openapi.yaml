@@ -1,0 +1,249 @@
+openapi: 3.0.3
+info:
+  title: Vibeforge App API
+  description: |
+    Vibeforge - API Documentation
+
+    ## Overview
+    This API provides endpoints for authentication, content management,
+    and application operations.
+
+    ## Authentication
+    All authenticated endpoints require a valid session cookie.
+    Session is established via POST /core/router.php with module=auth&action=login.
+
+    ## Rate Limiting
+    Progressive rate limiting based on IP + username combination.
+    Blocked after 5 failed attempts, increasing timeout each retry.
+    Response header includes Retry-After.
+
+    ## Response Format
+    All JSON responses follow this format:
+    ```json
+    {
+      "success": true|false,
+      "message": "Human-readable message",
+      "data": { ... },
+      "redirect": "/path" // optional
+    }
+    ```
+
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: /
+    description: Current server
+
+tags:
+  - name: Auth
+    description: Authentication and session management
+  - name: Users
+    description: User management operations
+  - name: Settings
+    description: User settings and preferences
+
+paths:
+  /core/router.php:
+    post:
+      summary: Router endpoint
+      description: |
+        Single endpoint for all module actions. Module and action
+        are specified in POST body. All requests require CSRF token
+        for state-changing operations.
+
+      tags:
+        - Auth
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                  enum:
+                    - auth
+                    - users
+                    - settings
+                    - content
+                    - reports
+                  description: The module to invoke
+                action:
+                  type: string
+                  description: The action within the module
+                csrf_token:
+                  type: string
+                  description: CSRF token for authenticated actions
+              required:
+                - module
+                - action
+
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/LoginResponse'
+                  - $ref: '#/components/schemas/RegisterResponse'
+                  - $ref: '#/components/schemas/ApiResponse'
+            text/html:
+              description: Module render HTML (for action=render)
+        '429':
+          description: Rate limited
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until retry is allowed
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /logout:
+    post:
+      summary: Logout
+      description: Destroy session and redirect to home
+      tags:
+        - Auth
+      security:
+        - session: []
+      responses:
+        '200':
+          description: Logged out successfully
+          headers:
+            Set-Cookie:
+              description: Session cookie cleared
+
+components:
+  schemas:
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Login successful"
+        redirect:
+          type: string
+          format: uri
+          example: "/client/"
+        user:
+          $ref: '#/components/schemas/User'
+
+    RegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Registration successful"
+        redirect:
+          type: string
+          format: uri
+          example: "/login/"
+        user:
+          $ref: '#/components/schemas/User'
+
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation successful"
+        data:
+          type: object
+          description: Response payload
+        redirect:
+          type: string
+          format: uri
+          description: Optional redirect URL
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Error description"
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Field-specific validation errors
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [manajemen, admin, client]
+        theme_preference:
+          type: string
+          enum: [dark, light]
+          default: dark
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UserCreate:
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        role:
+          type: string
+          enum: [client]
+          default: client
+
+  securitySchemes:
+    session:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+      description: PHP session cookie
+
+security:
+  - session: []

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - MyApp</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='28' height='24' viewBox='0 0 28 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='7' width='3' height='10' rx='1.5' fill='%23FFC107' /%3E%3Crect x='6' y='4' width='3' height='16' rx='1.5' fill='%23FFC107' /%3E%3Crect x='12' y='0' width='3' height='24' rx='1.5' fill='%23FFC107' /%3E%3Crect x='18' y='4' width='3' height='16' rx='1.5' fill='%23FFC107' /%3E%3Crect x='24' y='7' width='3' height='10' rx='1.5' fill='%23FFC107' /%3E%3C/svg%3E">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#FFC107',
+                            dark: '#0F0F11',
+                            card: '#1A1A1D',
+                            gray: '#8C8C8C',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8C8C8C;
+            transition: color 0.3s ease;
+        }
+        input:focus + .input-icon, 
+        input:focus ~ .input-icon {
+            color: #FFC107;
+        }
+        /* Custom Checkbox */
+        .custom-checkbox:checked {
+            background-color: #FFC107;
+            border-color: #FFC107;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-brand-dark dark:text-white font-sans antialiased min-h-screen flex flex-col relative">
+
+    <!-- Background Decoration -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-brand-gold/10 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-brand-gold/5 rounded-full blur-[100px]"></div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="absolute top-6 right-6 z-20">
+        <button id="themeToggleBtn" class="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-brand-card shadow-sm border border-gray-200 dark:border-gray-800 hover:text-brand-gold transition-colors" aria-label="Toggle Dark Mode">
+            <i class="ph ph-sun text-xl hidden dark:block text-brand-gold"></i>
+            <i class="ph ph-moon text-xl block dark:hidden text-gray-600"></i>
+        </button>
+    </div>
+
+    <main class="flex-grow flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div class="w-full max-w-md bg-white dark:bg-brand-card p-8 sm:p-10 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-800/60 relative overflow-hidden mt-8 mb-8">
+            
+            <!-- Logo & Header -->
+            <div class="text-center mb-8">
+                <a href="index.html" class="inline-flex flex-col items-center gap-3 mb-6 group cursor-pointer">
+                    <svg width="42" height="36" viewBox="0 0 28 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transform group-hover:scale-105 transition-transform duration-300">
+                        <rect x="0" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
+                        <rect x="6" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
+                        <rect x="12" y="0" width="3" height="24" rx="1.5" fill="#FFC107" />
+                        <rect x="18" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
+                        <rect x="24" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
+                    </svg>
+                    <span class="font-sans font-light text-2xl tracking-[0.25em] text-gray-900 dark:text-white mt-1">QAULEE</span>
+                </a>
+                <h2 class="text-2xl font-heading font-bold text-gray-900 dark:text-white mb-2">Bergabung Bersama Kami</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Buat akun untuk memulai perjalanan spiritualmu.</p>
+            </div>
+
+            <form action="#" method="POST" class="space-y-5" id="registerForm">
+                
+                <!-- Name Input -->
+                <div class="relative">
+                    <label for="fullname" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Nama Lengkap</label>
+                    <div class="relative">
+                        <input type="text" id="fullname" name="fullname" required 
+                            class="w-full bg-gray-50 dark:bg-[#0F0F11] border border-gray-200 dark:border-gray-700 rounded-xl px-11 py-3.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-all"
+                            placeholder="Ahmad Fulan">
+                        <i class="ph ph-user text-lg input-icon left-4"></i>
+                    </div>
+                </div>
+
+                <!-- Email Input -->
+                <div class="relative">
+                    <label for="email" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Alamat Email</label>
+                    <div class="relative">
+                        <input type="email" id="email" name="email" required 
+                            class="w-full bg-gray-50 dark:bg-[#0F0F11] border border-gray-200 dark:border-gray-700 rounded-xl px-11 py-3.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-all"
+                            placeholder="nama@email.com">
+                        <i class="ph ph-envelope text-lg input-icon left-4"></i>
+                    </div>
+                </div>
+
+                <!-- Password Input -->
+                <div class="relative">
+                    <label for="password" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Kata Sandi</label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" required minlength="8"
+                            class="w-full bg-gray-50 dark:bg-[#0F0F11] border border-gray-200 dark:border-gray-700 rounded-xl pl-11 pr-12 py-3.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-all"
+                            placeholder="Minimal 8 karakter">
+                        <i class="ph ph-lock-key text-lg input-icon left-4"></i>
+                        <button type="button" class="toggle-password absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-brand-gold transition-colors focus:outline-none" data-target="password">
+                            <i class="ph ph-eye-slash text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Confirm Password Input -->
+                <div class="relative">
+                    <label for="confirm-password" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Konfirmasi Kata Sandi</label>
+                    <div class="relative">
+                        <input type="password" id="confirm-password" name="confirm-password" required minlength="8"
+                            class="w-full bg-gray-50 dark:bg-[#0F0F11] border border-gray-200 dark:border-gray-700 rounded-xl pl-11 pr-12 py-3.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-all"
+                            placeholder="Ulangi kata sandi">
+                        <i class="ph ph-shield-check text-lg input-icon left-4"></i>
+                        <button type="button" class="toggle-password absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-brand-gold transition-colors focus:outline-none" data-target="confirm-password">
+                            <i class="ph ph-eye-slash text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="flex items-start mt-4">
+                    <div class="flex items-center h-5">
+                        <input id="terms" name="terms" type="checkbox" required
+                            class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-[#0F0F11] text-brand-gold focus:ring-brand-gold custom-checkbox cursor-pointer transition-colors mt-0.5">
+                    </div>
+                    <div class="ml-2 text-xs">
+                        <label for="terms" class="text-gray-600 dark:text-gray-400 cursor-pointer">
+                            Saya menyetujui <a href="#" class="font-medium text-brand-gold hover:text-yellow-400 transition-colors">Syarat & Ketentuan</a> serta <a href="#" class="font-medium text-brand-gold hover:text-yellow-400 transition-colors">Kebijakan Privasi</a> MyApp.
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button type="submit" id="submitBtn" class="w-full flex justify-center py-4 px-4 border border-transparent rounded-full shadow-lg text-sm font-bold text-brand-dark bg-brand-gold hover:bg-yellow-500 hover:shadow-brand-gold/30 transform hover:-translate-y-0.5 transition-all duration-300 focus:outline-none">
+                        <span>Buat Akun Sekarang</span>
+                        <i class="ph-bold ph-arrow-right ml-2 text-lg"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Divider -->
+            <div class="mt-6 relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
+                </div>
+                <div class="relative flex justify-center text-xs">
+                    <span class="px-3 bg-white dark:bg-brand-card text-gray-500">Atau daftar dengan</span>
+                </div>
+            </div>
+
+            <!-- Social Login -->
+            <div class="mt-6 grid grid-cols-2 gap-4">
+                <button class="flex items-center justify-center gap-2 w-full py-3 px-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-[#0F0F11] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5">
+                    Google
+                </button>
+                <button class="flex items-center justify-center gap-2 w-full py-3 px-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-[#0F0F11] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium">
+                    <i class="ph-fill ph-apple-logo text-xl"></i>
+                    Apple
+                </button>
+            </div>
+
+            <!-- Login Link -->
+            <div class="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
+                Sudah punya akun? 
+                <a href="login.html" class="font-bold text-brand-gold hover:text-yellow-400 hover:underline transition-all">Masuk di sini</a>
+            </div>
+            
+        </div>
+        
+        <!-- Back to Home Link (Bottom) -->
+        <div class="absolute bottom-6 text-center w-full left-0">
+            <a href="index.html" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-gold transition-colors">
+                <i class="ph ph-arrow-left"></i> Kembali ke Beranda
+            </a>
+        </div>
+    </main>
+
+    <script>
+        // Theme Handling
+        const htmlElement = document.documentElement;
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+        function initTheme() {
+            if (localStorage.theme === 'light') {
+                htmlElement.classList.remove('dark');
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
+        function toggleTheme() {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
+        if(themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', toggleTheme);
+        }
+
+        // Multiple Password Visibility Toggles
+        const toggleButtons = document.querySelectorAll('.toggle-password');
+        
+        toggleButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const eyeIcon = this.querySelector('i');
+                
+                if (passwordInput && eyeIcon) {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    
+                    if (type === 'text') {
+                        eyeIcon.classList.remove('ph-eye-slash');
+                        eyeIcon.classList.add('ph-eye');
+                        eyeIcon.classList.add('text-brand-gold');
+                    } else {
+                        eyeIcon.classList.remove('ph-eye');
+                        eyeIcon.classList.add('ph-eye-slash');
+                        eyeIcon.classList.remove('text-brand-gold');
+                    }
+                }
+            });
+        });
+
+        // Form Validation & Submit Simulation
+        const registerForm = document.getElementById('registerForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if(registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const pwd = document.getElementById('password').value;
+                const confirmPwd = document.getElementById('confirm-password').value;
+                
+                // Simple validation
+                if (pwd !== confirmPwd) {
+                    alert("Kata sandi dan konfirmasi kata sandi tidak cocok!");
+                    return;
+                }
+                
+                // Animate button to show loading
+                const originalContent = submitBtn.innerHTML;
+                submitBtn.innerHTML = `<i class="ph ph-spinner-gap animate-spin text-xl"></i> <span class="ml-2">Membuat Akun...</span>`;
+                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                
+                // Simulate API call delay
+                setTimeout(() => {
+                    // Redirect to login page after successful registration
+                    window.location.href = 'login.html'; 
+                }, 1500);
+            });
+        }
+
+        // Initialize
+        initTheme();
+    </script>
+</body>
+</html>

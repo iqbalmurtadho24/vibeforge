@@ -1,0 +1,112 @@
+# Addendum Audit: Kesesuaian Konsep & Paritas Keamanan Multi-Mode
+Versi: 2.0 (generik, lintas proyek)
+Status: Modul tambahan opsional, hanya dijalankan jika Bagian 0.1 mengonfirmasi berlaku
+
+## 0. Prasyarat Pemakaian
+
+Addendum ini HANYA dijalankan jika minimal satu dari dua kondisi berikut benar:
+- Proyek memiliki dokumen governance/konsep tertulis (nama file bervariasi, tidak selalu `CLAUDE.md`)
+- Proyek memiliki lebih dari satu mode penyimpanan data yang menjalankan logika bisnis yang sama (mis. JSON vs MySQL, atau mode lain)
+
+Jika kedua kondisi di atas tidak berlaku untuk proyek yang sedang diaudit, HENTIKAN, addendum ini tidak relevan, cukup gunakan `AUDIT_PROTOCOL.md` saja.
+
+## 0.1 Parameter Konteks (WAJIB diisi sebelum audit dimulai)
+
+- Nama aplikasi: [ISI]
+- Nama file governance doc (jika ada): [ISI, contoh: CLAUDE.md, ARCHITECTURE.md, dll. Kosongkan jika tidak ada]
+- Nama file konsep/bisnis tambahan (jika ada, contoh: konsep.md): [ISI atau kosongkan]
+- Arsitektur database multi-mode berlaku? [Ya/Tidak]
+- Jika Ya, sebutkan nama tiap mode: Mode 1 = [ISI], Mode 2 = [ISI], dst
+- Apakah Bagian A (kesesuaian governance) berlaku? [Ya/Tidak]
+- Apakah Bagian B (paritas multi-mode) berlaku? [Ya/Tidak]
+- Apakah proyek memakai Median.co (WebView-to-APK wrapper)? [Ya/Tidak]
+- Apakah proyek memakai OneSignal (push notification)? [Ya/Tidak]
+- Apakah Bagian C (integrasi pihak ketiga spesifik) berlaku? [Ya, jika salah satu dari dua poin di atas Ya / Tidak, jika keduanya Tidak]
+
+Jika Bagian A, B, atau C dijawab Tidak, skip bagian tersebut sepenuhnya di laporan akhir, jangan diisi "Tidak Dapat Diverifikasi", karena itu bukan celah, itu memang di luar cakupan proyek ini.
+
+## 1. Aturan Kerja
+
+- READ-ONLY. Jangan ubah kode apa pun, termasuk file governance itu sendiri.
+- Setiap klaim kesesuaian atau ketidaksesuaian WAJIB disertai bukti: file, baris, cuplikan kode.
+- Jika sebuah item tidak bisa diverifikasi dari kode saja (butuh menjalankan aplikasi), tulis "TIDAK DAPAT DIVERIFIKASI SECARA STATIS" dan jelaskan kenapa.
+- Dilarang menyimpulkan "sudah sesuai" hanya karena nama file atau nama fungsi terdengar benar. Baca isi logikanya.
+
+## 2. Bagian A: Audit Kesesuaian Konsep vs Governance Doc
+
+*(Jalankan hanya jika 0.1 mengonfirmasi Bagian A berlaku)*
+
+### Langkah 1: Ekstraksi Aturan (checkpoint wajib sebelum audit)
+
+Sebelum membandingkan apa pun, baca seluruh isi file governance yang disebutkan di 0.1 dan buat DAFTAR AturanEksplisit terlebih dahulu sebagai output terpisah, mencakup:
+- Aturan yang dinyatakan eksplisit sebagai instruksi/checklist
+- Pola arsitektural yang dijelaskan naratif meski tidak berbentuk daftar (contoh: penjelasan tentang bagaimana modul harus berinteraksi dengan core)
+- Batasan/larangan yang disebutkan (contoh: "modul tidak boleh mengubah X tanpa approval")
+
+Tampilkan daftar ini ke saya dulu sebagai bagian dari laporan, supaya saya bisa mengonfirmasi tidak ada aturan penting yang terlewat sebelum kamu lanjut ke Langkah 2.
+
+### Langkah 2: Verifikasi Kesesuaian
+
+Untuk SETIAP item dalam DaftarAturanEksplisit, cocokkan dengan implementasi nyata di kode. Buat tabel: Aturan | Status (Sesuai/Sebagian/Tidak Sesuai/Tidak Dapat Diverifikasi) | Bukti (file:baris) | Catatan.
+
+Perhatian khusus untuk kategori aturan yang umum ditemukan di governance doc:
+- Arsitektur routing/dispatcher (apakah entry point sesuai spesifikasi)
+- Interaksi dengan library/plugin pihak ketiga (apakah komponen yang dipakai sesuai spesifikasi, bukan komponen serupa yang salah)
+- Batasan struktural (mis. pemisahan folder, larangan modifikasi tanpa approval)
+- Konvensi UI/komponen jika didefinisikan sebagai taksonomi/standar
+
+## 3. Bagian B: Paritas Keamanan Antar Mode Penyimpanan
+
+*(Jalankan hanya jika 0.1 mengonfirmasi Bagian B berlaku, gunakan nama mode sesuai yang diisi di 0.1, jangan asumsikan nama "JSON"/"MySQL" jika proyek pakai mode lain)*
+
+Untuk SETIAP kontrol keamanan berikut, temukan implementasinya di SETIAP mode yang terdaftar di 0.1, lalu tentukan apakah setara. Jika satu mode punya kontrol yang tidak ada di mode lain, WAJIB dicatat sebagai temuan Kritis.
+
+1. **Tenant/scope enforcement**: apakah mekanisme pembatasan akses data diimplementasikan secara identik secara efek di semua mode?
+2. **Injection/manipulasi input**: cek risiko spesifik tiap mode (SQL injection untuk mode database relasional, path traversal/type juggling untuk mode berbasis file, dsb)
+3. **Race condition pada operasi tulis**: mode berbasis file rentan concurrent write tanpa locking, mode database relasional biasanya punya transaction, cek apakah ada penanganan setara
+4. **Rate limiting/counter kritis** (percobaan login, kuota, dsb): cek di mode mana data ini disimpan dan apakah race-condition-safe di semua mode
+5. **Access control di atas layer data**: pastikan otorisasi dipanggil SEBELUM query data di semua mode, bukan hanya diverifikasi di mode yang paling sering dites
+6. **Lokasi penyimpanan data mode berbasis file**: pastikan file data TIDAK berada di webroot yang bisa diakses langsung via HTTP, ini risiko yang mungkin hanya ada di mode tertentu
+7. **Audit trail/logging**: pastikan berjalan sama di semua mode
+8. **Konsistensi validasi input**: cek apakah ada input yang tervalidasi berbeda tergantung mode aktif
+
+Buat tabel: Kontrol Keamanan | Implementasi per Mode | Setara? (Ya/Tidak/Sebagian) | Bukti | Severity jika Tidak Setara.
+
+## 4. Bagian C: Integrasi Pihak Ketiga Spesifik
+
+*(Jalankan hanya jika 0.1 mengonfirmasi Bagian C berlaku. Sub-bagian di bawah dijalankan secara independen sesuai flag masing-masing, jangan jalankan sub-bagian yang flagnya Tidak)*
+
+### C.1 Median.co (WebView-to-APK)
+
+*(hanya jika flag Median.co = Ya)*
+
+- [ ] Plugin yang dipakai untuk audio background adalah "Native Media Player" (`median.backgroundMedia`), BUKAN plugin "Background Audio" yang minta izin mikrofon. Cari referensi ke kedua nama plugin ini di config/manifest, buktikan mana yang aktif dipakai
+- [ ] Tidak ada full-page reload pada flow yang seharusnya AJAX (login, register, navigasi utama), karena reload akan mematikan media player yang sedang berjalan
+- [ ] Pull-to-refresh dipastikan disabled atau diganti custom AJAX refresh, cari implementasinya di kode/konfigurasi Median
+- [ ] WebView URL whitelist: navigasi dibatasi ke domain aplikasi sendiri, cegah open-redirect jadi phishing-in-app
+- [ ] JS bridge `median.*`: daftar semua fungsi yang di-expose ke JS, cek apakah bisa dipanggil dari konteks/halaman yang tidak seharusnya
+
+### C.2 OneSignal (Push Notification)
+
+*(hanya jika flag OneSignal = Ya)*
+
+- [ ] `OneSignal.login(external_id)` dipanggil di server-side, bukan di client-side JS yang bisa dilihat/dimanipulasi user
+- [ ] REST API key OneSignal disimpan di `.env` server-side, bukan tertanam di kode client atau konfigurasi Median yang bisa dibongkar dari APK
+- [ ] External ID yang dikirim ke OneSignal tidak membocorkan data sensitif (mis. jangan pakai data yang predictable/enumerable sebagai ID)
+
+Buat tabel: Item | Status (Sesuai/Sebagian/Tidak Sesuai/Tidak Dapat Diverifikasi) | Bukti (file:baris) | Severity jika Tidak Sesuai.
+
+## 5. Output Wajib
+
+Hasilkan file laporan baru: `audit-report-conformance-{nama-aplikasi}-{YYYY-MM-DD}-{HHMM}.md`, berisi:
+
+1. Konfirmasi parameter konteks yang dipakai (isi ulang dari 0.1)
+2. Daftar AturanEksplisit hasil Langkah 1 (jika Bagian A berlaku)
+3. Ringkasan eksekutif (hanya untuk bagian yang berlaku)
+4. Tabel lengkap Bagian A (jika berlaku)
+5. Tabel lengkap Bagian B (jika berlaku)
+6. Tabel lengkap Bagian C, dipisah per sub-bagian C.1 dan C.2 (jika berlaku)
+7. Daftar temuan Kritis
+8. Rekomendasi prioritas
+
+Jangan lakukan perbaikan apa pun. Tunggu approval setelah laporan dibaca.

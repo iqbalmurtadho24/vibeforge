@@ -1,0 +1,6 @@
+<svg width="24" height="16" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Language">
+    <rect width="24" height="16" rx="2" fill="#8C8C8C" fill-opacity="0.15"/>
+    <circle cx="12" cy="8" r="6" fill="none" stroke="#8C8C8C" stroke-width="1.2"/>
+    <ellipse cx="12" cy="8" rx="2.4" ry="6" fill="none" stroke="#8C8C8C" stroke-width="1"/>
+    <line x1="6" y1="8" x2="18" y2="8" stroke="#8C8C8C" stroke-width="1"/>
+</svg>
