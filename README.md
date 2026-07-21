@@ -38,10 +38,11 @@ cd C:\xampp\htdocs
 Lalu unduh Vibeforge — command ini bisa langsung di-copy-paste apa adanya, *cukup ganti `<nama-aplikasi-anda>`* dengan nama project Anda sendiri (contoh: `toko-online-saya`):
 
 ```bash
-npx degit iqbalmurtadho24/vibeforge <nama-aplikasi-anda>
+npx -y degit iqbalmurtadho24/vibeforge <nama-aplikasi-anda>
 cd <nama-aplikasi-anda>
-code .
 ```
+
+> 💡 Flag `-y` membuat `npx` langsung setuju mengunduh package kecil `degit` tanpa menampilkan prompt konfirmasi (`Ok to proceed? (y)`) — ini hanya muncul sekali di komputer yang belum pernah pakai `npx degit` sebelumnya. Tanpa `-y`, kalau Anda paste beberapa baris command sekaligus, baris berikutnya bisa "termakan" jadi jawaban untuk prompt itu alih-alih dijalankan sebagai command terpisah.
 
 > ⚠️ Bagian `iqbalmurtadho24/vibeforge` *JANGAN diubah* — itu alamat resmi repo Vibeforge. Yang perlu Anda ganti hanya `<nama-aplikasi-anda>` (termasuk tanda `<` `>`-nya, jangan ikut disalin).
 
