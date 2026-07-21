@@ -31,6 +31,10 @@ cd C:\laragon\www
 cd C:\xampp\htdocs
 ```
 
+> 💡 *Path di atas cuma contoh default.* Laragon/XAMPP bisa saja terinstal di drive lain (`D:\laragon\www`, `E:\xampp\htdocs`, dst), tergantung pilihan Anda saat instalasi. Kalau tidak yakin lokasinya, klik kanan *ikon tray Laragon* → klik *"www"* (atau buka shortcut XAMPP Control Panel → cek path instalasi) untuk melihat folder aslinya di File Explorer, lalu sesuaikan drive di command `cd` Anda.
+>
+> Di PowerShell, pindah drive cukup dengan `cd D:\laragon\www` langsung (beda dengan Command Prompt/`cmd.exe` yang butuh `cd /d D:\laragon\www`).
+
 Lalu unduh Vibeforge (ganti `username` dengan akun GitHub Anda sendiri):
 
 ```bash
