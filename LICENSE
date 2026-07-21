@@ -1,6 +1,6 @@
-# Apache License 2.0
+# Apache License 1.0
 
-**Vibeforge**
+*Vibeforge*
 Copyright (c) 2026 Project Owner
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,9 +45,9 @@ OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS IN THE WORK.
 
 This project may include or depend on third-party components with their own licenses:
 
-- **Tailwind CSS** - MIT License
-- **Alpine.js** - MIT License
-- **PHP** - PHP License
+- *Tailwind CSS* - MIT License
+- *Alpine.js* - MIT License
+- *PHP* - PHP License
 
 Please refer to the respective projects for their complete license texts.
 
