@@ -52,15 +52,46 @@ Folder yang muncul adalah salinan bersih Vibeforge — *tanpa riwayat git*, siap
 
 ---
 
-## Langkah 2 — Isi identitas aplikasi Anda (WAJIB, sebelum lanjut)
+## Langkah 2 — Siapkan Identitas & Konsep Aplikasi (WAJIB, sebelum lanjut)
 
-Vibeforge ini generik. Sebelum AI mulai membangun apa pun, isi dulu 3 hal berikut supaya AI tahu persis aplikasi apa yang Anda maksud:
+Jawaban atas pertanyaan ini menentukan alur yang diambil:
 
-1. *`docs/prd.md`* — jelaskan aplikasi Anda: nama, fitur utama, peran pengguna (siapa saja aktornya), model bisnis.
+### A. Jika MEMBUAT aplikasi baru
+
+Isi 3 hal berikut supaya AI tahu persis aplikasi yang Anda maksud:
+
+1. *`docs/prd.md`* — jelaskan aplikasi Anda: nama, fitur utama, peran
+   pengguna (siapa saja aktornya), model bisnis.
 2. *`docs/branding.md`* — identitas visual: nama brand, warna, font, logo.
-3. *`references/*.html`* — 6 file HTML ini adalah *contoh pola struktur & styling* dari aplikasi referensi. Kalau aplikasi Anda beda topik/konten, sesuaikan teks dan komponen di dalamnya agar mencerminkan aplikasi Anda. AI membaca file ini sebagai *acuan struktur*, bukan konten final yang disalin mentah.
+3. *`references/*.html`* — 6 file HTML ini adalah *contoh pola struktur &
+   styling* dari aplikasi referensi. Kalau aplikasi Anda beda topik/konten,
+   sesuaikan teks dan komponen di dalamnya agar mencerminkan aplikasi Anda.
+   AI membaca file ini sebagai *acuan struktur*, bukan konten final yang
+   disalin mentah.
 
-> Jangan lewati langkah ini. Kalau `prd.md`/`branding.md` dibiarkan kosong, AI akan berhenti dan balik bertanya ke Anda — itu memang disengaja, supaya AI tidak menebak-nebak konsep aplikasi Anda.
+> Jangan lewati langkah ini. Kalau `prd.md`/`branding.md` dibiarkan
+> kosong, AI akan berhenti dan balik bertanya ke Anda — itu memang
+> disengaja, supaya AI tidak menebak-nebak konsep aplikasi Anda.
+
+### B. Jika MEREDESAIN aplikasi yang sudah ada
+
+Aplikasi sudah pernah dibuat dan Anda ingin meredesain. AI perlu memahami
+konsep lama terlebih dahulu:
+
+1. Pastikan folder `references/*.html` berisi salinan/concept dokumen
+   aplikasi lama Anda (struktur HTML, styling, navigasi) — ini yang akan
+   dibaca AI sebagai acuan.
+2. AI akan **menulis ulang** `docs/prd.md` dan `docs/branding.md`
+   berdasarkan apa yang dibaca di `references/*.html`, mengikuti format
+   placeholder `[...]` yang sudah ada di masing-masing file.
+3. Sesuaikan `references/*.html` agar mencerminkan versi baru setelah
+   `prd.md`/`branding.md` terisi.
+
+> **Catatan penting:** `docs/prd.md` dan `docs/branding.md` adalah
+> **satu-satunya** sumber kebenaran untuk konsep dan identitas aplikasi.
+> `references/*.html` hanya menggambarkan struktur dan styling — bukan
+> teks final. Semua isi aplikasi (nama, warna, deskripsi) WAJIB
+> didefinisikan di `prd.md`/`branding.md`.
 
 ---
 
