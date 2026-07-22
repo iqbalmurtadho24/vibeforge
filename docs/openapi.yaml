@@ -13,20 +13,21 @@ info:
     Session is established via POST /core/router.php with module=auth&action=login.
 
     ## Rate Limiting
-    Progressive rate limiting based on IP + username combination.
-    Blocked after 5 failed attempts, increasing timeout each retry.
-    Response header includes Retry-After.
+    Fixed-window rate limiting keyed by IP + email combination
+    (`RATE_LIMIT_MAX_ATTEMPTS` per `RATE_LIMIT_WINDOW` seconds, default
+    5/300s - see `core/ratelimit.php`). Returns HTTP 429 once the window's
+    attempt count is exceeded. No `Retry-After` header is currently sent.
 
     ## Response Format
     All JSON responses follow this format:
     ```json
     {
       "success": true|false,
-      "message": "Human-readable message",
-      "data": { ... },
-      "redirect": "/path" // optional
+      "error": "Human-readable error message (only when success=false)"
     }
     ```
+    Successful responses may include additional fields specific to the
+    action (e.g. `dashboard_url` on login) - see per-endpoint schemas below.
 
   version: 1.0.0
   contact:
@@ -72,7 +73,12 @@ paths:
                     - settings
                     - content
                     - reports
-                  description: The module to invoke
+                  description: |
+                    The module to invoke. Only `auth` (actions: `login`,
+                    `register`) is implemented so far, backed by
+                    `modules/auth/*.php`. The other values are reserved
+                    naming convention for future modules and are not
+                    wired up yet.
                 action:
                   type: string
                   description: The action within the module
@@ -96,65 +102,66 @@ paths:
             text/html:
               description: Module render HTML (for action=render)
         '429':
-          description: Rate limited
-          headers:
-            Retry-After:
+          description: |
+            Rate limited (see `isRateLimited()` in core/ratelimit.php).
+            No `Retry-After` header is sent yet - not implemented.
+          content:
+            application/json:
               schema:
-                type: integer
-              description: Seconds until retry is allowed
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
 
-  /logout:
-    post:
+  /logout/:
+    get:
       summary: Logout
-      description: Destroy session and redirect to home
+      description: |
+        Destroys the session (and any remember-me token/cookie) then
+        redirects to the landing page. This is a plain shell entry point
+        (`public/logout/index.php`), not a `core/router.php` module
+        action - GET, not POST, and renders no HTML (see CLAUDE.md
+        Section 12f).
       tags:
         - Auth
       security:
         - session: []
       responses:
-        '200':
-          description: Logged out successfully
+        '302':
+          description: Session destroyed, redirected to `/`
           headers:
+            Location:
+              schema:
+                type: string
+                example: /
             Set-Cookie:
-              description: Session cookie cleared
+              description: Session cookie and remember_token cookie cleared
 
 components:
   schemas:
     LoginResponse:
       type: object
+      description: Actual shape returned by modules/auth/login.php
       properties:
         success:
           type: boolean
           example: true
-        message:
-          type: string
-          example: "Login successful"
-        redirect:
+        dashboard_url:
           type: string
           format: uri
+          description: |
+            Role -> shell mapping from getDashboardUrl() (core/session.php),
+            e.g. /manajemen/, /admin/, /client/. Only present on success.
           example: "/client/"
-        user:
-          $ref: '#/components/schemas/User'
 
     RegisterResponse:
       type: object
+      description: Actual shape returned by modules/auth/register.php
       properties:
         success:
           type: boolean
           example: true
-        message:
-          type: string
-          example: "Registration successful"
-        redirect:
-          type: string
-          format: uri
-          example: "/login/"
-        user:
-          $ref: '#/components/schemas/User'
 
     ApiResponse:
       type: object
@@ -162,33 +169,22 @@ components:
         success:
           type: boolean
           example: true
-        message:
-          type: string
-          example: "Operation successful"
         data:
           type: object
           description: Response payload
-        redirect:
-          type: string
-          format: uri
-          description: Optional redirect URL
 
     ErrorResponse:
       type: object
+      description: |
+        Actual error shape used by modules/auth/*.php and core/router.php
+        (e.g. invalid CSRF, rate limited, invalid credentials).
       properties:
         success:
           type: boolean
           example: false
-        message:
+        error:
           type: string
-          example: "Error description"
-        errors:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
-          description: Field-specific validation errors
+          example: "Email atau password salah"
 
     User:
       type: object

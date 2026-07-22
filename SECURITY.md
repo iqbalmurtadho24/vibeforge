@@ -78,7 +78,7 @@ Before going to production:
 | SQL Injection | ✅ | Prepared Statements |
 | XSS Prevention | ✅ | Output Escaping |
 | Session Hijacking | ✅ | Session Regeneration |
-| Rate Limiting | ✅ | IP + Username |
+| Rate Limiting | ✅ | Fixed-window, IP + email (`core/ratelimit.php`) |
 | Remember-Me | ✅ | Selector + Validator |
 | Clickjacking | ⚠️ | To be implemented |
 
@@ -102,14 +102,16 @@ APP_DEBUG=false
 ### Recommended Production Settings
 
 ```env
-# Database
+# Database - "mysql" forces a hard fail (not a silent JSON fallback) if the
+# connection or a required table is missing. Use "auto" only while tables
+# are still being migrated incrementally (see CLAUDE.md Section 3g).
 DB_MODE=mysql
 
 # Session
 SESSION_LIFETIME=3600  # 1 hour
 
 # Rate Limiting
-RATE_LIMIT_MAX=10
+RATE_LIMIT_MAX_ATTEMPTS=10
 RATE_LIMIT_WINDOW=300  # 5 minutes
 ```
 

@@ -10,6 +10,8 @@ defined('APP_ENTRY') or define('APP_ENTRY', true);
 
 require_once __DIR__ . '/../../include/config.php';
 require_once __DIR__ . '/../../include/helper.php';
+require_once __DIR__ . '/../../core/session.php';
+require_once __DIR__ . '/../../core/csrf.php';
 
 initSession();
 
@@ -34,15 +36,9 @@ if (!$isLoggedIn || $userRole !== 'admin') {
     exit;
 }
 
-// Theme preference (server-side to avoid flicker)
-$themePreference = 'dark';
-$users = loadJsonFile('users.json');
-foreach ($users as $u) {
-    if (($u['id'] ?? null) === $userId) {
-        $themePreference = $u['theme_preference'] ?? 'dark';
-        break;
-    }
-}
+// Theme preference (server-side to avoid flicker) - sourced from the same
+// Repo-backed $user row as everything else (Section 3g), no direct JSON read.
+$themePreference = $user['theme_preference'] ?? 'dark';
 
 $isDev = APP_ENV !== 'production';
 $userName = escape($user['name'] ?? 'Creator');

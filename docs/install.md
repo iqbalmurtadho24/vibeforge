@@ -98,9 +98,21 @@ TAHAP 1 - AUDIT & RENCANA (read-only, TIDAK menulis kode)
      `APP_DISPLAY_NAME`, `APP_TAGLINE`, `APP_ENV`, `DB_MODE`, dst)
    - `core/router.php` (router asli) dan `public/core/router.php` (proxy,
      lihat Section 3f)
-   - `modules/auth/login.php`, `register.php`, `logout.php`
+   - `core/session.php`, `core/csrf.php`, `core/remember.php`,
+     `core/ratelimit.php`, `core/Repo.php` (data access layer, Section 3g)
+   - `modules/auth/login.php`, `register.php`
    - `data/users.json` (bukan `.example`-nya)
    - `.env` (bukan `.env.example`-nya)
+
+   > Kalau file-file `core/` dan `modules/auth/` di atas SUDAH ADA (repo
+   > Vibeforge ini sudah menyertakan reference implementation auth core
+   > yang generik lintas-project, teruji end-to-end), JANGAN dibangun
+   > ulang dari nol - itu infrastruktur reusable, bukan business logic
+   > spesifik `docs/prd.md`. Cukup verifikasi masih konsisten dengan
+   > CLAUDE.md Section 3g/8, dan `data/users.json` sudah diisi demo user
+   > yang relevan dengan role aplikasi Anda (role tetap
+   > manajemen/admin/client mengikuti Section 3c, nama tampilan/isi bisnis
+   > lain mengikuti `docs/prd.md`).
 4. Buat SATU file output: `docs/build_plan.md`, berisi:
    - Tabel: Shell -> file `references/` acuan -> status (belum dibuat /
      draft / lengkap)
@@ -130,8 +142,19 @@ TAHAP 2 - EKSEKUSI ONE-SHOT (setelah build_plan.md disetujui)
    `manajemen/`, `admin/`, `client/`):
    a. Copy struktur & styling dari `references/*.html` yang sesuai (mapping
       di CLAUDE.md Section 3e)
-   b. Tambahkan PHP header standar (Section 12e): require `config.php`,
-      `helper.php`, panggil `initSession()`
+   b. Tambahkan PHP header standar (Section 12e), WAJIB EMPAT require ini,
+      bukan cuma dua — kalau hanya `config.php`+`helper.php` lalu langsung
+      panggil `initSession()`, shell akan fatal error "Call to undefined
+      function" karena fungsi itu ada di file lain:
+      ```php
+      require_once __DIR__ . '/../../include/config.php';
+      require_once __DIR__ . '/../../include/helper.php';
+      require_once __DIR__ . '/../../core/session.php';
+      require_once __DIR__ . '/../../core/csrf.php';
+
+      initSession();
+      ```
+      (sesuaikan jumlah `../` dengan depth shell, lihat tabel Section 12e)
    c. GANTI semua teks statis jadi `<?= t('key') ?>` - tambahkan key barunya
       ke SEMUA `locales/*.json` (id, en, DAN ar - bukan cuma id.json)
    d. GANTI nama aplikasi hardcode jadi `<?= APP_DISPLAY_NAME ?>`
@@ -139,9 +162,23 @@ TAHAP 2 - EKSEKUSI ONE-SHOT (setelah build_plan.md disetujui)
 6. Validasi sintaks: jalankan `php -l` untuk SETIAP file `.php` yang dibuat
    atau diubah di langkah ini. Tempel hasilnya apa adanya di laporan. Error
    WAJIB diperbaiki dulu sebelum lanjut ke poin berikutnya.
+7. **Validasi fungsional, bukan cuma sintaks** - `php -l` HANYA menangkap
+   parse error, TIDAK menangkap "fungsi belum di-require" (itu tetap lolos
+   `php -l` tapi fatal saat runtime). Jalankan server sementara dan akses
+   tiap shell via HTTP asli untuk membuktikan tidak ada fatal error:
+   ```bash
+   php -S localhost:8099 -t public
+   curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8099/
+   curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8099/login/
+   ```
+   Landing page (`/`) dan `/login/` WAJIB HTTP 200 (bukan 500/blank) di
+   titik ini SEBELUM lanjut ke Tahap 3 - preview manual project owner di
+   browser bukan pengganti untuk menangkap fatal error dasar ini lebih
+   awal. Hentikan server setelah dicek.
 
 BERHENTI DI SINI. Laporkan hasil TAHAP 2 (daftar file dibuat/diubah + hasil
-`php -l` lengkap) dan tunggu approval sebelum lanjut TAHAP 3.
+`php -l` lengkap + hasil HTTP check poin 7 untuk `/` dan `/login/`) dan
+tunggu approval sebelum lanjut TAHAP 3.
 
 TAHAP 3 - PREVIEW LOKAL
 --------------------------

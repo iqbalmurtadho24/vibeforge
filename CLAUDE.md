@@ -34,10 +34,16 @@ Pilih audit prompt yang sesuai dengan fase project:
 - Native PHP (tanpa framework), Tailwind CSS (CDN atau build lokal),
   Alpine.js untuk interaktivitas ringan, vanilla JS untuk sisanya.
 - Laragon untuk development lokal, FTP untuk deploy production.
-- Database dual-mode: JSON (`data/*.json`) untuk dummy/testing tanpa DB,
-  MySQL untuk production. Ditentukan oleh `DB_MODE` di `.env`.
-- Autoloading: PSR-4 manual via `spl_autoload_register()` (tidak pakai
-  Composer), memetakan namespace ke path folder sesuai konvensi PSR-4.
+- Database dual-mode: JSON (`data/*.json`) atau MySQL, diakses HANYA lewat
+  data access layer terpusat `core/Repo.php` (auto-switch per entitas,
+  lihat Section 3g).
+- Autoloading: TIDAK ADA autoloader. Class/fungsi di `core/`, `include/`,
+  `modules/` di-include eksplisit via `require_once` di titik yang
+  membutuhkannya (lihat pola di `core/router.php`, `core/session.php`,
+  shell `public/*/index.php`). Class TIDAK di-namespace (mis. `Repo` di
+  `core/Repo.php` adalah class global). Kalau nanti butuh PSR-4 asli
+  (banyak class, perlu namespacing), itu perubahan arsitektur terpisah
+  yang WAJIB direncanakan & disetujui dulu, bukan dianggap sudah berjalan.
 - Coding style: PSR-12.
 - Versioning: SemVer, dicatat di `CHANGELOG.md`.
 - Dokumentasi API (jika ada endpoint publik nanti): OpenAPI 3.0 di
@@ -154,6 +160,85 @@ require_once dirname(__DIR__, 2) . '/core/router.php';
 
 > Error yang muncul: "Server returned invalid response" atau "Invalid JSON response"
 > di console browser.
+
+## 3g. Data Access Layer - Repo Pattern (Auto-Switch SQL/JSON)
+
+Semua modul (auth, admin, client, manajemen) WAJIB mengakses data lewat satu
+data access layer terpusat: `core/Repo.php`. Modul TIDAK BOLEH melakukan
+query PDO langsung maupun baca/tulis file JSON langsung — modul hanya
+memanggil `Repo::table('nama_entitas')` dan tidak perlu tahu apakah data
+sedang datang dari MySQL atau JSON.
+
+### Mode Deteksi (per-entitas, bukan flag global manual)
+
+`DB_MODE` di `.env` menerima tiga nilai:
+- `auto` (default direkomendasikan) - Repo mendeteksi otomatis PER ENTITAS:
+  1. Coba koneksi PDO ke MySQL pakai `DB_HOST`/`DB_NAME`/`DB_USER`/`DB_PASSWORD`.
+  2. Jika koneksi berhasil DAN tabel untuk entitas yang diminta ada
+     (`information_schema.tables`) -> mode entitas ini = **SQL**.
+  3. Jika koneksi gagal ATAU tabel spesifik itu belum ada -> mode entitas
+     ini = **JSON** (`data/{entitas}.json`).
+  4. Ini per-entitas supaya migrasi bertahap tetap jalan: contoh tabel
+     `users` sudah dimigrasikan ke MySQL tapi `audit_trail` belum -> Repo
+     otomatis pakai SQL untuk `users` dan tetap pakai JSON untuk
+     `audit_trail`, tanpa perlu flag terpisah.
+  5. Deteksi dijalankan sekali per request (in-memory static cache di
+     `Repo`, pola yang sama seperti cache `t()` di `helper.php`) - TIDAK
+     disimpan lintas request, supaya begitu tabel baru selesai
+     dimigrasikan, request berikutnya otomatis pindah ke SQL tanpa restart
+     apapun.
+- `json` (force) - abaikan koneksi SQL sama sekali, semua entitas selalu
+  JSON. Untuk demo/testing terisolasi.
+- `mysql` (force) - semua entitas WAJIB SQL. Jika koneksi gagal atau tabel
+  entitas belum ada -> HALT dengan error jelas ke `cache/debug.log`, JANGAN
+  diam-diam fallback ke JSON (mencegah kejadian riwayat: production jalan
+  pakai data dummy tanpa disadari).
+
+> **Catatan penting**: auto-switch di atas hanya menentukan SUMBER BACA/TULIS
+> berikutnya begitu tabel SQL tersedia. Repo TIDAK melakukan migrasi data
+> otomatis dari `data/*.json` ke MySQL - importing data JSON existing ke
+> tabel SQL (kalau mau dipertahankan) adalah langkah manual terpisah
+> (`migrations/` atau script import), di luar tanggung jawab Repo.
+
+### Kontrak API (semua modul pakai method yang sama, apapun mode-nya)
+
+```php
+Repo::table('users')->all(): array
+Repo::table('users')->find($id): ?array
+Repo::table('users')->where(array $criteria): array
+Repo::table('users')->insert(array $data): string|int   // return id baru
+Repo::table('users')->update($id, array $data): bool
+Repo::table('users')->delete($id): bool
+```
+
+Struktur array yang dikembalikan HARUS identik baik sumbernya SQL row
+maupun JSON object (nama kolom/key sama persis) - kode pemanggil tidak
+boleh punya cabang `if ($mode === 'sql') { ... } else { ... }` di modul
+manapun. Normalisasi ini tanggung jawab `Repo`, bukan tanggung jawab modul.
+
+### JSON Write Safety (WAJIB saat mode JSON aktif)
+
+Setiap insert/update/delete terhadap `data/{entitas}.json` WAJIB:
+1. Mutex ditangani lewat file lock terpisah `{entitas}.json.lock` (bukan
+   lock di file data itu sendiri) yang di-`flock(LOCK_EX)` sepanjang siklus
+   read-modify-write, supaya proses atomic-rename di langkah 2 tidak
+   bentrok dengan file yang sedang dibuka — perilaku lock-on-open-file saat
+   rename berbeda antara POSIX dan Windows, jadi lock dan file data
+   sengaja dipisah.
+2. Tulis ke file temporary lalu `rename()` ke path asli (atomic write) -
+   mencegah file JSON corrupt/setengah-tertulis kalau proses terputus
+   di tengah penulisan. Karena rename ini atomic, pembacaan (`all()`)
+   TIDAK perlu lock tambahan — pembaca selalu dapat versi lama utuh atau
+   versi baru utuh, tidak pernah setengah-tertulis.
+3. `update()`/`delete()` yang menyasar id tidak ditemukan -> return `false`,
+   BUKAN exception - konsisten dengan hasil `false` dari query SQL yang
+   affected-rows 0.
+
+### Prepared Statement (mode SQL)
+
+Semua query SQL di dalam `Repo` WAJIB prepared statement via PDO (existing
+requirement Section 8), parameter binding, tidak ada interpolasi string ke
+query.
 
 ## 4. Struktur Folder
 
@@ -316,7 +401,10 @@ D:\laragon\bin\php\php-8.3.30-Win32-vs16-x64\php.exe -r "echo password_hash('pas
   terpusat di `core/router.php`, bukan per-file.
 - Remember-me: selector+validator token, per-device logout, invalidate
   semua token saat password berubah.
-- Rate limiting progresif berbasis IP+username.
+- Rate limiting berbasis IP+username. Baseline minimum: fixed-window
+  (`RATE_LIMIT_MAX_ATTEMPTS` percobaan per `RATE_LIMIT_WINDOW` detik,
+  lihat `core/ratelimit.php`) - progresif/exponential backoff adalah
+  peningkatan lanjutan yang direkomendasikan, bukan syarat minimum WAJIB.
 - Re-authentication middleware untuk aksi sensitif.
 - `requireRole()` guard di setiap file module.
 - Prepared statements via PDO wrapper (mode MySQL); JSON mode tetap
@@ -1066,7 +1154,7 @@ di-inject ke DOM lewat JavaScript setelah page load, termasuk:
   6. **WAJIB**: Setup CSP di `public/.htaccess` (lihat Section 8b)
   7. **WAJIB**: Buat `locales/*.json` dengan terjemahan untuk i18n
   8. **WAJIB**: Download flag assets ke `public/assets/flags/`
-- Section berikut GENERIK dan berlaku untuk semua project: 1, 2, 3, 3a-3f, 4,
+- Section berikut GENERIK dan berlaku untuk semua project: 1, 2, 3, 3a-3g, 4,
   5, 6, 6b, 7, 8, 8b, 9, 10, 11, 12, 12a-12d, 13.
 - Section berikut SPESIFIK-FITUR (abaikan jika tidak relevan): 3 (konsep
   aplikasi), 6, 9, 10, 11.
@@ -1093,10 +1181,24 @@ defined('APP_ENTRY') or define('APP_ENTRY', true);
 
 require_once __DIR__ . '/../../include/config.php';
 require_once __DIR__ . '/../../include/helper.php';
+require_once __DIR__ . '/../../core/session.php';
+require_once __DIR__ . '/../../core/csrf.php';
 
 initSession();
 // ... shell logic ...
 ```
+
+> **KRITIS**: `initSession()`, `isLoggedIn()`, `getCurrentUser()`,
+> `getDashboardUrl()`, `requireRole()` didefinisikan di `core/session.php`
+> (yang otomatis membawa `core/Repo.php`), dan `generateCsrfToken()`/
+> `verifyCsrfToken()` di `core/csrf.php` — BUKAN di `include/helper.php`.
+> Shell yang hanya require `config.php`+`helper.php` lalu langsung
+> memanggil fungsi-fungsi ini akan **fatal error "Call to undefined
+> function"** di semua shell, bukan cuma warning kosmetik. Ini pernah
+> benar-benar terjadi (semua shell termasuk landing page tidak bisa
+> diakses sama sekali) sampai `core/session.php`/`core/csrf.php`
+> ditambahkan ke setiap shell secara eksplisit — jangan ulangi galat ini
+> saat membuat shell baru maupun mengikuti `docs/install.md`.
 
 ## 12f. Logout Flow Pattern (WAJIB)
 

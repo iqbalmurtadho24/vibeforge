@@ -7,6 +7,8 @@ defined('APP_ENTRY') or define('APP_ENTRY', true);
 
 require_once __DIR__ . '/../../include/config.php';
 require_once __DIR__ . '/../../include/helper.php';
+require_once __DIR__ . '/../../core/session.php';
+require_once __DIR__ . '/../../core/csrf.php';
 
 initSession();
 
@@ -163,15 +165,36 @@ $themePreference = 'dark';
                 </button>
             </div>
 
-            <?php if (defined('APP_ENV') && APP_ENV !== 'production'): ?>
+            <?php if (defined('APP_ENV') && APP_ENV !== 'production'):
+                // Demo emails sourced from Repo (data/users.json or SQL), not
+                // hardcoded literals (Section 3g) - password123 stays literal
+                // per Section 6b (it's the known plaintext for every demo hash).
+                $demoRoleLabels = ['manajemen' => 'Manajemen', 'admin' => 'Admin', 'client' => 'Client'];
+                $demoRoleClasses = [
+                    'manajemen' => 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800',
+                    'admin' => 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800',
+                    'client' => 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50 border border-green-200 dark:border-green-800',
+                ];
+                $demoUsers = Repo::table('users')->all();
+                $demoByRole = [];
+                foreach ($demoUsers as $du) {
+                    $r = $du['role'] ?? null;
+                    if ($r !== null && !isset($demoByRole[$r])) {
+                        $demoByRole[$r] = $du;
+                    }
+                }
+            ?>
+            <?php if ($demoByRole !== []): ?>
             <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <p class="text-xs text-center text-gray-500 dark:text-gray-400 mb-3"><?= t('login.demo') ?></p>
                 <div class="grid grid-cols-3 gap-2">
-                    <button type="button" onclick="quickLoginFill('manajemen@example.com', 'password123')" class="py-2 px-3 text-xs font-medium rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors border border-purple-200 dark:border-purple-800">Manajemen</button>
-                    <button type="button" onclick="quickLoginFill('admin@example.com', 'password123')" class="py-2 px-3 text-xs font-medium rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors border border-blue-200 dark:border-blue-800">Admin</button>
-                    <button type="button" onclick="quickLoginFill('client@example.com', 'password123')" class="py-2 px-3 text-xs font-medium rounded-lg bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors border border-green-200 dark:border-green-800">Client</button>
+                    <?php foreach ($demoRoleLabels as $roleKey => $roleLabel): ?>
+                        <?php if (!isset($demoByRole[$roleKey])) { continue; } ?>
+                        <button type="button" onclick="quickLoginFill('<?= escape($demoByRole[$roleKey]['email']) ?>', 'password123')" class="py-2 px-3 text-xs font-medium rounded-lg transition-colors <?= $demoRoleClasses[$roleKey] ?? '' ?>"><?= escape($roleLabel) ?></button>
+                    <?php endforeach; ?>
                 </div>
             </div>
+            <?php endif; ?>
             <?php endif; ?>
 
             <div class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">

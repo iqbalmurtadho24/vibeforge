@@ -7,6 +7,8 @@ defined('APP_ENTRY') or define('APP_ENTRY', true);
 
 require_once __DIR__ . '/../../include/config.php';
 require_once __DIR__ . '/../../include/helper.php';
+require_once __DIR__ . '/../../core/session.php';
+require_once __DIR__ . '/../../core/csrf.php';
 
 initSession();
 

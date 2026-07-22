@@ -13,6 +13,8 @@ define('APP_ENTRY', true);
 // Load configuration - use correct path from public/logout/ to include/
 require_once __DIR__ . '/../../include/config.php';
 require_once __DIR__ . '/../../include/helper.php';
+require_once __DIR__ . '/../../core/session.php';
+require_once __DIR__ . '/../../core/remember.php';
 
 // Initialize session
 initSession();

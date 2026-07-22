@@ -16,6 +16,14 @@ if (!function_exists('escape')) {
     }
 }
 
+if (!function_exists('redirect')) {
+    function redirect(string $url): void
+    {
+        header('Location: ' . $url);
+        exit;
+    }
+}
+
 if (!defined('LANGUAGES_MANIFEST')) {
     define('LANGUAGES_MANIFEST', LOCALES_PATH . '/languages.json');
 }

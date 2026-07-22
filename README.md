@@ -170,7 +170,11 @@ Laragon/XAMPP Anda mungkin terinstal di drive lain (bukan `C:`). Klik kanan ikon
 Buka aplikasi Anda di:
 
 ```
+# Laragon
 http://<nama-aplikasi-anda>.test/
+
+# XAMPP
+http://localhost/<nama-aplikasi-anda>/
 ```
 
 (ganti `<nama-aplikasi-anda>` dengan nama folder project yang Anda pakai di Langkah 1 — mengikuti konvensi Auto Virtual Host Laragon, atau URL sesuai konfigurasi XAMPP Anda).
@@ -186,7 +190,25 @@ docs/
   branding.md      ← WAJIB diisi (Langkah 2)
 references/        ← 6 file HTML, pola struktur — sesuaikan isinya (Langkah 2)
 CLAUDE.md          ← aturan arsitektur & konvensi kode (dibaca AI di awal Tahap 1)
+core/Repo.php       ← data access layer siap pakai (lihat "Data & Login" di bawah)
 ```
+
+---
+
+## Data & Login — sudah siap pakai, tanpa setup database
+
+Vibeforge sudah menyertakan auth (login/register/logout) dan data access
+layer yang jalan langsung tanpa perlu setup MySQL:
+
+- Belum ada koneksi database? Semua CRUD otomatis pakai `data/*.json`
+  (file locking + atomic write, aman dari race condition).
+- Sudah ada MySQL dengan tabel yang sesuai? Aplikasi otomatis pindah pakai
+  SQL untuk tabel itu — tidak ada kode yang perlu diubah manual.
+- 3 akun demo (`manajemen`/`admin`/`client`, password `password123`) sudah
+  ada di `data/users.json` untuk langsung dicoba di halaman `/login/`
+  (tombol quick-login, hanya muncul saat `APP_ENV != production`).
+
+Detail lengkap mekanismenya ada di `CLAUDE.md` Section 3g.
 
 ---
 

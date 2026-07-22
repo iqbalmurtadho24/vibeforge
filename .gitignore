@@ -3,6 +3,10 @@
 
 # Sensitive / runtime data
 data/users.json
+data/audit_trail.json
+data/login_attempts.json
+data/remember_tokens.json
+data/*.lock
 
 # Cache & debug logs
 cache/*
