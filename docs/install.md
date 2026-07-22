@@ -1,5 +1,47 @@
-BUILD PROTOCOL - BANGUN APLIKASI DARI TEMPLATE
+# BUILD PROTOCOL - BANGUN APLIKASI DARI TEMPLATE
 ================================================
+
+## PERTANYAAN AWAL — New atau Redesign?
+
+Sebelum membaca dokumen lain, jawab dulu pertanyaan ini:
+
+**Apa yang ingin Anda lakukan?**
+
+> **A. MEMBUAT APLIKASI BARU** (`new`)
+> Anda ingin membangun aplikasi baru dari nol. Konteks aplikasi, fitur, dan
+> identitas visual belum ada — semua akan didefinisikan sendiri.
+>
+> **Langkah yang akan dilakukan:**
+> 1. Baca `docs/prd.md` → isi konsep aplikasi, fitur, model bisnis, role
+> 2. Baca `docs/branding.md` → isi nama brand, warna, font, logo
+> 3. Sesuaikan `references/*.html` → 6 file HTML ini menggambarkan
+>    struktur/styling shell. Sesuaikan teks dan komponen di dalamnya agar
+>    mencerminkan aplikasi Anda (bukan salin literal, lihat CLAUDE.md §12c)
+> 4. Lanjut ke TAHAP 1
+
+> **B. REDESAIN APLIKASI YANG SUDAH ADA** (`redesign`)
+> Aplikasi sudah pernah dibuat sebelumnya, dan Anda ingin membuat ulang/
+> meredesain dengan template ini. Konsep dan data lama masih ada.
+>
+> **Langkah yang akan dilakukan:**
+> 1. Baca SELURUH isi folder `references/*.html` lama — ini adalah
+>    dokumen konsep dan styling aplikasi existing Anda
+> 2. Tulis ulang `docs/prd.md` dan `docs/branding.md` dari hasil bacaan
+>    di atas, mengikuti FORMAT yang sudah ditentukan di masing-masing
+>    file (sesuaikan placeholder `[...]` sesuai konteks aplikasi lama)
+> 3. Update `references/*.html` → sesuaikan agar mencerminkan aplikasi
+>    Anda yang baru (bukan salin literal)
+> 4. Lanjut ke TAHAP 1
+
+> **Catatan penting:**
+> - `references/*.html` bukan sumber teks final. Isi aplikasinya
+>   (nama, deskripsi, warna) WAJIB datang dari `prd.md`/`branding.md`,
+>   bukan disalin langsung dari konten lama yang mungkin sudah tidak relevan.
+> - `docs/prd.md` dan `docs/branding.md` adalah **satu-satunya**
+>   sumber kebenaran untuk konsep dan identitas aplikasi. Selalu rujuk
+>   ke sana, bukan ke `references/*.html`.
+
+---
 
 KONTEKS
 -------
