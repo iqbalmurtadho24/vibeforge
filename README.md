@@ -78,19 +78,25 @@ Isi 3 hal berikut supaya AI tahu persis aplikasi yang Anda maksud:
 Aplikasi sudah pernah dibuat dan Anda ingin meredesain. AI perlu memahami
 konsep lama terlebih dahulu:
 
-1. Pastikan folder `references/*.html` berisi salinan/concept dokumen
-   aplikasi lama Anda (struktur HTML, styling, navigasi) — ini yang akan
-   dibaca AI sebagai acuan.
-2. AI akan **menulis ulang** `docs/prd.md` dan `docs/branding.md`
-   berdasarkan apa yang dibaca di `references/*.html`, mengikuti format
+1. Masukkan salinan/dokumentasi aplikasi lama Anda ke folder `references/`.
+   Isinya *tidak harus* berupa file `.html` saja — boleh berupa beberapa
+   *folder* berisi campuran file PHP, JS, HTML, bahkan CSS template
+   lengkap dari codebase lama Anda. AI akan membaca **seluruh isinya**
+   (semua folder, semua tipe file, bukan cuma file HTML) sebagai acuan
+   konsep, struktur, dan styling.
+2. AI akan **menulis ulang** `docs/prd.md` dan `docs/branding.md` secara
+   lengkap berdasarkan hasil bacaan menyeluruh di atas, mengikuti format
    placeholder `[...]` yang sudah ada di masing-masing file.
-3. Sesuaikan `references/*.html` agar mencerminkan versi baru setelah
-   `prd.md`/`branding.md` terisi.
+3. Setelah `prd.md`/`branding.md` terisi, rapikan `references/` kembali ke
+   format standar *6 file `.html`* (lihat Langkah 2A poin 3) yang
+   mencerminkan aplikasi versi baru — dump aplikasi lama (folder php/js/css
+   dst) tidak perlu dipertahankan lagi setelah konsepnya berhasil diekstrak.
 
 > **Catatan penting:** `docs/prd.md` dan `docs/branding.md` adalah
 > **satu-satunya** sumber kebenaran untuk konsep dan identitas aplikasi.
-> `references/*.html` hanya menggambarkan struktur dan styling — bukan
-> teks final. Semua isi aplikasi (nama, warna, deskripsi) WAJIB
+> Isi folder `references/` — apa pun formatnya (html/php/js/css) dan berapa
+> pun banyak foldernya — hanya bahan bacaan/acuan struktur dan styling,
+> bukan teks final. Semua isi aplikasi (nama, warna, deskripsi) WAJIB
 > didefinisikan di `prd.md`/`branding.md`.
 
 ---

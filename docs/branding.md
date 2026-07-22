@@ -1,6 +1,14 @@
 ## [Nama Brand] - Brand Identity & UI/UX Guidelines
 Dokumen ini merangkum identitas merek, pedoman visual, dan konsep antarmuka (UI/UX) untuk aplikasi ini. Ganti seluruh bagian dalam [ ] dengan detail brand kamu sebelum reuse template ini.
 
+> **Mode Redesain** (lihat `docs/install.md` alur B): kalau dokumen ini
+> ditulis ulang dari aplikasi existing, sumber acuannya adalah SELURUH isi
+> folder `references/` — *tidak terbatas pada file `.html`*. Folder
+> tersebut bisa berisi beberapa subfolder dengan campuran file PHP, JS,
+> HTML, bahkan CSS template lengkap dari codebase lama. Baca semuanya
+> secara lengkap (termasuk file CSS untuk warna/tipografi asli) sebelum
+> menyusun identitas visual di bawah ini.
+
 ## 1. Identitas Inti (Core Identity)
 - Nama Brand: [NAMA BRAND]
 - Tagline Utama: "[Tagline singkat brand]"

@@ -1,6 +1,14 @@
 ## [Nama Aplikasi] - Master Application Concept (Product Document)
 Dokumen ini mendeskripsikan secara komprehensif arsitektur produk, fitur inti, model bisnis, dan alur kerja untuk aplikasi ini. Ganti seluruh bagian dalam [ ] sebelum eksekusi/reuse template.
 
+> **Mode Redesain** (lihat `docs/install.md` alur B): kalau dokumen ini
+> ditulis ulang dari aplikasi existing, sumber acuannya adalah SELURUH isi
+> folder `references/` — *tidak terbatas pada file `.html`*. Folder
+> tersebut bisa berisi beberapa subfolder dengan campuran file PHP, JS,
+> HTML, bahkan CSS template lengkap dari codebase lama. Baca semuanya
+> secara lengkap sebelum menyusun konsep di bawah ini, supaya hasilnya
+> mencerminkan aplikasi lama secara utuh, bukan cuma dari potongan HTML.
+
 ## 1. Ringkasan Eksekutif (Executive Summary)
 [Aplikasi ini adalah ... (jenis produk) yang berfokus pada ... (domain/masalah). Platform ini menjembatani ... (target pengguna) dengan ... (target kreator/mitra/pihak kedua, jika ada).]
 

@@ -24,22 +24,29 @@ Sebelum membaca dokumen lain, jawab dulu pertanyaan ini:
 > meredesain dengan template ini. Konsep dan data lama masih ada.
 >
 > **Langkah yang akan dilakukan:**
-> 1. Baca SELURUH isi folder `references/*.html` lama — ini adalah
->    dokumen konsep dan styling aplikasi existing Anda
-> 2. Tulis ulang `docs/prd.md` dan `docs/branding.md` dari hasil bacaan
->    di atas, mengikuti FORMAT yang sudah ditentukan di masing-masing
->    file (sesuaikan placeholder `[...]` sesuai konteks aplikasi lama)
-> 3. Update `references/*.html` → sesuaikan agar mencerminkan aplikasi
->    Anda yang baru (bukan salin literal)
+> 1. Baca SELURUH isi folder `references/` lama — dokumen konsep dan
+>    styling aplikasi existing Anda. Isi folder ini *tidak harus* berupa
+>    file `.html` saja: bisa berupa beberapa *folder* berisi campuran file
+>    PHP, JS, HTML, bahkan CSS template lengkap dari codebase lama. Baca
+>    LENGKAP seluruh isinya (semua folder, semua tipe file) — jangan hanya
+>    file `.html` tingkat teratas — sebelum menyimpulkan konsep aplikasi.
+> 2. Tulis ulang `docs/prd.md` dan `docs/branding.md` secara lengkap dari
+>    hasil bacaan menyeluruh di atas, mengikuti FORMAT yang sudah
+>    ditentukan di masing-masing file (sesuaikan placeholder `[...]`
+>    sesuai konteks aplikasi lama)
+> 3. Setelah `prd.md`/`branding.md` terisi, konsolidasikan `references/`
+>    kembali ke format standar 6 file `.html` (bukan salin literal) agar
+>    sesuai dengan struktur yang dipakai TAHAP 1-3 di bawah
 > 4. Lanjut ke TAHAP 1
 
 > **Catatan penting:**
-> - `references/*.html` bukan sumber teks final. Isi aplikasinya
+> - Isi folder `references/` — apa pun formatnya (html/php/js/css) dan
+>   berapa pun banyak foldernya — bukan sumber teks final. Isi aplikasinya
 >   (nama, deskripsi, warna) WAJIB datang dari `prd.md`/`branding.md`,
 >   bukan disalin langsung dari konten lama yang mungkin sudah tidak relevan.
 > - `docs/prd.md` dan `docs/branding.md` adalah **satu-satunya**
 >   sumber kebenaran untuk konsep dan identitas aplikasi. Selalu rujuk
->   ke sana, bukan ke `references/*.html`.
+>   ke sana, bukan ke isi mentah `references/`.
 
 ---
 
