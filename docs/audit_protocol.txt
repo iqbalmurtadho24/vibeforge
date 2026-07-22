@@ -1,0 +1,320 @@
+BASIC AUDIT CHECKLIST
+=====================
+
+KONTEKS
+--------
+Kamu bertindak sebagai auditor teknis untuk project Vibeforge.
+Gunakan prompt ini setiap kali aplikasi sudah dipakai/dibangun (shell kosong
+maupun sudah berisi fitur bisnis) dan kamu perlu tahu apa yang belum selesai,
+belum benar, atau bermasalah secara STRUKTURAL — bukan audit kelayakan bisnis
+per fitur (untuk itu pakai docs/prompt_audit_menyeluruh.txt sebagai tambahan).
+
+CATATAN: Di sesi ini, JANGAN perbaiki atau eksekusi apapun selain membaca dan
+menjalankan `php -l` (read-only, tidak mengubah file). Hanya audit,
+identifikasi, dan dokumentasikan temuan. Buat file docs/AUDIT_BASIC.md
+sebagai output audit.
+
+BACAAN WAJIB SEBELUM MULAI (URUTAN TIDAK BOLEH DILOMPATI)
+------------------------------------------------------------
+1. CLAUDE.md (root) — technical constitution, standar non-negotiable
+2. docs/konsep.md — scope bisnis aplikasi spesifik
+3. docs/branding.md — palet warna, typography, CSS variable
+4. docs/ref_*.html (semua file) — golden template tiap shell
+5. locales/*.json (semua file) — daftar key terjemahan yang seharusnya ada
+6. .env dan .env.example — konfigurasi aktual vs dokumentasi variabel
+7. Struktur folder aktual — jalankan listing lengkap, EXCLUDE:
+   - vendor/, node_modules/, .git/, cache/, .claude/
+
+STANDAR RUJUKAN
+---------------
+- PSR-4: Autoloading standard
+- PSR-12: Coding style
+- 12-Factor App: Configuration, Statelessness
+- OWASP ASVS Level 1-2: Security baseline
+- SemVer + Keep a Changelog: Versioning
+- public/ sebagai SATU-SATUNYA document root
+
+
+AUDIT CHECKLIST
+===============
+
+### A. Entry Guard Consistency (CLAUDE.md §8)
+- [ ] Apakah SEMUA file entry-point (public/*/index.php, public/core/router.php,
+  core/router.php) menggunakan `defined('APP_ENTRY') or define('APP_ENTRY', true);`?
+- [ ] Apakah SEMUA file include/module (include/*.php, core/*.php selain
+  router.php, modules/**/*.php) TIDAK memakai `die()` polos tanpa guard —
+  ikuti pola aktual yang didefinisikan CLAUDE.md §8 (module di bawah
+  core/router.php memakai `define()` juga, karena APP_ENTRY sudah diset router
+  sebelum include). Kalau ditemukan file include/module pakai
+  `defined('APP_ENTRY') or die(...)`, catat sebagai TEMUAN, karena ini
+  berpotensi konflik dengan cara module dipanggil via router.
+- [ ] CEK KHUSUS: pastikan TIDAK ADA entry-point (Pola 1) yang memakai
+  `die()` — ini pernah jadi bug fatal (halaman blank "Direct access
+  forbidden" untuk user normal via browser).
+- [ ] Baca ulang CLAUDE.md §8 "Entry Guard - Dua Pola" sendiri: jika contoh
+  kode di Pola 1 dan Pola 2 sudah konsisten (sama-sama `define()`), tandai
+  OK. Jika masih ada sisa contoh `die()` untuk file yang di-include (include/
+  config.php, core/auth.php, core/session.php), itu WAJIB dicatat sebagai
+  potensi self-contradiction dokumen, bukan cuma bug kode.
+
+### B. Router Proxy Pattern (CLAUDE.md §3f) — KRITIS
+- [ ] Apakah `public/core/router.php` ADA? (Tanpa file ini, SEMUA AJAX
+  login/logout/register akan 404 dan aplikasi tidak bisa dipakai sama sekali.)
+- [ ] Apakah isinya benar: `define('APP_ENTRY', true);` lalu
+  `require_once dirname(__DIR__, 2) . '/core/router.php';`?
+- [ ] Apakah `core/router.php` (actual, di project root) ada dan menjadi
+  satu-satunya sumber logika routing (proxy tidak boleh punya logika sendiri)?
+- [ ] Apakah root `.htaccess` TIDAK memblokir akses ke `core/` sehingga proxy
+  bisa require file di luar document root?
+
+### C. Path Resolution Correctness (CLAUDE.md §12e)
+- [ ] Untuk SETIAP shell di public/ (index.php level-1, login/register/
+  manajemen/admin/client level-2), verifikasi require_once ke include/ dan
+  core/ pakai jumlah `../` yang benar sesuai depth folder (level-1 pakai
+  `__DIR__ . '/../include/'`, level-2 pakai `__DIR__ . '/../../include/'`).
+  Path yang salah biasanya lolos di local (Windows case-insensitive) tapi
+  gagal di server Linux — catat sebagai TEMUAN meski saat ini masih "jalan".
+
+### D. Document Root Leakage
+- [ ] Apakah file yang seharusnya private (core/, include/, data/, modules/)
+  bisa diakses langsung via HTTP (bandingkan document root vs lokasi file)?
+- [ ] Apakah .htaccess di root DAN public/ sudah sebagai mitigasi berlapis?
+- [ ] Cek: .env, include/config.php, data/*.json — pastikan tidak bisa
+  diakses langsung.
+
+### E. Sensitive File Exposure
+- [ ] File yang HARUS di-block: .env, .log, .sql, .md, backup files (.bak,
+  ~, .old).
+- [ ] Apakah public/.htaccess sudah blok semua ekstensi di atas?
+- [ ] Apakah ada file sensitif nyasar di document root public/ yang
+  seharusnya tidak ada di sana?
+
+### F. Session Security & Cross-Shell Auth State (CLAUDE.md §3b, §5)
+- [ ] Apakah SEMUA shell (login, register, manajemen, admin, client, juga
+  public/index.php) memanggil session_start()/initSession() SEBELUM output
+  HTML apapun?
+- [ ] Apakah status login ($is_logged_in / role) divalidasi ulang dari
+  session SERVER-SIDE di setiap shell, bukan cuma dipercaya dari cookie/JS?
+- [ ] Apakah tiap shell role-restricted (manajemen/admin/client) redirect
+  paksa ke /login/ kalau validasi gagal ATAU role tidak cocok dengan folder
+  (lihat tabel Role & Shell Mapping §3c)?
+- [ ] Apakah mapping role→shell (`$role_to_shell`) di public/index.php sudah
+  benar dan dipakai konsisten (bukan hardcode redirect path berulang)?
+
+### G. Logout Flow Pattern (CLAUDE.md §12f)
+- [ ] Apakah public/logout/index.php HANYA berisi: session destroy + redirect
+  + exit, TANPA output HTML/CSS/JS apapun?
+- [ ] Apakah session di-destroy SEBELUM header Location dikirim?
+
+### H. Environment Configuration & Production Safety (CLAUDE.md §6)
+- [ ] Apakah APP_ENV di .env terisi eksplisit (development/staging/
+  production), tidak kosong?
+- [ ] Apakah .env.example lengkap mencakup SEMUA variabel yang benar-benar
+  dipakai kode (grep semua `$_ENV`/`getenv`/konstanta config, bandingkan)?
+- [ ] Apakah tombol quick-fill login HANYA muncul saat APP_ENV != production,
+  dan validasi ini ADA JUGA di server-side modul login (bukan cuma
+  disembunyikan via CSS/JS)?
+- [ ] Apakah kombinasi DB_MODE=json + APP_ENV=production di server production
+  SUNGGUHAN (dideteksi dari domain/host, bukan cuma nilai APP_ENV) di-block
+  keras (halt + log jelas)? Apakah di development/staging kombinasi ini
+  dibiarkan jalan dengan warning log saja (bukan diblokir)?
+
+### I. Demo Users & Password Hash Validity (CLAUDE.md §6b)
+- [ ] Apakah setiap password hash di data/users.json berformat Argon2ID valid
+  (`$argon2id$v=19$...`), bukan placeholder/string acak?
+- [ ] Apakah login module menerima `password123` sebagai valid HANYA saat
+  APP_ENV === 'development' (cek logikanya langsung, jangan asumsi dari nama
+  variabel)?
+- [ ] Apakah di production hanya hash Argon2ID asli yang divalidasi (jalur
+  demo password di-skip total)?
+
+### J. Landing Page & Auth Button Consistency (CLAUDE.md §5, §12i)
+- [ ] Apakah semua CTA landing page (navbar, hero, CTA tengah, footer)
+  konsisten berdasarkan SATU variabel $is_logged_in di awal file (bukan cek
+  session berulang per section)?
+- [ ] Apakah tombol Login/Daftar berubah jadi "Ke Dashboard" (mengarah ke URL
+  sesuai role) saat sudah login?
+- [ ] Apakah auth button ADA dan konsisten di kedua lokasi: desktop header
+  (kanan) DAN mobile bottom nav (tengah, elevated)?
+
+### K. Golden Template Conformance (CLAUDE.md §12c, §3e) — KRITIS
+Untuk SETIAP shell di tabel §3e, bandingkan terhadap docs/ref_*.html
+pasangannya:
+- [ ] public/index.php vs docs/ref_landingpage.html
+- [ ] public/login/index.php vs docs/ref_login.html
+- [ ] public/register/index.php vs docs/ref_register.html
+- [ ] public/manajemen/index.php vs docs/ref_modul_manajemen.html
+- [ ] public/admin/index.php vs docs/ref_modul_admin.html
+- [ ] public/client/index.php vs docs/ref_modul_client.html
+
+Untuk tiap pasangan, cek:
+- [ ] Semua section besar di referensi ADA di implementasi (nav items, hero/
+  header, sidebar, bottom nav, footer) — hitung jumlah item nav dan
+  cocokkan satu-satu.
+- [ ] CSS classes/struktur layout tidak menyimpang tanpa alasan (data
+  dinamis/auth state/theme boleh beda, teks & struktur TIDAK boleh).
+- [ ] Tidak ada teks statis yang di-copy-paste literal dari ref_*.html tanpa
+  dibungkus sistem i18n (lihat Bagian L) — ini pelanggaran §12c poin
+  "YANG TIDAK BOLEH berbeda: Teks static (harus gunakan sistem i18n)".
+
+Status per shell: MATCH (sesuai penuh) / SEBAGIAN (ada section
+hilang/menyimpang minor) / TIDAK SESUAI (struktur berbeda signifikan).
+
+### L. Internationalization (i18n) Completeness (CLAUDE.md §12d) — KRITIS
+- [ ] Apakah locales/id.json, en.json, ar.json ada dan valid JSON (bisa
+  di-decode tanpa error)?
+- [ ] Apakah SETIAP key yang ada di id.json juga ada di en.json DAN ar.json
+  (dan sebaliknya)? Laporkan key yang timpang antar file sebagai TEMUAN,
+  sertakan daftarnya.
+- [ ] Apakah SEMUA teks statis di tiap shell (termasuk yang dirender lewat
+  PHP langsung ke HTML) memanggil `t('key')`, bukan hardcode Bahasa
+  Indonesia/lainnya?
+- [ ] PENTING — cek KHUSUS konten yang di-inject via JavaScript (template
+  literal/backtick string di dalam `<script>`, hasil AJAX fragment, atau
+  apapun yang di-assign ke `innerHTML`/`textContent` lewat JS): apakah teks
+  di dalamnya JUGA melalui `t()` (baik lewat interpolasi PHP langsung di
+  dalam template literal, atau lewat objek JS seperti `window._q18n`/
+  `window._i18n` yang di-populate dari PHP)? Ini adalah celah paling sering
+  lolos audit karena secara visual terlihat "sudah ada bahasa lain" padahal
+  hanya shell/chrome (sidebar/header/nav) yang ter-i18n-kan, sedangkan
+  konten dinamis (isi halaman) tetap hardcode satu bahasa. WAJIB grep
+  manual untuk pola teks Indonesia/asing di dalam blok `<script>` tiap shell,
+  jangan hanya percaya pada keberadaan pemanggilan `t()` di bagian atas file.
+- [ ] Apakah language selector ada dan berfungsi (ganti `?lang=`, tersimpan
+  di `$_SESSION['language']`)?
+- [ ] Apakah flag assets untuk SETIAP locale ada di path yang benar-benar
+  dipakai kode (cocokkan ekstensi file — .svg/.png — antara kode dan file
+  aktual, jangan asumsi dari contoh CLAUDE.md)?
+- [ ] Apakah `dir="rtl"` dan CSS RTL diterapkan saat locale = ar, dan
+  benar-benar mengubah alignment (bukan cuma atribut kosong)?
+- [ ] Apakah ada logic (mis. greeting berdasarkan jam, pesan sukses/error
+  dinamis) yang hardcode satu bahasa di JavaScript murni (bukan dari PHP
+  `t()`)? Ini WAJIB dicatat meski secara visual jarang tertangkap.
+
+### M. Theme System Dark/Light (CLAUDE.md §9)
+- [ ] Apakah branding.css (CSS variables) dipakai di semua shell, bukan hex
+  hardcode tersebar di banyak file?
+- [ ] Apakah `data-theme`/class `dark` di tag `<html>` konsisten dengan
+  `theme_preference` user dari data/users.json (bukan hanya localStorage)?
+- [ ] Apakah preference tersimpan per-user di data/users.json, bukan hanya
+  client-side?
+
+### N. Security Headers / CSP (CLAUDE.md §8b)
+- [ ] Apakah public/.htaccess punya header Content-Security-Policy yang
+  mengizinkan resource eksternal yang benar-benar dipakai (unpkg.com untuk
+  Phosphor Icons, fonts.googleapis.com, cdn.tailwindcss.com jika masih pakai
+  CDN)?
+- [ ] Apakah ada resource eksternal baru di kode (script/link/img src ke
+  domain lain) yang BELUM masuk daftar CSP — ini akan silent-fail di
+  browser (blocked) tanpa error PHP.
+
+### O. Core Security Baseline (CLAUDE.md §8)
+- [ ] CSRF: apakah token digenerate & diverifikasi dengan `hash_equals()`,
+  terpusat di core/router.php (bukan re-implementasi per modul)?
+- [ ] Apakah setiap modul sensitif (login, register, ubah data) memanggil
+  `requireRole()` atau guard setara sebelum eksekusi logika?
+- [ ] Mode MySQL: apakah query pakai prepared statement (PDO), tidak ada
+  string concatenation SQL?
+- [ ] Mode JSON: apakah input tetap divalidasi (tipe, panjang, whitelist)
+  meski tidak ada risiko SQL injection langsung?
+- [ ] Apakah ada rate limiting progresif berbasis IP+username untuk endpoint
+  login?
+
+### P. Logging System Separation (CLAUDE.md §7)
+- [ ] Apakah cache/debug.log HANYA aktif saat APP_DEBUG=true dan HANYA berisi
+  error development (bukan audit trail)?
+- [ ] Apakah audit trail (data/audit_trail.json atau tabel audit_log)
+  append-only, berjalan TANPA syarat APP_DEBUG, dan mencatat semua aksi POST
+  penting (login, ubah data)?
+- [ ] Pastikan tidak ada logika yang mencampur dua jenis log ini ke file yang
+  sama.
+
+### Q. Folder Structure (CLAUDE.md §4)
+- [ ] Apakah struktur folder sesuai CLAUDE.md Section 4 (termasuk migrations/,
+  locales/, cache/)?
+- [ ] Apakah modules/ scoped per role/domain, tidak ada file lintas-tanggung
+  jawab dalam satu file?
+- [ ] Apakah core/ TIDAK dimodifikasi dari dalam modules/ (cek riwayat kalau
+  ada git, atau cek apakah ada duplikasi logika core di dalam modules/)?
+
+### R. SPA Architecture & Router Behavior (CLAUDE.md §3a)
+- [ ] Apakah perpindahan state/tab DI DALAM satu shell tidak memicu full-page
+  reload (pakai AJAX ke core/router.php)?
+- [ ] Apakah reload penuh HANYA terjadi saat pindah ANTAR shell (login ->
+  client, dst)?
+- [ ] Apakah login.php/register.php/logout.php BUKAN file mandiri yang
+  diakses langsung, melainkan module di bawah modules/auth/ yang dipanggil
+  via router?
+
+### S. PHP Syntax Validation (CLAUDE.md §12h) — WAJIB, ZERO TOLERANCE
+- [ ] Jalankan `php -l` pada SEMUA file .php di project (public/, core/,
+  include/, modules/ — bukan cuma daftar contoh di CLAUDE.md §12h), exclude
+  vendor/node_modules jika ada. Gunakan enumerasi otomatis (glob/dir
+  recursive), jangan pilih file secara manual/parsial.
+- [ ] SETIAP parse error yang ditemukan WAJIB dicatat sebagai temuan
+  KRITIS/blocker terlepas dari kategori lain — file dengan parse error
+  berarti fitur terkait 100% tidak berfungsi (fatal error/blank page) di
+  semua kondisi, bukan cuma edge case.
+- [ ] Laporkan jumlah file yang diperiksa vs jumlah yang lolos, supaya
+  cakupan pemeriksaan ini bisa diverifikasi (bukan cuma klaim "sudah dicek").
+
+
+FORMAT OUTPUT
+=============
+
+Buat file: docs/AUDIT_BASIC.md
+
+Gunakan format berikut untuk setiap temuan:
+
+---
+## [CHECKLIST-X] Judul Checklist
+
+**Lokasi:** path/file.php (baris:opsional)
+
+**Kondisi Aktual:**
+Deskripsi apa yang ditemukan di codebase (sertakan cuplikan kode/bukti
+konkret, bukan kesimpulan tanpa rujukan).
+
+**Kondisi Standar:**
+Apa yang seharusnya menurut CLAUDE.md (sebutkan nomor section) atau standar
+eksternal yang relevan.
+
+**Status:** ✅ OK / ❌ GAGAL / ⚠️ PERHATIAN
+
+**Prioritas:** 🔴 Kritis / 🟠 Tinggi / 🟡 Sedang / 🟢 Rendah
+(Kritis = aplikasi tidak bisa dipakai/fatal error/lubang keamanan aktif;
+Tinggi = fitur inti tidak berfungsi sesuai spesifikasi; Sedang = menyimpang
+dari standar tapi tidak menghalangi fungsi; Rendah = kosmetik/dokumentasi.)
+
+**Rekomendasi Perbaikan:**
+Langkah konkret untuk memperbaiki (bukan cuma "perbaiki ini" — sebutkan
+pendekatan spesifik), TANPA benar-benar mengeksekusinya di sesi ini.
+---
+
+Di AKHIR file, tambahkan:
+
+---
+## RINGKASAN
+
+- Total checklist item: X
+- ✅ Passed: X
+- ❌ Failed: X
+- ⚠️ Warnings: X
+- Breakdown prioritas: 🔴 X | 🟠 X | 🟡 X | 🟢 X
+
+## TEMUAN KRITIS (BLOCKER)
+
+Daftar ringkas semua temuan berprioritas 🔴, urut dari yang paling
+menghalangi penggunaan aplikasi.
+
+## REKOMENDASI PRIORITAS
+
+Urutan pengerjaan yang disarankan (bukan cuma daftar ulang temuan, tapi
+urutan logis: fix blocker dulu baru yang lain), maksimal 10 poin teratas.
+
+## CATATAN AUDITOR
+
+[Catatan tambahan jika ada hal penting yang tidak masuk kategori di atas,
+termasuk kalau ada bagian checklist yang tidak bisa diverifikasi secara
+statis dan butuh pengujian manual via browser.]
+---

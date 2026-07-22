@@ -1,0 +1,19 @@
+# Environment
+.env
+
+# Sensitive / runtime data
+data/users.json
+
+# Cache & debug logs
+cache/*
+
+# Dependencies
+vendor/
+node_modules/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
