@@ -827,7 +827,13 @@ function t(string $key, string $fallback = ''): string {
 }
 
 /**
- * Detect language based on IP and preference
+ * Detect language based on IP and preference.
+ *
+ * Bahasa default MENGIKUTI negara asal IP visitor (bukan hardcode 'id').
+ * Kalau kode negaranya terdeteksi tapi TIDAK ADA di $countryToLang (belum
+ * punya mapping bahasa), catat ke cache/debug.log supaya project owner bisa
+ * menyiapkan locale/mapping untuk negara tsb, lalu fallback ke English
+ * ('en') sebagai default universal — BUKAN ke 'id'.
  */
 function detectLanguage(): string {
     // 1. Cek session/cookie dulu
@@ -860,7 +866,25 @@ function detectLanguage(): string {
         'OM' => 'ar', 'YE' => 'ar', 'SY' => 'ar', 'LB' => 'ar', 'SD' => 'ar',
     ];
 
-    return $countryToLang[$countryCode] ?? 'id'; // Default: Indonesia
+    // Negara terdeteksi tapi belum ada mapping bahasa -> catat ke cache/debug.log
+    // (lihat Section 7, guard APP_DEBUG sama seperti error log development
+    // lainnya) supaya owner tahu negara mana yang perlu ditambahkan bahasanya,
+    // lalu fallback ke English.
+    if (!isset($countryToLang[$countryCode])) {
+        if (defined('APP_DEBUG') && APP_DEBUG) {
+            $logLine = sprintf(
+                "[%s] [i18n] Negara \"%s\" (IP: %s) belum punya mapping bahasa di detectLanguage(). "
+                . "Fallback ke \"en\". Tambahkan mapping negara ini + locales/xx.json jika perlu.\n",
+                date('Y-m-d H:i:s'),
+                $countryCode,
+                $ip
+            );
+            @file_put_contents(ROOT_PATH . '/cache/debug.log', $logLine, FILE_APPEND);
+        }
+        return 'en';
+    }
+
+    return $countryToLang[$countryCode];
 }
 
 /**
