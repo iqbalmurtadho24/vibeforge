@@ -26,9 +26,9 @@ ini. Baca lengkap sebelum audit atau eksekusi kode apapun.
 
 ### Audit Prompts
 Pilih audit prompt yang sesuai dengan fase project:
-- **docs/audit_protocol.txt** - Basic audit untuk Step 1 (shell kosong/konfigurasi dasar)
-- **docs/audit_conformance_addendum.txt** - Comprehensive audit setelah fitur bisnis mulai
-  diisi ke shell (manajemen/admin/client). Output: docs/STANDARD_AUDIT.md
+- **docs/audit_protocol.md** - Basic audit untuk Step 1 (shell kosong/konfigurasi dasar). Output: docs/AUDIT_BASIC.md
+- **docs/audit_conformance_addendum.md** - Comprehensive audit setelah fitur bisnis mulai
+  diisi ke shell (manajemen/admin/client). Output: docs/AUDIT_CONFORMANCE.md
 
 ## 2. Stack Teknis
 - Native PHP (tanpa framework), Tailwind CSS (CDN atau build lokal),
@@ -80,22 +80,13 @@ module AJAX di bawah `modules/auth/`, dipanggil dari dalam shell
 
 | Shell Folder     | Allowed Role | Akses Level                    | Template Reference             |
 |------------------|-------------|--------------------------------|-------------------------------|
-| manajemen/       | manajemen   | Super Admin (full access)     | `references/modul_manajemen.html` |
-| admin/           | admin       | Creator (produksi)      | `references/modul_admin.html`     |
-| client/          | client      | Client             | `references/modul_client.html`    |
+| manajemen/       | manajemen   | Administrator (Full Access)  | `references/modul_manajemen.html` |
+| admin/           | admin       | Creator (Produksi)           | `references/modul_admin.html`     |
+| client/          | client      | Client (Pendengar)           | `references/modul_client.html`    |
 
 **Catatan Penting:**
-- Role `manajemen` = Super Admin (dashboard overview, approve kreator, moderasi
-  konten/audit, manajemen user, keuangan — lihat `docs/prd.md` Section D)
-- Role `admin` = Creator (upload karya, analitik performa, manajemen
-  royalti & penarikan dana — untuk Artis/Pendakwah/Podcaster/Munsyid
-  terverifikasi, lihat `docs/prd.md` Section C). Nama role tetap `admin`
-  secara teknis (folder shell, kolom `role` di `data/users.json`, dst) —
-  yang berubah di sini hanyalah definisi konseptualnya, bukan penamaan kode.
-- Role `client` = Pendengar (Free & Premium) — lihat `docs/prd.md` Section B.
-  Moderasi konten dan manajemen user BUKAN tanggung jawab role `admin`;
-  keduanya sepenuhnya berada di bawah role `manajemen` sesuai `docs/prd.md`
-  Section D, konsisten dengan yang sudah dijelaskan di atas.
+- Role `manajemen` = Super Admin / Administrator Utama (dashboard overview, approve kreator, moderasi konten/audit, manajemen user, keuangan — lihat `docs/prd.md` Section D)
+- Role `admin` = Creator / Admin Biasa (upload karya, analitik performa, manajemen royalti & penarikan dana — untuk Artis/Pendakwah/Podcaster/Munsyid terverifikasi, lihat `docs/prd.md` Section C). Nama role tetap `admin` secara teknis (folder shell, kolom `role` di `data/users.json`, dst).
 
 ### 3d. Branding Dinamis
 Nama aplikasi, logo, warna diambil dari `docs/prd.md`
@@ -280,8 +271,8 @@ project-root/
 |   +-- prd.md               <- DEFINISI APLIKASI SPESIFIK
 |   +-- branding.md          <- WARNA, TYPOGRAPHY, LOGO APLIKASI
 |   +-- install.md
-|   +-- audit_protocol.txt
-|   +-- audit_conformance_addendum.txt
+|   +-- audit_protocol.md
+|   +-- audit_conformance_addendum.md
 |   +-- openapi.yaml
 +-- references/              <- template shell (golden reference), lihat Section 3e/12c
 |   +-- landingpage.html       <- template shell landing page

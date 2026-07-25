@@ -49,7 +49,8 @@ if (!function_exists('env')) {
 
 defined('APP_ENV') or define('APP_ENV', env('APP_ENV', 'development'));
 defined('APP_DEBUG') or define('APP_DEBUG', filter_var(env('APP_DEBUG', 'true'), FILTER_VALIDATE_BOOLEAN));
-defined('APP_DISPLAY_NAME') or define('APP_DISPLAY_NAME', env('APP_DISPLAY_NAME', 'App'));
+defined('APP_DISPLAY_NAME') or define('APP_DISPLAY_NAME', env('APP_DISPLAY_NAME', 'Vibeforge'));
+defined('APP_TAGLINE') or define('APP_TAGLINE', env('APP_TAGLINE', 'Template Aplikasi Web'));
 
 // DB_MODE: auto (default, per-entity SQL/JSON detection) | json (force) | mysql (force)
 defined('DB_MODE') or define('DB_MODE', env('DB_MODE', 'auto'));

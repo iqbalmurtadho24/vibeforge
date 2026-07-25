@@ -1,8 +1,7 @@
-<?php
+﻿<?php
 /**
- * Landing Page (Public Index)
- *
- * Entry point for unauthenticated users.
+ * Vibeforge Landing Page
+ * Full informational page with installation guide
  */
 
 defined('APP_ENTRY') or define('APP_ENTRY', true);
@@ -12,32 +11,62 @@ require_once __DIR__ . '/../include/helper.php';
 require_once __DIR__ . '/../core/session.php';
 require_once __DIR__ . '/../core/csrf.php';
 
-// Initialize session
 initSession();
 
-// Handle language change
 if (!empty($_GET['lang']) && in_array($_GET['lang'], getAvailableLocaleCodes(), true)) {
     $_SESSION['language'] = $_GET['lang'];
 }
 
-// Detect/set language
 $currentLang = $_SESSION['language'] ?? detectLanguage();
 $_SESSION['language'] = $currentLang;
 $isRtl = isRtlLanguage();
 
-// Generate CSRF token
 $csrfToken = generateCsrfToken();
-
-// Check login status
 $isLoggedIn = isLoggedIn();
 $user = getCurrentUser();
 $dashboardUrl = getDashboardUrl();
-
-// Get theme preference - sourced from the same Repo-backed $user row as
-// everything else (Section 3g), no direct JSON read.
 $themePreference = $user['theme_preference'] ?? 'dark';
-
 $isDev = APP_ENV !== 'production';
+
+$projectRoot = dirname(__DIR__);
+
+// Auto-detect drive letter and server type for interactive installer
+$detectedDrive = strtoupper(substr($projectRoot, 0, 1));
+if (!preg_match('/^[A-Z]$/', $detectedDrive)) {
+    $detectedDrive = 'C';
+}
+
+$detectedServer = 'laragon';
+$normalizedProjectRoot = str_replace('\\', '/', strtolower($projectRoot));
+
+if (str_contains($normalizedProjectRoot, 'xampp')) {
+    $detectedServer = 'xampp';
+} elseif (str_contains($normalizedProjectRoot, 'laragon')) {
+    $detectedServer = 'laragon';
+} else {
+    $drivePrefix = $detectedDrive . ':/';
+    if (is_dir($drivePrefix . 'xampp/htdocs')) {
+        $detectedServer = 'xampp';
+    } elseif (is_dir($drivePrefix . 'laragon/www')) {
+        $detectedServer = 'laragon';
+    }
+}
+
+$availableDrives = [];
+if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+    foreach (range('A', 'Z') as $letter) {
+        if (is_dir($letter . ':\\')) {
+            $availableDrives[] = $letter;
+        }
+    }
+}
+if (empty($availableDrives)) {
+    $availableDrives = ['C', 'D', 'E', 'F', 'G', 'H'];
+}
+if (!in_array($detectedDrive, $availableDrives, true)) {
+    $availableDrives[] = $detectedDrive;
+    sort($availableDrives);
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= $currentLang ?>" dir="<?= $isRtl ? 'rtl' : 'ltr' ?>" class="<?= $themePreference === 'light' ? '' : 'dark' ?>">
@@ -45,784 +74,809 @@ $isDev = APP_ENV !== 'production';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= APP_DISPLAY_NAME ?> - <?= escape(APP_TAGLINE) ?></title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='28' height='24' viewBox='0 0 28 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='7' width='3' height='10' rx='1.5' fill='%23FFC107' /%3E%3Crect x='6' y='4' width='3' height='16' rx='1.5' fill='%23FFC107' /%3E%3Crect x='12' y='0' width='3' height='24' rx='1.5' fill='%23FFC107' /%3E%3Crect x='18' y='4' width='3' height='16' rx='1.5' fill='%23FFC107' /%3E%3Crect x='24' y='7' width='3' height='10' rx='1.5' fill='%23FFC107' /%3E%3C/svg%3E">
-    
-    <!-- Fonts: Inter for general text, possibly Poppins for headings to match elegance -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF6B35'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Icons: Phosphor Icons for a clean, modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <!-- Tailwind CSS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        // Suppress Tailwind CDN production warning
+        const origWarn = console.warn;
+        console.warn = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
+            origWarn.apply(console, args);
+        };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <link rel="stylesheet" href="/assets/css/branding.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        brand: {
-                            gold: '#FFC107', // Approximate gold from image
-                            dark: '#0F0F11', // Main dark background
-                            card: '#1A1A1D', // Slightly lighter dark for cards
-                            gray: '#8C8C8C',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        heading: ['Poppins', 'sans-serif'],
-                    }
+                    colors: { brand: { primary: '#F97316', dark: '#0D1117', card: '#161B22' } },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], heading: ['Poppins', 'sans-serif'] }
                 }
             }
         }
     </script>
     <style>
-        /* Custom styles for elements that are tricky with utility classes alone */
-        body {
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        
-        .glass-header {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* SVG Logo styling to match colors dynamically if needed, though we'll use inline SVG */
-        .app-logo path.bar {
-            fill: #FFC107;
-        }
-
-        /* Language Selector Dropdown */
-        .lang-dropdown {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.2s ease;
-        }
-        .lang-selector:hover .lang-dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        /* RTL Support */
-        [dir="rtl"] { direction: rtl; text-align: right; }
-        [dir="rtl"] .ms-auto { margin-left: auto; margin-right: 0; }
-        [dir="rtl"] .me-auto { margin-right: auto; margin-left: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
+        h1, h2, h3 { font-family: 'Poppins', sans-serif; }
+        .text-gradient { background: linear-gradient(135deg, #F97316 0%, #F59E0B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #F59E0B 100%); }
+        .glow-orange { box-shadow: 0 0 40px rgba(255, 107, 53, 0.3); }
+        .glow-orange-sm { box-shadow: 0 0 20px rgba(255, 107, 53, 0.2); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-brand-dark dark:text-white font-sans antialiased min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col antialiased">
 
-    <!-- Navigation -->
-    <header class="fixed top-0 w-full z-50 glass-header bg-white/80 dark:bg-brand-dark/80 border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 bg-[var(--bg-secondary)]/90 backdrop-blur-md border-b border-[var(--border-default)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <!-- Logo & Tagline -->
-                <div class="flex flex-col justify-center items-start">
-                    <a href="#" class="flex items-center gap-3">
-                        <!-- Custom SVG Logo representing the audio waves -->
-                        <svg width="28" height="24" viewBox="0 0 28 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="0" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
-                            <rect x="6" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
-                            <rect x="12" y="0" width="3" height="24" rx="1.5" fill="#FFC107" />
-                            <rect x="18" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
-                            <rect x="24" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
-                        </svg>
-                        <span class="font-sans font-light text-2xl tracking-[0.25em] text-gray-900 dark:text-white mt-1">MYAPP</span>
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-2">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#F97316">
+                        <path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/>
+                    </svg>
+                    <span class="font-heading font-bold text-xl">
+                        <span class="text-[var(--text-primary)]">Vibe</span><span class="text-gradient">forge</span>
+                    </span>
+                </a>
+
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#fitur" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">Fitur</a>
+                    <a href="#cara-pasang" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">Cara Pasang</a>
+                    <a href="#demo" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">Demo</a>
+                    <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1">
+                        <i class="ph ph-github-logo"></i> GitHub
                     </a>
-                    <span class="text-[10px] sm:text-xs font-medium text-brand-gold mt-1 ml-[44px]"><?= APP_TAGLINE ?></span>
+                    <a href="/install/" class="px-4 py-2 bg-[var(--brand-primary)] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg glow-orange-sm">
+                        <i class="ph ph-magic-wand mr-1"></i> Setup Wizard
+                    </a>
                 </div>
 
-                <!-- Desktop Menu & Actions -->
-                <div class="hidden md:flex items-center gap-6">
-                    <nav class="flex gap-6">
-                        <a href="#kategori" class="text-sm font-medium hover:text-brand-gold transition-colors"><?= t('nav.categories', 'Kategori') ?></a>
-                        <a href="#terbaru" class="text-sm font-medium hover:text-brand-gold transition-colors"><?= t('nav.popular', 'Populer') ?></a>
-                        <a href="#premium" class="text-sm font-medium hover:text-brand-gold transition-colors"><?= t('nav.premium', 'Premium') ?></a>
-                    </nav>
-
-                    <div class="flex items-center gap-4">
-                        <!-- Language Selector -->
-                        <div class="relative lang-selector">
-                            <button class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Change Language">
-                                <img src="<?= escape(getAvailableLanguages()[$currentLang]['flag'] ?? '/assets/flags/_default.svg') ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="<?= $currentLang ?>" class="w-6 h-4 rounded-sm shadow-sm object-cover">
-                                <i class="ph ph-caret-down text-xs text-gray-500"></i>
-                            </button>
-                            <div class="lang-dropdown absolute right-0 mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 min-w-[140px] z-50">
-                                <?php foreach (getAvailableLanguages() as $code => $lang): ?>
-                                <a href="?lang=<?= $code ?>" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors <?= $currentLang === $code ? 'text-brand-gold' : 'text-gray-700 dark:text-gray-300' ?>">
-                                    <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-5 h-3.5 rounded-sm"> <?= escape($lang['name']) ?>
-                                </a>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-
-                        <!-- Theme Toggle -->
-                        <button id="themeToggleBtn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle Dark Mode">
-                            <i class="ph ph-sun text-xl hidden dark:block text-brand-gold"></i>
-                            <i class="ph ph-moon text-xl block dark:hidden text-gray-600"></i>
+                <div class="flex items-center gap-3">
+                    <!-- Language Selector -->
+                    <div class="relative group" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors text-xs font-medium" aria-label="Change Language">
+                            <img src="<?= escape(getAvailableLanguages()[$currentLang]['flag'] ?? '/assets/flags/_default.svg') ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="<?= $currentLang ?>" class="w-5 h-3.5 rounded-sm shadow-sm">
+                            <span class="hidden sm:inline uppercase font-bold text-[var(--text-secondary)]"><?= escape($currentLang) ?></span>
+                            <i class="ph ph-caret-down text-xs text-[var(--text-muted)]"></i>
                         </button>
-
-                        <!-- Auth Buttons - PHP Based -->
-                        <?php if ($isLoggedIn): ?>
-                        <a href="<?= $dashboardUrl ?>" class="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-full border border-gray-200 dark:border-gray-700 hover:border-brand-gold transition-colors">
-                            <i class="ph-fill ph-squares-four text-brand-gold"></i> <?= t('auth.dashboard', 'Dashboard') ?>
-                        </a>
-                        <a href="/logout/" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-500 hover:text-red-600 transition-colors">
-                            <i class="ph-bold ph-sign-out"></i> <?= t('auth.logout', 'Keluar') ?>
-                        </a>
-                        <?php else: ?>
-                        <a href="/login/" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-gold transition-colors"><?= t('auth.login', 'Masuk') ?></a>
-                        <a href="/register/" class="px-5 py-2 text-sm font-medium bg-brand-gold text-brand-dark rounded-full hover:bg-yellow-500 transition-colors shadow-sm"><?= t('auth.register', 'Daftar') ?></a>
-                        <?php endif; ?>
+                        <div x-show="open" x-transition class="absolute right-0 mt-1 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[150px] z-50">
+                            <?php foreach (getAvailableLanguages() as $code => $lang): ?>
+                            <a href="?lang=<?= $code ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[var(--bg-hover)] transition-colors <?= $currentLang === $code ? 'text-[var(--brand-primary)] font-bold bg-[var(--brand-primary-light)]/10' : 'text-[var(--text-secondary)]' ?>">
+                                <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-5 h-3.5 rounded-sm">
+                                <span><?= escape($lang['name']) ?></span>
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Mobile Header (No Menu Button) -->
-                <div class="flex items-center gap-3 md:hidden">
-                    <button id="mobileThemeToggle" class="p-2 rounded-full text-brand-gold">
-                        <i class="ph ph-sun text-xl hidden dark:block"></i>
-                        <i class="ph ph-moon text-xl block dark:hidden text-gray-600"></i>
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="w-9 h-9 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] flex items-center justify-center transition-colors" aria-label="Toggle theme">
+                        <i class="ph ph-moon text-base text-[var(--text-muted)] dark:text-yellow-400"></i>
                     </button>
+                    <?php if ($isLoggedIn): ?>
+                    <a href="<?= $dashboardUrl ?>" class="px-4 py-2 bg-[var(--brand-primary)] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Dashboard</a>
+                    <?php else: ?>
+                    <a href="/login/" class="px-3.5 py-1.5 text-[var(--text-secondary)] text-sm font-medium rounded-lg hover:bg-[var(--bg-hover)] transition-colors">Masuk</a>
+                    <a href="/register/" class="px-4 py-2 bg-gradient-brand text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg glow-orange-sm">Daftar</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <main class="flex-grow pt-24 pb-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main class="flex-grow pt-20">
 
-            <!-- Hero Section (Public Landing Page) -->
-            <section class="py-12 lg:py-20 flex flex-col-reverse lg:flex-row justify-between items-center gap-12 lg:gap-8">
-                <div class="lg:w-1/2 flex flex-col items-start text-left">
-                    <div class="inline-block px-3 py-1 mb-6 rounded-full bg-brand-gold/10 border border-brand-gold/20 text-brand-gold text-xs font-semibold tracking-wide uppercase">
-                        <?= t('hero.badge', 'The Home of Nasheed') ?>
+        <!-- Hero -->
+        <section class="py-16 sm:py-24 bg-[var(--bg-primary)]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-4xl mx-auto">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--brand-primary-light)] border border-[var(--brand-primary)]/20 mb-6">
+                        <i class="ph ph-robot text-[var(--brand-primary)]"></i>
+                        <span class="text-sm font-medium text-[var(--brand-primary)]">AI-Powered Web Template</span>
                     </div>
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-6 leading-tight text-gray-900 dark:text-white">
-                        <?= t('hero.title', 'Dengarkan Suara') ?> <br class="hidden sm:block">
-                        <span class="text-brand-gold"><?= t('hero.title_highlight', 'Ketenangan Hati.') ?></span>
+
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-6 leading-tight">
+                        Tempakan Aplikasi Anda<br>
+                        <span class="text-gradient">dari Dokumen ke Kode Jadi</span>
                     </h1>
-                    <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-lg leading-relaxed">
-                        <?= t('hero.subtitle', APP_DISPLAY_NAME . ' menemani setiap momenmu dengan ribuan nasyid, murottal, dan kajian inspiratif pilihan. Mulai perjalanan spiritualmu hari ini.') ?>
+
+                    <p class="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto">
+                        <?= APP_DISPLAY_NAME ?> adalah template starter untuk membangun aplikasi web dengan pendekatan vibe coding: jelaskan aplikasi lewat dokumen, AI coding assistant yang mengubahnya jadi kode fungsional lengkap.
                     </p>
 
-                    <!-- Hero Auth Actions - PHP Based -->
-                    <?php if ($isLoggedIn): ?>
-                    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                        <a href="<?= $dashboardUrl ?>" class="px-8 py-4 bg-brand-gold text-brand-dark font-semibold rounded-full hover:bg-yellow-500 transition-all shadow-lg hover:shadow-brand-gold/20 flex items-center justify-center gap-2 text-center w-full sm:w-auto">
-                            <i class="ph-bold ph-play-circle text-xl"></i> <?= t('hero.cta.listen', 'Mulai Mendengarkan') ?>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="#cara-pasang" class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-brand text-white font-bold rounded-xl hover:opacity-90 transition-opacity shadow-lg glow-orange">
+                            <i class="ph ph-rocket-launch text-xl"></i> Mulai Pasang Sekarang
                         </a>
-                        <a href="<?= $dashboardUrl ?>" class="px-8 py-4 bg-white dark:bg-brand-card text-gray-900 dark:text-white font-medium rounded-full border border-gray-200 dark:border-gray-700 hover:border-brand-gold transition-all flex items-center justify-center gap-2 text-center w-full sm:w-auto">
-                            <i class="ph-bold ph-arrow-right text-xl"></i> <?= t('auth.dashboard', 'Ke Dashboard') ?>
+                        <a href="/install/" class="inline-flex items-center gap-2 px-8 py-4 bg-[var(--bg-card)] text-[var(--text-primary)] font-medium rounded-xl border border-[var(--brand-primary)] hover:bg-[var(--brand-primary-light)]/10 transition-colors shadow-lg glow-orange-sm">
+                            <i class="ph ph-magic-wand text-xl text-[var(--brand-primary)]"></i> Mulai Menyiapkan Instalasi
                         </a>
                     </div>
-                    <?php else: ?>
-                    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                        <a href="/login/" class="px-8 py-4 bg-brand-gold text-brand-dark font-semibold rounded-full hover:bg-yellow-500 transition-all shadow-lg hover:shadow-brand-gold/20 flex items-center justify-center gap-2 text-center w-full sm:w-auto">
-                            <?= t('hero.cta.listen', 'Mulai Mendengarkan') ?> <i class="ph-bold ph-play-circle text-xl"></i>
-                        </a>
-                        <button onclick="document.getElementById('kategori').scrollIntoView({behavior: 'smooth'})" class="px-8 py-4 bg-white dark:bg-brand-card text-gray-900 dark:text-white font-medium rounded-full border border-gray-200 dark:border-gray-700 hover:border-brand-gold transition-all flex items-center justify-center gap-2 text-center w-full sm:w-auto">
-                            <?= t('hero.cta.explore', 'Jelajahi Kategori') ?>
-                        </button>
-                    </div>
-                    <?php endif; ?>
+                </div>
+            </div>
+        </section>
 
-                    <!-- Social Proof -->
-                    <div class="mt-10 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                        <div class="flex -space-x-3">
-                            <img class="w-8 h-8 rounded-full border-2 border-white dark:border-brand-dark" src="https://i.pravatar.cc/100?img=1" alt="User">
-                            <img class="w-8 h-8 rounded-full border-2 border-white dark:border-brand-dark" src="https://i.pravatar.cc/100?img=2" alt="User">
-                            <img class="w-8 h-8 rounded-full border-2 border-white dark:border-brand-dark" src="https://i.pravatar.cc/100?img=3" alt="User">
-                            <div class="w-8 h-8 rounded-full border-2 border-white dark:border-brand-dark bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[10px] font-bold text-gray-600 dark:text-gray-300">
-                                10k+
-                            </div>
-                        </div>
-                        <p><?= t('social_proof.active_listeners', 'Pendengar aktif setiap hari.') ?></p>
+        <!-- Prerequisites -->
+        <section class="py-12 bg-[var(--bg-surface)] border-y border-[var(--border-default)]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-lg font-heading font-semibold mb-6 text-center">Prasyarat</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="p-4">
+                        <i class="ph ph-file-code text-3xl text-[var(--brand-primary)] mb-2 block"></i>
+                        <p class="text-sm font-medium">AI Coding CLI</p>
+                        <p class="text-xs text-[var(--text-muted)]">Claude/Cursor/Copilot</p>
+                    </div>
+                    <div class="p-4">
+                        <i class="ph ph-browser text-3xl text-[var(--brand-primary)] mb-2 block"></i>
+                        <p class="text-sm font-medium">XAMPP / Laragon</p>
+                        <p class="text-xs text-[var(--text-muted)]">PHP 8.x runtime</p>
+                    </div>
+                    <div class="p-4">
+                        <i class="ph ph-git-branch text-3xl text-[var(--brand-primary)] mb-2 block"></i>
+                        <p class="text-sm font-medium">Git (opsional)</p>
+                        <p class="text-xs text-[var(--text-muted)]">Clone repo</p>
+                    </div>
+                    <div class="p-4">
+                        <i class="ph ph-folder-simple text-3xl text-[var(--brand-primary)] mb-2 block"></i>
+                        <p class="text-sm font-medium">Folder project</p>
+                        <p class="text-xs text-[var(--text-muted)]">htdocs/ atau www/</p>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <!-- Hero Image/Graphic -->
-                <div class="lg:w-1/2 relative w-full flex justify-center lg:justify-end">
-                    <!-- Decorative background blob -->
-                    <div class="absolute inset-0 bg-gradient-to-tr from-brand-gold/20 to-transparent rounded-full blur-3xl -z-10 w-3/4 h-3/4 mx-auto lg:mx-0 lg:ml-auto"></div>
-                    
-                    <!-- Mockup Container -->
-                    <div class="relative w-[300px] h-[600px] bg-black rounded-[2.5rem] border-8 border-gray-900 dark:border-gray-800 shadow-2xl overflow-hidden transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                        <!-- Notch -->
-                        <div class="absolute top-0 inset-x-0 h-6 bg-black z-20 rounded-b-3xl mx-16"></div>
-                        
-                        <!-- App UI Mockup inside phone -->
-                        <div class="absolute inset-0 bg-brand-dark text-white p-4 pt-10 flex flex-col">
-                             <div class="flex items-center justify-between mb-6">
-                                 <i class="ph ph-list text-xl"></i>
-                                 <div class="flex items-center gap-2">
-                                     <svg width="20" height="16" viewBox="0 0 28 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                         <rect x="0" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
-                                         <rect x="6" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
-                                         <rect x="12" y="0" width="3" height="24" rx="1.5" fill="#FFC107" />
-                                         <rect x="18" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
-                                         <rect x="24" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
-                                     </svg>
-                                     <span class="font-sans font-light text-base tracking-[0.25em]">MYAPP</span>
-                                 </div>
-                                 <i class="ph ph-magnifying-glass text-xl"></i>
-                             </div>
-                             
-                             <div class="bg-gray-900 p-4 rounded-xl mb-6">
-                                 <h4 class="font-heading font-bold text-lg text-brand-gold mb-1">Murottal Pilihan</h4>
-                                 <p class="text-xs text-gray-400 mb-3">Surah Al-Kahfi</p>
-                                 <div class="flex items-center justify-between">
-                                     <button class="w-8 h-8 bg-brand-gold rounded-full flex items-center justify-center text-black">
-                                         <i class="ph-fill ph-play text-sm"></i>
-                                     </button>
-                                     <div class="w-2/3 h-1 bg-gray-700 rounded-full overflow-hidden">
-                                         <div class="w-1/2 h-full bg-brand-gold"></div>
-                                     </div>
-                                 </div>
-                             </div>
+        <!-- Features -->
+        <section id="fitur" class="py-16 sm:py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl sm:text-4xl font-heading font-bold text-center mb-4">Kenapa <?= APP_DISPLAY_NAME ?>?</h2>
+                <p class="text-center text-[var(--text-secondary)] max-w-2xl mx-auto mb-12">Template yang dirancang untuk developer modern yang ingin bangun aplikasi cepat dengan AI coding assistant.</p>
 
-                             <h4 class="font-semibold text-sm mb-3">Populer Hari Ini</h4>
-                             <div class="grid grid-cols-2 gap-3 mb-6">
-                                 <div class="bg-gray-900 rounded-lg aspect-square overflow-hidden relative">
-                                     <img src="https://images.unsplash.com/photo-1519682577862-22b62b24e493?auto=format&fit=crop&w=200&q=80" alt="Cover" class="w-full h-full object-cover opacity-60">
-                                     <div class="absolute inset-0 flex items-end p-2">
-                                         <span class="text-[10px] font-bold">SNADA</span>
-                                     </div>
-                                 </div>
-                                 <div class="bg-gray-900 rounded-lg aspect-square overflow-hidden relative">
-                                     <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=200&q=80" alt="Cover" class="w-full h-full object-cover opacity-60">
-                                     <div class="absolute inset-0 flex items-end p-2">
-                                         <span class="text-[10px] font-bold">EDCOUSTIC</span>
-                                     </div>
-                                 </div>
-                             </div>
-                             
-                             <div class="mt-auto bg-gray-900 mx--4 px-4 py-3 flex justify-around border-t border-gray-800">
-                                  <i class="ph-fill ph-house text-brand-gold text-xl"></i>
-                                  <i class="ph ph-compass text-gray-500 text-xl"></i>
-                                  <i class="ph ph-user text-gray-500 text-xl"></i>
-                             </div>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-all group">
+                        <div class="w-14 h-14 rounded-xl bg-[var(--brand-primary-light)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-file-doc text-2xl text-[var(--brand-primary)]"></i>
                         </div>
+                        <h3 class="font-heading font-semibold text-lg mb-2">Dokumen ke Kode</h3>
+                        <p class="text-sm text-[var(--text-secondary)]">Jelaskan aplikasi lewat docs/prd.md, AI yang mengubahnya jadi kode fungsional lengkap.</p>
+                    </div>
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-all group">
+                        <div class="w-14 h-14 rounded-xl bg-[var(--brand-primary-light)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-layout text-2xl text-[var(--brand-primary)]"></i>
+                        </div>
+                        <h3 class="font-heading font-semibold text-lg mb-2">Template Siap Pakai</h3>
+                        <p class="text-sm text-[var(--text-secondary)]">Landing page, login, register, dashboard — semua sudah ada dan tinggal konfigurasi.</p>
+                    </div>
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-all group">
+                        <div class="w-14 h-14 rounded-xl bg-[var(--brand-primary-light)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-shield-check text-2xl text-[var(--brand-primary)]"></i>
+                        </div>
+                        <h3 class="font-heading font-semibold text-lg mb-2">Auth & Security</h3>
+                        <p class="text-sm text-[var(--text-secondary)]">Argon2ID, CSRF, rate limiting, remember-me, role-based access.</p>
+                    </div>
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-all group">
+                        <div class="w-14 h-14 rounded-xl bg-[var(--brand-primary-light)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-palette text-2xl text-[var(--brand-primary)]"></i>
+                        </div>
+                        <h3 class="font-heading font-semibold text-lg mb-2">Dark/Light Theme</h3>
+                        <p class="text-sm text-[var(--text-secondary)]">Tema modern dengan switcher dan CSS variables yang mudah dikustomisasi.</p>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Categories / Quick Links -->
-            <section id="kategori" class="py-12 border-t border-gray-200 dark:border-gray-800/50">
-                <div class="text-center mb-10">
-                    <h2 class="text-2xl md:text-3xl font-heading font-bold mb-3"><?= t('categories.title', 'Jelajahi Kategori') ?></h2>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm md:text-base"><?= t('categories.subtitle', 'Temukan konten audio yang sesuai dengan suasana hatimu.') ?></p>
-                </div>
-                <div class="flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-10">
-                    <!-- Nasyid -->
-                    <button class="flex flex-col items-center gap-3 w-[80px] sm:w-[100px] group">
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white dark:bg-brand-card border border-gray-200 dark:border-gray-800 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-brand-dark transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:-translate-y-1">
-                            <i class="ph ph-music-notes text-3xl sm:text-4xl"></i>
-                        </div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-brand-gold transition-colors"><?= t('categories.nasyid', 'Nasyid') ?></span>
-                    </button>
-                    <!-- Quran -->
-                    <button class="flex flex-col items-center gap-3 w-[80px] sm:w-[100px] group">
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white dark:bg-brand-card border border-gray-200 dark:border-gray-800 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-brand-dark transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:-translate-y-1">
-                            <i class="ph ph-book-open text-3xl sm:text-4xl"></i>
-                        </div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-brand-gold transition-colors"><?= t('categories.quran', 'Quran') ?></span>
-                    </button>
-                    <!-- Kajian -->
-                    <button class="flex flex-col items-center gap-3 w-[80px] sm:w-[100px] group">
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white dark:bg-brand-card border border-gray-200 dark:border-gray-800 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-brand-dark transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:-translate-y-1">
-                            <i class="ph ph-microphone-stage text-3xl sm:text-4xl"></i>
-                        </div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-brand-gold transition-colors"><?= t('categories.kajian', 'Kajian') ?></span>
-                    </button>
-                    <!-- Podcast -->
-                    <button class="flex flex-col items-center gap-3 w-[80px] sm:w-[100px] group">
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white dark:bg-brand-card border border-gray-200 dark:border-gray-800 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-brand-dark transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:-translate-y-1">
-                            <i class="ph ph-headphones text-3xl sm:text-4xl"></i>
-                        </div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-brand-gold transition-colors"><?= t('categories.podcast', 'Podcast') ?></span>
-                    </button>
-                    <!-- Dzikir -->
-                    <button class="flex flex-col items-center gap-3 w-[80px] sm:w-[100px] group">
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white dark:bg-brand-card border border-gray-200 dark:border-gray-800 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-brand-dark transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:-translate-y-1">
-                            <i class="ph ph-heart text-3xl sm:text-4xl"></i>
-                        </div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-brand-gold transition-colors"><?= t('categories.dzikir', 'Dzikir') ?></span>
-                    </button>
-                </div>
-            </section>
-
-            <!-- Populer Saat Ini -->
-            <section id="terbaru" class="py-12">
-                <div class="flex justify-between items-end mb-8">
-                    <div>
-                        <h2 class="text-2xl font-heading font-bold mb-1"><?= t('popular.title', 'Paling Banyak Didengarkan') ?></h2>
-                        <p class="text-sm text-gray-500"><?= t('popular.subtitle', 'Audio favorit pilihan pendengar ' . APP_DISPLAY_NAME) ?>.</p>
-                    </div>
-                    <a href="#" class="text-sm text-brand-gold hover:underline font-medium hidden sm:block"><?= t('common.see_all', 'Lihat semua') ?></a>
-                </div>
-                
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
-                    <!-- Item 1 -->
-                    <div class="group cursor-pointer">
-                        <div class="relative rounded-2xl overflow-hidden aspect-square mb-4 shadow-sm group-hover:shadow-xl transition-all duration-300 bg-gray-200 dark:bg-gray-800">
-                            <img src="https://images.unsplash.com/photo-1542816417-0983c9c9ad53?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Al-Kahfi" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <button class="w-12 h-12 bg-brand-gold rounded-full flex items-center justify-center text-brand-dark shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                                    <i class="ph-fill ph-play text-xl"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <h3 class="font-bold text-sm sm:text-base truncate group-hover:text-brand-gold transition-colors">Al-Kahfi (Ayat 1-110)</h3>
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Misyari Rasyid</p>
-                    </div>
-
-                    <!-- Item 3 -->
-                    <div class="group cursor-pointer">
-                        <div class="relative rounded-2xl overflow-hidden aspect-square mb-4 shadow-sm group-hover:shadow-xl transition-all duration-300 bg-gray-200 dark:bg-gray-800">
-                            <img src="https://images.unsplash.com/photo-1555529771-835f59bfc50c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Ust. Adnin Roslan" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <button class="w-12 h-12 bg-brand-gold rounded-full flex items-center justify-center text-brand-dark shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                                    <i class="ph-fill ph-play text-xl"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <h3 class="font-bold text-sm sm:text-base truncate group-hover:text-brand-gold transition-colors">Menjaga Hati</h3>
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Ust. Adnin Roslan</p>
-                    </div>
-
-                    <!-- Item 4 (Added for wider screens) -->
-                     <div class="group cursor-pointer hidden sm:block">
-                        <div class="relative rounded-2xl overflow-hidden aspect-square mb-4 shadow-sm group-hover:shadow-xl transition-all duration-300 bg-gray-200 dark:bg-gray-800">
-                            <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Edcoustic" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <button class="w-12 h-12 bg-brand-gold rounded-full flex items-center justify-center text-brand-dark shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                                    <i class="ph-fill ph-play text-xl"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <h3 class="font-bold text-sm sm:text-base truncate group-hover:text-brand-gold transition-colors">Muhasabah Cinta</h3>
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Edcoustic</p>
-                    </div>
-
-                     <!-- Item 5 (Added for wider screens) -->
-                     <div class="group cursor-pointer hidden xl:block">
-                        <div class="relative rounded-2xl overflow-hidden aspect-square mb-4 shadow-sm group-hover:shadow-xl transition-all duration-300 bg-gray-200 dark:bg-gray-800">
-                            <img src="https://images.unsplash.com/photo-1493225457124-a1a2a5f52479?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Gradasi" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <button class="w-12 h-12 bg-brand-gold rounded-full flex items-center justify-center text-brand-dark shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                                    <i class="ph-fill ph-play text-xl"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <h3 class="font-bold text-sm sm:text-base truncate group-hover:text-brand-gold transition-colors">Anak Bertanya</h3>
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Gradasi</p>
-                    </div>
-                </div>
-                 <div class="mt-6 text-center sm:hidden">
-                    <button class="px-6 py-2 border border-brand-gold text-brand-gold rounded-full text-sm font-medium hover:bg-brand-gold hover:text-brand-dark transition-colors">Lihat Semua</button>
-                </div>
-            </section>
-
-            <!-- Premium Banner -->
-            <section id="premium" class="py-12">
-                <div class="bg-gradient-to-r from-gray-900 to-gray-800 dark:from-brand-card dark:to-[#151518] rounded-[2rem] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between border border-gray-800 relative overflow-hidden shadow-2xl">
-                    <!-- Background waves -->
-                    <div class="absolute right-0 top-0 h-full w-1/2 opacity-20 pointer-events-none">
-                        <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full text-brand-gold fill-current">
-                            <path d="M0,50 C20,20 40,80 60,50 C80,20 100,50 100,50 L100,100 L0,100 Z" />
-                        </svg>
-                    </div>
-                    <div class="flex items-center gap-6 mb-8 md:mb-0 relative z-10 flex-col md:flex-row text-center md:text-left">
-                        <div>
-                            <i class="ph-fill ph-crown text-4xl text-brand-gold mb-2 mx-auto md:mx-0 block"></i>
-                            <h3 class="text-white font-sans font-light tracking-[0.25em] text-lg">MYAPP<br><span class="text-brand-gold font-medium tracking-normal text-sm">PREMIUM</span></h3>
-                        </div>
-                        <div class="w-px h-16 bg-gray-700 hidden md:block"></div>
-                        <div class="text-white max-w-md">
-                            <h4 class="font-bold text-2xl mb-2"><?= t('premium.banner.title', 'Tanpa Batas, Tanpa Iklan') ?></h4>
-                            <p class="font-normal text-gray-400 text-sm md:text-base"><?= t('premium.banner.subtitle', 'Dengarkan ribuan konten Islami dengan kualitas tinggi, unduh untuk didengarkan offline, di mana saja dan kapan saja.') ?></p>
-                        </div>
-                    </div>
-
-                    <a href="/register/" class="relative z-10 w-full md:w-auto bg-brand-gold hover:bg-yellow-500 text-brand-dark font-bold text-lg py-4 px-10 rounded-full transition-all shadow-lg hover:shadow-brand-gold/30 flex items-center justify-center gap-2 transform hover:scale-105">
-                        <?= t('premium.banner.cta', 'Coba Gratis 30 Hari') ?> <i class="ph-bold ph-arrow-right"></i>
-                    </a>
-                </div>
-            </section>
-
-             <!-- Kajian Populer -->
-             <section class="py-8">
-                <div class="flex justify-between items-end mb-6">
-                    <h2 class="text-xl font-heading font-semibold"><?= t('kajian.title', 'Kajian Populer') ?></h2>
-                    <a href="#" class="text-sm text-brand-gold hover:underline"><?= t('common.see_all', 'Lihat semua') ?></a>
-                </div>
-                
-                <div class="flex flex-col gap-4">
-                    <!-- List Item 1 -->
-                    <div class="flex items-center gap-4 bg-white dark:bg-brand-card p-3 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-brand-gold/50 transition-colors cursor-pointer group">
-                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Hanan Attaki" class="w-16 h-16 rounded-lg object-cover">
-                        <div class="flex-grow">
-                            <h3 class="font-semibold text-sm group-hover:text-brand-gold transition-colors">Kiat Menjadi Hamba yang Bersyukur</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Ustadz Hanan Attaki, Lc.</p>
-                        </div>
-                        <div class="flex items-center gap-3 text-gray-400">
-                            <button class="hover:text-brand-gold"><i class="ph ph-bookmark text-xl"></i></button>
-                            <button class="w-10 h-10 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center hover:text-brand-gold hover:border-brand-gold transition-colors">
-                                <i class="ph-fill ph-play"></i>
-                            </button>
-                            <button class="hover:text-gray-600 dark:hover:text-gray-200"><i class="ph ph-dots-three-vertical text-xl"></i></button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Fitur Unggulan / Kenapa <?= APP_DISPLAY_NAME ?> -->
-            <section id="fitur" class="py-16 mt-8 border-t border-gray-200 dark:border-gray-800/50">
+        <!-- Installation Steps -->
+        <section id="cara-pasang" class="py-16 sm:py-24 bg-[var(--bg-surface)] border-y border-[var(--border-default)]">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <h2 class="text-2xl md:text-3xl font-heading font-bold mb-4"><?= t('features.title', 'Mengapa Mendengarkan di ' . APP_DISPLAY_NAME . '?') ?></h2>
-                    <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"><?= t('features.subtitle', 'Kami merancang pengalaman mendengarkan audio Islami yang tidak hanya lengkap, tapi juga nyaman dan menenangkan hati.') ?></p>
+                    <span class="px-3 py-1 bg-[var(--brand-primary-light)] text-[var(--brand-primary)] text-xs font-semibold uppercase tracking-wider rounded-full">Panduan Instalasi & Eksekusi Interaktif</span>
+                    <h2 class="text-3xl sm:text-4xl font-heading font-bold mt-3 mb-4">Unduh & Konfigurasi Aplikasi</h2>
+                    <p class="text-[var(--text-secondary)] max-w-2xl mx-auto">Pilih jenis server, tentukan nama aplikasi Anda, lalu unduh dan jalankan setup wizard otomatis.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <!-- Feature 1 -->
-                    <div class="bg-white dark:bg-brand-card p-6 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
-                        <div class="w-14 h-14 bg-brand-gold/10 text-brand-gold rounded-xl flex items-center justify-center text-3xl mb-6">
-                            <i class="ph ph-waveform"></i>
-                        </div>
-                        <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white"><?= t('features.hd_quality', 'Kualitas Audio HD') ?></h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed"><?= t('features.hd_quality.desc', 'Nikmati lantunan ayat suci dan nasyid dengan kejernihan maksimal seolah mendengarkan langsung.') ?></p>
-                    </div>
-                    <!-- Feature 2 -->
-                    <div class="bg-white dark:bg-brand-card p-6 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
-                        <div class="w-14 h-14 bg-brand-gold/10 text-brand-gold rounded-xl flex items-center justify-center text-3xl mb-6">
-                            <i class="ph ph-download-simple"></i>
-                        </div>
-                        <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white"><?= t('features.offline', 'Dengarkan Offline') ?></h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed"><?= t('features.offline.desc', 'Unduh audio favoritmu dan dengarkan kapan saja di mana saja, tanpa khawatir kehabisan kuota internet.') ?></p>
-                    </div>
-                    <!-- Feature 3 -->
-                    <div class="bg-white dark:bg-brand-card p-6 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
-                        <div class="w-14 h-14 bg-brand-gold/10 text-brand-gold rounded-xl flex items-center justify-center text-3xl mb-6">
-                            <i class="ph ph-playlist"></i>
-                        </div>
-                        <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white"><?= t('features.personal', 'Kurasi Personal') ?></h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed"><?= t('features.personal.desc', 'Dapatkan rekomendasi playlist harian yang disesuaikan dengan suasana hati dan kebutuhan spiritualmu.') ?></p>
-                    </div>
-                    <!-- Feature 4 -->
-                    <div class="bg-white dark:bg-brand-card p-6 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
-                        <div class="w-14 h-14 bg-brand-gold/10 text-brand-gold rounded-xl flex items-center justify-center text-3xl mb-6">
-                            <i class="ph ph-shield-check"></i>
-                        </div>
-                        <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white"><?= t('features.no_ads', '100% Bebas Iklan') ?></h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed"><?= t('features.no_ads.desc', 'Fokus beribadah, merenung, dan mencari inspirasi tanpa gangguan iklan audio yang tiba-tiba muncul.') ?></p>
-                    </div>
-                </div>
-            </section>
+                <!-- Interactive App Downloader Component -->
+                <div id="appDownloaderComponent" x-data="appDownloader()" class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6 shadow-xl glow-orange-sm mb-12">
 
-            <!-- Testimonial Section -->
-            <section id="testimoni" class="py-16 border-t border-gray-200 dark:border-gray-800/50">
-                <div class="text-center mb-10">
-                    <h2 class="text-2xl md:text-3xl font-heading font-bold mb-3"><?= t('testimonials.title', 'Apa Kata Sahabat ' . APP_DISPLAY_NAME . '?') ?></h2>
-                    <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"><?= t('testimonials.subtitle', 'Ribuan orang telah menjadikan ' . APP_DISPLAY_NAME . ' sebagai teman setia di setiap momen keseharian mereka.') ?></p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Review 1 -->
-                    <div class="bg-gray-100 dark:bg-brand-card/50 p-8 rounded-2xl">
-                        <div class="flex text-brand-gold mb-4 text-sm">
-                            <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                    <form @submit.prevent="checkFolder()" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Server Type Selector -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="block text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider">1. Web Server</label>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20" title="Terdeteksi Otomatis">
+                                    <i class="ph ph-check-circle"></i> Auto: <?= strtoupper($detectedServer) ?>
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" @click="server = 'laragon'; isSubmitted = false" :class="server === 'laragon' ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="py-2.5 px-3 rounded-xl border text-xs font-medium transition-all flex items-center justify-center gap-1.5">
+                                    <i class="ph ph-bug text-base"></i> Laragon
+                                </button>
+                                <button type="button" @click="server = 'xampp'; isSubmitted = false" :class="server === 'xampp' ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="py-2.5 px-3 rounded-xl border text-xs font-medium transition-all flex items-center justify-center gap-1.5">
+                                    <i class="ph ph-file-css text-base"></i> XAMPP
+                                </button>
+                            </div>
                         </div>
-                        <p class="text-gray-700 dark:text-gray-300 mb-6 italic leading-relaxed">"Alhamdulillah, aplikasi ini menemani perjalanan harian saya ke kantor. Pilihan murottalnya sangat lengkap dan antarmukanya bersih, sangat elegan."</p>
-                        <div class="flex items-center gap-3">
-                            <img src="https://i.pravatar.cc/150?img=11" alt="Budi" class="w-10 h-10 rounded-full">
-                            <div>
-                                <h4 class="font-semibold text-sm">Budi Santoso</h4>
-                                <p class="text-xs text-gray-500">Karyawan Swasta</p>
+
+                        <!-- Disk Drive Selector -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="block text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider">2. Local Disk</label>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20" title="Terdeteksi Otomatis">
+                                    <i class="ph ph-hard-drive"></i> Auto: Disk <?= $detectedDrive ?>:
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
+                                <template x-for="d in drives" :key="d">
+                                    <button type="button" @click="drive = d; isSubmitted = false" :class="drive === d ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="px-3 py-2.5 rounded-xl border text-xs font-medium transition-all flex items-center gap-1 shrink-0">
+                                        <i class="ph ph-hard-drive"></i> (<span x-text="d"></span>:)
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- App Name Input + Submit Button -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider mb-3">3. Nama Aplikasi <span class="text-red-400">*</span></label>
+                            <div class="flex items-center gap-2">
+                                <div class="relative flex-1">
+                                    <input type="text" x-model="appName" @input="sanitizeAppName(); isSubmitted = false" required placeholder="Tulis nama aplikasimu" pattern="^[a-zA-Z0-9][a-zA-Z0-9_-]*$" title="Hanya huruf, angka, underscore (_), dan hyphen (-). Tidak boleh spasi, titik, koma, atau simbol lain." class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors font-mono" :class="{ 'border-red-400': appNameError }">
+                                    <i class="ph ph-folder-simple absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
+                                    <template x-if="appNameError">
+                                        <div class="absolute bottom-full left-0 mb-1 px-2 py-1 bg-red-500/90 text-white text-[10px] rounded whitespace-nowrap">Gunakan _ atau - sebagai pemisah, tanpa spasi/simbol</div>
+                                    </template>
+                                </div>
+                                <button type="submit" :disabled="!appName.trim() || isChecking || appNameError" class="px-4 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity shadow-md disabled:opacity-50 flex items-center gap-1.5 shrink-0">
+                                    <template x-if="!isChecking">
+                                        <span class="flex items-center gap-1"><i class="ph ph-paper-plane-right"></i> Proses</span>
+                                    </template>
+                                    <template x-if="isChecking">
+                                        <span class="flex items-center gap-1"><i class="ph ph-circle-notch animate-spin"></i> Mengecek...</span>
+                                    </template>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Computed Terminal Box & Next Step CTA (tampil setelah Submit) -->
+                    <div x-show="isSubmitted" x-transition class="space-y-4 pt-2">
+                        <div class="bg-[var(--bg-primary)] rounded-xl p-4 sm:p-5 border border-[var(--border-default)] space-y-3 relative group shadow-inner">
+                            <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-2 text-xs text-[var(--text-muted)] font-mono">
+                                <span class="flex items-center gap-1.5"><i class="ph ph-terminal text-sm text-[var(--brand-primary)]"></i> Perintah PowerShell Download (GitHub)</span>
+                                <span class="text-[10px] text-green-400 font-sans" x-text="'Target Path: ' + fullTargetDir()"></span>
+                            </div>
+                            <div class="font-mono text-xs sm:text-sm text-[var(--text-primary)] space-y-1 select-all break-all" x-text="fullCommand()"></div>
+
+                            <div class="flex items-center gap-2 pt-2 flex-wrap">
+                                <button type="button" @click="copySnippet($el, fullCommand())" class="px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5">
+                                    <i class="ph ph-copy"></i> Salin Perintah
+                                </button>
+                                <?php if ($isDev): ?>
+                                <button type="button" @click="executeInteractiveTerminal($el)" class="px-4 py-2 bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5">
+                                    <i class="ph ph-download-simple"></i> Unduh & Buka Terminal Otomatis
+                                </button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <!-- Status Folder & Button Setup Wizard -->
+                        <div class="p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-3 transition-all"
+                            :class="folderExists ? 'bg-green-500/10 border-green-500/30' : 'bg-amber-500/10 border-amber-500/30'">
+                            <div class="flex items-center gap-3">
+                                <template x-if="folderExists">
+                                    <i class="ph ph-check-circle text-2xl text-green-400 shrink-0"></i>
+                                </template>
+                                <template x-if="!folderExists">
+                                    <i class="ph ph-info text-2xl text-amber-400 shrink-0"></i>
+                                </template>
+                                <div>
+                                    <p class="text-xs font-bold" x-text="folderExists ? 'Folder Aplikasi Sudah Ada!' : 'Folder Belum Dibuat / Belum Diunduh'"></p>
+                                    <p class="text-[11px] text-[var(--text-muted)]" x-text="folderExists ? 'Folder target sudah siap. Silakan klik Setup Wizard untuk melanjutkan.' : 'Jalankan perintah di atas / klik Unduh Otomatis untuk mengunduh template ke folder target.'"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <template x-if="!folderExists">
+                                    <button type="button" @click="checkFolder()" :disabled="isChecking" class="px-3 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-secondary)] rounded-lg text-xs font-medium hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-50 flex items-center gap-1">
+                                        <template x-if="!isChecking">
+                                            <i class="ph ph-arrows-clockwise"></i> Refresh Status
+                                        </template>
+                                        <template x-if="isChecking">
+                                            <i class="ph ph-circle-notch animate-spin"></i> Mengecek...
+                                        </template>
+                                    </button>
+                                </template>
+                                <template x-if="folderExists">
+                                    <a :href="wizardUrl()" class="px-5 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1.5 whitespace-nowrap shadow-md glow-orange-sm">
+                                        <i class="ph ph-magic-wand"></i> Masuk Setup Wizard <i class="ph ph-arrow-right"></i>
+                                    </a>
+                                </template>
                             </div>
                         </div>
                     </div>
-                    <!-- Review 2 -->
-                    <div class="bg-gray-100 dark:bg-brand-card/50 p-8 rounded-2xl">
-                        <div class="flex text-brand-gold mb-4 text-sm">
-                            <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
-                        </div>
-                        <p class="text-gray-700 dark:text-gray-300 mb-6 italic leading-relaxed">"Aplikasi audio Islami terbaik yang pernah saya coba. Nasyid kenangan era 2000-an semuanya ada di sini. Sangat mengobati rindu."</p>
-                        <div class="flex items-center gap-3">
-                            <img src="https://i.pravatar.cc/150?img=5" alt="Aisyah" class="w-10 h-10 rounded-full">
-                            <div>
-                                <h4 class="font-semibold text-sm">Aisyah Fitriani</h4>
-                                <p class="text-xs text-gray-500">Ibu Rumah Tangga</p>
+                </div>
+
+                <!-- Tab Menu for Workflows -->
+                <div class="flex justify-center mb-8 border-b border-[var(--border-default)] max-w-md mx-auto" x-data="{ tab: 'new' }">
+                    <button @click="tab = 'new'; $dispatch('tab-change', 'new')" :class="tab === 'new' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-sm font-semibold transition-colors focus:outline-none">Alur Aplikasi Baru (New)</button>
+                    <button @click="tab = 'redesign'; $dispatch('tab-change', 'redesign')" :class="tab === 'redesign' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-sm font-semibold transition-colors focus:outline-none">Alur Redesain Aplikasi (Redesign)</button>
+                </div>
+
+                <div x-data="{ mode: 'new' }" @tab-change.window="mode = $event.detail">
+                    <!-- NEW MODE TUTORIAL (12 Langkah) -->
+                    <div x-show="mode === 'new'" class="space-y-6">
+                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 shadow-sm">
+                            <h3 class="font-heading font-semibold text-lg mb-4 text-center">12 Langkah Setup Wizard - Aplikasi Baru</h3>
+                            <div class="space-y-4">
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">1</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Overview</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Halaman sambutan untuk memilih mode instalasi dan memahami alur kerja Vibeforge.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">2</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">PRD (Product Requirements Document)</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Tulis spesifikasi aplikasi: nama, fitur, target pengguna, user flow, dan kebutuhan bisnis di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">docs/prd.md</code>.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">3</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Branding Identity</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Konfigurasi warna, font, logo, dan identitas visual aplikasi di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">docs/branding.md</code>.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">4</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Logo</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Upload logo aplikasi berformat PNG (max 2MB) yang disimpan ke <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">docs/logo.png</code>.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">5</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Landing Page</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Kustomisasi struktur & styling halaman landing di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/landingpage.html</code>.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">6</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Login Page</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Atur tampilan halaman login di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/login.html</code>.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">7</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Register Page</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Kustomisasi halaman registrasi di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/register.html</code>.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">8</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Modul Manajemen</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Dashboard Super Admin di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/modul_manajemen.html</code>.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">9</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Modul Admin/Creator</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Studio creator di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/modul_admin.html</code>.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">10</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Modul Client</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Dashboard pendengar di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/modul_client.html</code>.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">11</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Server Configuration</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Pilih server lokal (Laragon/XAMPP) dan disk tujuan instalasi.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">12</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Install Path & Execute</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Konfirmasi lokasi project dan buka terminal untuk menjalankan <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">baca dan jalankan @docs/install.md</code>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-6">
+                                <a href="/install/" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-brand text-white font-bold rounded-xl hover:opacity-90 transition-opacity glow-orange shadow-lg">
+                                    <i class="ph ph-magic-wand"></i> Mulai Wizard Baru (12 Langkah)
+                                </a>
                             </div>
                         </div>
                     </div>
-                    <!-- Review 3 -->
-                    <div class="bg-gray-100 dark:bg-brand-card/50 p-8 rounded-2xl">
-                        <div class="flex text-brand-gold mb-4 text-sm">
-                            <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
-                        </div>
-                        <p class="text-gray-700 dark:text-gray-300 mb-6 italic leading-relaxed">"Kajiannya sangat terstruktur. Saya suka fitur kurasi playlist yang bikin hati tenang saat sedang banyak pikiran. Sangat direkomendasikan!"</p>
-                        <div class="flex items-center gap-3">
-                            <img src="https://i.pravatar.cc/150?img=33" alt="Hendi" class="w-10 h-10 rounded-full">
-                            <div>
-                                <h4 class="font-semibold text-sm">dr. Hendi</h4>
-                                <p class="text-xs text-gray-500">Tenaga Medis</p>
+
+                    <!-- REDESIGN MODE TUTORIAL (5 Langkah) -->
+                    <div x-show="mode === 'redesign'" class="space-y-6">
+                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 shadow-sm">
+                            <h3 class="font-heading font-semibold text-lg mb-4 text-center">5 Langkah Setup Wizard - Redesain Aplikasi</h3>
+                            <div class="space-y-4">
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-heading font-bold text-base shrink-0">1</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Overview</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Halaman sambutan untuk memilih mode Redesain dan memahami alur cepat.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-heading font-bold text-base shrink-0">2</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Kelola Folder References</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Upload file/folder codebase lama aplikasi Anda ke folder <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-purple-400 font-mono text-xs">references/</code> via Web UI atau buka File Explorer langsung.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-heading font-bold text-base shrink-0">3</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Logo</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Upload logo aplikasi PNG (max 2MB) ke <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-purple-400 font-mono text-xs">docs/logo.png</code>.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-heading font-bold text-base shrink-0">4</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Server Configuration</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Pilih server lokal (Laragon/XAMPP) dan disk tujuan instalasi.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
+                                    <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-heading font-bold text-base shrink-0">5</div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Install Path & Execute</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Konfirmasi lokasi project dan buka terminal. PRD & Branding akan otomatis dibuat oleh AI saat menjalankan <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-purple-400 font-mono text-xs">baca dan jalankan @docs/install.md</code>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-6">
+                                <a href="/install/?mode=redesign" class="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors shadow-lg">
+                                    <i class="ph ph-folder-open"></i> Mulai Wizard Redesain (5 Langkah)
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- FAQ Section -->
-            <section id="faq" class="py-16 border-t border-gray-200 dark:border-gray-800/50">
-                <div class="max-w-3xl mx-auto">
-                    <div class="text-center mb-12">
-                        <h2 class="text-2xl md:text-3xl font-heading font-bold mb-4"><?= t('faq.title', 'Pertanyaan Seputar ' . APP_DISPLAY_NAME) ?></h2>
-                        <p class="text-gray-600 dark:text-gray-400"><?= t('faq.subtitle', 'Temukan jawaban yang sering ditanyakan terkait layanan kami.') ?></p>
+        <!-- Demo / Try It -->
+        <section id="demo" class="py-16 sm:py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl sm:text-4xl font-heading font-bold mb-4">Coba Sekarang</h2>
+                <p class="text-[var(--text-secondary)] mb-10">Klik tombol di bawah ini untuk langsung masuk ke dashboard masing-masing role tanpa perlu mengetik credential.</p>
+
+                <div class="grid sm:grid-cols-3 gap-6 mb-8 max-w-4xl mx-auto">
+                    <!-- Demo Card 1: Manajemen -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 text-left flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4">
+                                <i class="ph ph-users text-2xl text-purple-400"></i>
+                            </div>
+                            <h3 class="font-heading font-semibold mb-1">Manajemen</h3>
+                            <p class="text-sm text-[var(--text-muted)] mb-4">Super Admin dashboard penuh</p>
+                        </div>
+                        <form action="/core/router.php" method="POST" class="w-full">
+                            <input type="hidden" name="module" value="auth">
+                            <input type="hidden" name="action" value="login">
+                            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+                            <input type="hidden" name="email" value="manajemen@example.com">
+                            <input type="hidden" name="password" value="password123">
+                            <button type="submit" onclick="directLogin(event, this.form, '/manajemen/')" class="w-full py-2.5 bg-purple-500 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 shadow-md">
+                                <i class="ph ph-sign-in text-base"></i> Masuk Manajemen
+                            </button>
+                        </form>
                     </div>
 
-                    <div class="space-y-4">
-                        <!-- FAQ Item 1 -->
-                        <div class="bg-white dark:bg-brand-card border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                            <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white"><?= t('faq.paid.title', 'Apakah aplikasi ' . APP_DISPLAY_NAME . ' berbayar?') ?></h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400"><?= t('faq.paid.content', 'Anda dapat menikmati sebagian besar konten ' . APP_DISPLAY_NAME . ' secara gratis dengan dukungan iklan. Namun, untuk pengalaman tanpa batas, bebas iklan, dan fitur offline, Anda dapat berlangganan ' . APP_DISPLAY_NAME . ' Premium.') ?></p>
+                    <!-- Demo Card 2: Admin/Creator -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--brand-primary)] p-6 text-left relative overflow-hidden flex flex-col justify-between">
+                        <div class="absolute top-3 right-3 px-2 py-1 bg-[var(--brand-primary)] text-white text-xs font-bold rounded">Creator</div>
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-[var(--brand-primary-light)] flex items-center justify-center mb-4">
+                                <i class="ph ph-rocket-launch text-2xl text-[var(--brand-primary)]"></i>
+                            </div>
+                            <h3 class="font-heading font-semibold mb-1">Admin / Creator</h3>
+                            <p class="text-sm text-[var(--text-muted)] mb-4">Studio upload & analitik</p>
                         </div>
-                        <!-- FAQ Item 2 -->
-                        <div class="bg-white dark:bg-brand-card border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                            <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white"><?= t('faq.offline.title', 'Bagaimana cara mengaktifkan Mode Offline?') ?></h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400"><?= t('faq.offline.content', 'Mode offline eksklusif untuk pengguna Premium. Cukup klik ikon unduh (download) pada album, playlist, atau episode podcast yang Anda inginkan, dan dengarkan tanpa koneksi internet di menu Koleksi.') ?></p>
+                        <form action="/core/router.php" method="POST" class="w-full">
+                            <input type="hidden" name="module" value="auth">
+                            <input type="hidden" name="action" value="login">
+                            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+                            <input type="hidden" name="email" value="admin@example.com">
+                            <input type="hidden" name="password" value="password123">
+                            <button type="submit" onclick="directLogin(event, this.form, '/admin/')" class="w-full py-2.5 bg-gradient-brand text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 shadow-md glow-orange-sm">
+                                <i class="ph ph-sign-in text-base"></i> Masuk Creator
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Demo Card 3: Client -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 text-left flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center mb-4">
+                                <i class="ph ph-user text-2xl text-green-400"></i>
+                            </div>
+                            <h3 class="font-heading font-semibold mb-1">Client / Pengguna</h3>
+                            <p class="text-sm text-[var(--text-muted)] mb-4">Dashboard eksplorasi konten</p>
                         </div>
-                        <!-- FAQ Item 3 -->
-                        <div class="bg-white dark:bg-brand-card border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                            <h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white"><?= t('faq.creator.title', 'Apakah saya bisa menjadi podcaster/kreator di ' . APP_DISPLAY_NAME . '?') ?></h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400"><?= t('faq.creator.content', 'Tentu! Kami selalu mencari suara-suara inspiratif baru. Anda dapat mengajukan podcast Islami atau konten kajian Anda melalui menu "Mitra Kreator" di pengaturan akun Anda.') ?></p>
-                        </div>
+                        <form action="/core/router.php" method="POST" class="w-full">
+                            <input type="hidden" name="module" value="auth">
+                            <input type="hidden" name="action" value="login">
+                            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+                            <input type="hidden" name="email" value="client@example.com">
+                            <input type="hidden" name="password" value="password123">
+                            <button type="submit" onclick="directLogin(event, this.form, '/client/')" class="w-full py-2.5 bg-[var(--brand-primary)] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 shadow-md">
+                                <i class="ph ph-sign-in text-base"></i> Masuk Client
+                            </button>
+                        </form>
                     </div>
                 </div>
-            </section>
 
-            <!-- Final Call to Action -->
-            <section class="py-16">
-                <div class="bg-brand-gold rounded-[2rem] p-10 md:p-16 text-center relative overflow-hidden shadow-2xl shadow-brand-gold/20">
-                    <!-- Decor -->
-                    <div class="absolute inset-0 opacity-10 pointer-events-none flex justify-center items-center">
-                        <i class="ph-fill ph-headphones text-[20rem] text-brand-dark transform rotate-12 translate-x-32"></i>
-                    </div>
+            </div>
+        </section>
 
-                    <div class="relative z-10 max-w-2xl mx-auto">
-                        <h2 class="text-3xl md:text-5xl font-heading font-bold text-brand-dark mb-6"><?= t('cta.title', 'Siap Menemukan Ketenangan Hati?') ?></h2>
-                        <p class="text-brand-dark/80 font-medium text-lg mb-10"><?= t('cta.subtitle', 'Bergabunglah dengan ribuan pendengar lainnya. Buat akun gratis sekarang dan mulai dengarkan nasyid, murottal, serta kajian inspiratif.') ?></p>
-                        <a href="/register/" class="px-10 py-5 bg-brand-dark text-brand-gold font-bold text-lg rounded-full hover:bg-gray-900 transition-transform transform hover:scale-105 shadow-xl flex items-center justify-center gap-2 mx-auto w-full sm:w-auto">
-                            <?= t('cta.button', 'Daftar Sekarang Secara Gratis') ?>
-                        </a>
-                    </div>
-                </div>
-            </section>
-
-        </div>
+        <!-- GitHub CTA -->
+        <section class="py-12 bg-gradient-brand">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <h2 class="text-2xl font-heading font-bold text-white mb-4">Source Code Terbuka</h2>
+                <p class="text-white/80 mb-6">Lihat, fork, dan kontribusi di GitHub</p>
+                <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-[var(--brand-primary)] font-bold rounded-xl hover:opacity-90 transition-opacity shadow-lg">
+                    <i class="ph ph-github-logo text-xl"></i> github.com/iqbalmurtadho24/vibeforge
+                </a>
+            </div>
+        </section>
     </main>
 
-    <!-- Mobile Bottom Navigation (Visible on small screens) -->
-    <div class="md:hidden fixed bottom-0 w-full bg-white dark:bg-[#1A1A1D] border-t border-gray-200 dark:border-gray-800 pb-safe z-40">
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-card)]/95 backdrop-blur-md border-t border-[var(--border-default)] z-50 shadow-lg">
         <div class="flex justify-around items-center h-16 px-2">
-
-            <a href="#kategori" onclick="document.getElementById('kategori').scrollIntoView({behavior: 'smooth'})" class="mobile-nav-item flex flex-col items-center gap-1 text-gray-400 w-1/5 transition-colors">
-                <i class="ph ph-music-notes text-2xl"></i>
-                <span class="text-[10px] font-medium"><?= t('nav.categories', 'Kategori') ?></span>
+            <a href="#fitur" class="flex flex-col items-center gap-1 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
+                <i class="ph ph-lightning text-xl"></i>
+                <span class="text-[10px] font-medium">Fitur</span>
             </a>
-
-            <a href="#terbaru" onclick="document.getElementById('terbaru').scrollIntoView({behavior: 'smooth'})" class="mobile-nav-item flex flex-col items-center gap-1 text-gray-400 w-1/5 transition-colors">
-                <i class="ph ph-fire text-2xl"></i>
-                <span class="text-[10px] font-medium"><?= t('nav.popular', 'Populer') ?></span>
+            <a href="#cara-pasang" class="flex flex-col items-center gap-1 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
+                <i class="ph ph-wrench text-xl"></i>
+                <span class="text-[10px] font-medium">Pasang</span>
             </a>
-
-            <!-- Auth buttons - CENTER position -->
-            <?php if ($isLoggedIn): ?>
-            <a href="<?= $dashboardUrl ?>" class="flex flex-col items-center gap-1 text-brand-gold w-1/5 -mt-4">
-                <div class="w-12 h-12 bg-brand-gold rounded-full flex items-center justify-center text-brand-dark shadow-lg border-4 border-white dark:border-[#1A1A1D]">
-                    <i class="ph-fill ph-squares-four text-lg"></i>
-                </div>
-                <span class="text-[10px] font-medium"><?= t('auth.dashboard', 'Dashboard') ?></span>
+            <a href="#demo" class="flex flex-col items-center gap-1 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
+                <i class="ph ph-play-circle text-xl"></i>
+                <span class="text-[10px] font-medium">Demo</span>
             </a>
-            <?php else: ?>
-            <a href="/login/" class="flex flex-col items-center gap-1 text-brand-gold w-1/5 -mt-4">
-                <div class="w-12 h-12 bg-brand-gold rounded-full flex items-center justify-center text-brand-dark shadow-lg border-4 border-white dark:border-[#1A1A1D]">
-                    <i class="ph ph-user text-lg"></i>
-                </div>
-                <span class="text-[10px] font-medium"><?= t('auth.login', 'Masuk') ?></span>
-            </a>
-            <?php endif; ?>
-
-            <a href="#faq" onclick="document.getElementById('faq').scrollIntoView({behavior: 'smooth'})" class="mobile-nav-item flex flex-col items-center gap-1 text-gray-400 w-1/5 transition-colors">
-                <i class="ph ph-question text-2xl"></i>
-                <span class="text-[10px] font-medium">FAQ</span>
-            </a>
-
-            <a href="#testimoni" onclick="document.getElementById('testimoni').scrollIntoView({behavior: 'smooth'})" class="mobile-nav-item flex flex-col items-center gap-1 text-gray-400 w-1/5 transition-colors">
-                <i class="ph ph-chat-circle-text text-2xl"></i>
-                <span class="text-[10px] font-medium">Testimoni</span>
+            <a href="/install/" class="flex flex-col items-center gap-1 text-[var(--brand-primary)]">
+                <i class="ph ph-magic-wand text-xl"></i>
+                <span class="text-[10px] font-semibold">Wizard</span>
             </a>
         </div>
-    </div>
+    </nav>
 
-    <!-- Desktop Footer -->
-    <footer class="hidden md:block bg-white dark:bg-brand-card border-t border-gray-200 dark:border-gray-800 mt-12 pt-16 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                <!-- Brand Info -->
-                <div class="col-span-1 md:col-span-1">
-                    <div class="flex items-center gap-4 mb-6">
-                        <svg width="28" height="24" viewBox="0 0 28 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="0" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
-                            <rect x="6" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
-                            <rect x="12" y="0" width="3" height="24" rx="1.5" fill="#FFC107" />
-                            <rect x="18" y="4" width="3" height="16" rx="1.5" fill="#FFC107" />
-                            <rect x="24" y="7" width="3" height="10" rx="1.5" fill="#FFC107" />
-                        </svg>
-                        <span class="font-sans font-light text-xl tracking-[0.25em] text-gray-900 dark:text-white mt-1">MYAPP</span>
-                    </div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                        <?= t('footer.about_text', 'Platform streaming audio Islami terdepan. Misi kami adalah menghadirkan ketenangan hati melalui lantunan ayat suci, nasyid, dan kajian inspiratif ke dalam genggaman Anda.') ?>
-                    </p>
-                    <!-- Social Links -->
-                    <div class="flex gap-4">
-                        <a href="#" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-brand-gold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                            <i class="ph-fill ph-instagram-logo text-xl"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-brand-gold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                            <i class="ph-fill ph-twitter-logo text-xl"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-brand-gold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                            <i class="ph-fill ph-youtube-logo text-xl"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Links Group 1 -->
-                <div>
-                    <h4 class="font-bold text-gray-900 dark:text-white mb-6"><?= t('footer.company', 'Perusahaan') ?></h4>
-                    <ul class="space-y-4 text-sm text-gray-600 dark:text-gray-400">
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.about', 'Tentang Kami') ?></a></li>
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.careers', 'Karir') ?></a></li>
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.press', 'Berita & Pers') ?></a></li>
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.creators', 'Mitra Kreator') ?></a></li>
-                    </ul>
-                </div>
-
-                <!-- Links Group 2 -->
-                <div>
-                    <h4 class="font-bold text-gray-900 dark:text-white mb-6"><?= t('footer.community', 'Komunitas') ?></h4>
-                    <ul class="space-y-4 text-sm text-gray-600 dark:text-gray-400">
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= APP_DISPLAY_NAME ?> for Artists</a></li>
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.developers', 'Pengembang (API)') ?></a></li>
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.ads', 'Iklan') ?></a></li>
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.investors', 'Investor') ?></a></li>
-                    </ul>
-                </div>
-
-                <!-- Links Group 3 -->
-                <div>
-                    <h4 class="font-bold text-gray-900 dark:text-white mb-6"><?= t('footer.useful_links', 'Tautan Berguna') ?></h4>
-                    <ul class="space-y-4 text-sm text-gray-600 dark:text-gray-400">
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.help', 'Pusat Bantuan') ?></a></li>
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.android_app', 'Aplikasi Mobile Android') ?></a></li>
-                        <li><a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.ios_app', 'Aplikasi Mobile iOS') ?></a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Copyright -->
-            <div class="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
-                <div class="flex gap-6">
-                    <a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.legal', 'Legal') ?></a>
-                    <a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.privacy', 'Pusat Privasi') ?></a>
-                    <a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.privacy_policy', 'Kebijakan Privasi') ?></a>
-                    <a href="#" class="hover:text-brand-gold transition-colors"><?= t('footer.cookies', 'Cookie') ?></a>
-                </div>
-                <div>
-                    <?= t('footer.copyright', '&copy; 2026 ' . APP_DISPLAY_NAME . '. All rights reserved.') ?>
-                </div>
+    <footer class="bg-[var(--bg-secondary)] border-t border-[var(--border-default)] py-8 pb-24 md:pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[var(--text-muted)]">
+            <p>&copy; 2026 <?= APP_DISPLAY_NAME ?>. All rights reserved.</p>
+            <div class="flex gap-6">
+                <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="hover:text-[var(--brand-primary)] transition-colors">GitHub</a>
+                <a href="#" class="hover:text-[var(--brand-primary)] transition-colors">Dokumentasi</a>
+                <a href="#" class="hover:text-[var(--brand-primary)] transition-colors">Lisensi Apache 2.0</a>
             </div>
         </div>
     </footer>
 
     <script>
-        // DOM Elements
-        const htmlElement = document.documentElement;
-        const themeToggleBtns = [document.getElementById('themeToggleBtn'), document.getElementById('mobileThemeToggle')];
-
-        // Theme Handling
-        function initTheme() {
-            if (localStorage.theme === 'light') {
-                htmlElement.classList.remove('dark');
-            } else {
-                htmlElement.classList.add('dark');
-                localStorage.theme = 'dark';
-            }
-        }
-
-        function toggleTheme() {
-            if (htmlElement.classList.contains('dark')) {
-                htmlElement.classList.remove('dark');
-                localStorage.theme = 'light';
-            } else {
-                htmlElement.classList.add('dark');
-                localStorage.theme = 'dark';
-            }
-        }
-
-        themeToggleBtns.forEach(btn => {
-            if(btn) btn.addEventListener('click', toggleTheme);
-        });
-
-        // Mobile Nav Scroll Spy
-        const sectionIds = ['kategori', 'terbaru', 'premium', 'faq', 'testimoni'];
-
-        function updateMobileNavHighlight(activeId) {
-            const navItems = document.querySelectorAll('.mobile-nav-item');
-            navItems.forEach(item => {
-                item.classList.remove('text-brand-gold');
-                item.classList.add('text-gray-400');
-            });
-            const activeNav = document.querySelector(`.mobile-nav-item[href="#${activeId}"]`);
-            if (activeNav) {
-                activeNav.classList.add('text-brand-gold');
-                activeNav.classList.remove('text-gray-400');
-            }
-        }
-
-        const observerOptions = {
-            rootMargin: '-40% 0px -40% 0px',
-            threshold: 0
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    updateMobileNavHighlight(entry.target.id);
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('appDownloader', () => ({
+                appName: '',
+                appNameError: false,
+                server: '<?= $detectedServer ?>',
+                drive: '<?= $detectedDrive ?>',
+                drives: <?= json_encode(array_values($availableDrives)) ?>,
+                isSubmitted: false,
+                isChecking: false,
+                folderExists: false,
+                subPath() {
+                    return this.server === 'laragon' ? 'laragon\\www' : 'xampp\\htdocs';
+                },
+                fullTargetDir() {
+                    return this.drive + ':\\' + this.subPath() + '\\' + (this.appName.trim() || 'myapp');
+                },
+                fullCommand() {
+                    const targetDir = this.drive + ':\\' + this.subPath();
+                    const appName = this.appName.trim() || 'myapp';
+                    return `Set-Location -Path '${targetDir}'; npx -y degit iqbalmurtadho24/vibeforge ${appName}; if ($?) { Set-Location -Path '.\\${appName}' }`;
+                },
+                wizardUrl() {
+                    const name = this.appName.trim() || 'myapp';
+                    if (this.server === 'laragon') {
+                        return 'http://' + name + '.test/install/';
+                    }
+                    return 'http://localhost/' + name + '/public/install/';
+                },
+                sanitizeAppName() {
+                    // Hanya izinkan huruf, angka, underscore, hyphen
+                    // Hapus karakter yang tidak diizinkan
+                    this.appName = this.appName.replace(/[^a-zA-Z0-9_-]/g, '');
+                    // Cek apakah ada karakter yang dihapus (misal spasi, titik, koma)
+                    this.appNameError = /[^a-zA-Z0-9_-]/.test(this.appName);
+                },
+                init() {
+                    // Auto-refresh status folder setiap 4 detik jika belum ada
+                    setInterval(() => {
+                        if (this.isSubmitted && !this.folderExists && !this.isChecking && this.appName.trim()) {
+                            this.checkFolder();
+                        }
+                    }, 4000);
+                },
+                async checkFolder() {
+                    if (!this.appName.trim()) return;
+                    this.isChecking = true;
+                    try {
+                        const res = await fetch('/core/router.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                module: 'install',
+                                action: 'check_folder',
+                                drive: this.drive,
+                                serverType: this.server,
+                                projectName: this.appName.trim(),
+                                csrf_token: '<?= $csrfToken ?>'
+                            })
+                        });
+                        const data = await res.json();
+                        this.folderExists = data.exists || false;
+                    } catch(e) {
+                        this.folderExists = false;
+                    } finally {
+                        this.isChecking = false;
+                        this.isSubmitted = true;
+                    }
                 }
-            });
-        }, observerOptions);
-
-        sectionIds.forEach(id => {
-            const section = document.getElementById(id);
-            if (section) observer.observe(section);
+            }));
         });
 
+        const html = document.documentElement;
+        function initTheme() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            html.classList.toggle('dark', saved === 'dark');
+        }
+        document.getElementById('themeToggle')?.addEventListener('click', () => {
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
         initTheme();
+
+        // Copy Snippet Helper with fallback for non-secure contexts
+        async function copySnippet(btn, codeText) {
+            const originalHtml = btn.innerHTML;
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(codeText);
+                } else {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = codeText;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                }
+                btn.innerHTML = '<i class="ph ph-check text-green-400"></i> Tersalin!';
+            } catch(e) {
+                btn.innerHTML = '<i class="ph ph-warning text-red-400"></i> Gagal!';
+            } finally {
+                setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+            }
+        }
+
+        // Execute Terminal Helper via AJAX (downloads via npx degit & opens PowerShell inside project folder)
+        async function executeInteractiveTerminal(btn) {
+            const dataEl = document.getElementById('appDownloaderComponent');
+            if (!dataEl) return;
+            const state = Alpine.$data(dataEl);
+            const cmdText = state.fullCommand();
+
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i> Mengeksekusi...';
+
+            try {
+                const res = await fetch('/core/router.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        module: 'install',
+                        action: 'execute',
+                        drive: state.drive,
+                        serverType: state.server,
+                        projectName: state.appName.trim(),
+                        command: cmdText, // Gunakan fullCommand() yang berisi perintah download lengkap
+                        csrf_token: '<?= $csrfToken ?>'
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    btn.innerHTML = '<i class="ph ph-check-circle text-green-400"></i> Berhasil Dijalankan!';
+                } else {
+                    alert(data.error || 'Gagal membuka terminal');
+                    btn.innerHTML = originalHtml;
+                }
+            } catch(e) {
+                alert('Gagal membuka terminal.');
+                btn.innerHTML = originalHtml;
+            } finally {
+                setTimeout(() => { btn.disabled = false; btn.innerHTML = originalHtml; }, 3000);
+            }
+        }
+
+        // Open Folder Helper via AJAX
+        async function openFolderExplorer(btn) {
+            try {
+                const res = await fetch('/core/router.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        module: 'install',
+                        action: 'open_folder',
+                        folder: 'references',
+                        csrf_token: '<?= $csrfToken ?>'
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) alert(data.error || 'Gagal membuka folder');
+            } catch(e) {
+                alert('Gagal membuka folder.');
+            }
+        }
+
+        // Direct Login without redirection manually typing credentials
+        async function directLogin(event, form, targetUrl) {
+            event.preventDefault();
+            const btn = event.currentTarget;
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ph ph-circle-notch animate-spin text-base"></i> Memproses...';
+
+            try {
+                // Post request to router proxy /core/router.php
+                const response = await fetch('/core/router.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(new FormData(form)).toString()
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = targetUrl;
+                } else {
+                    alert(data.error || 'Login gagal');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Terjadi kesalahan jaringan atau server.');
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
     </script>
 </body>
 </html>

@@ -2,159 +2,195 @@
 
 ## 🔒 Security Commitment
 
-This project prioritizes security as a core requirement. We follow
-[OWASP ASVS Level 1-2](https://owasp.org/www-project-application-security-verification-standard/)
-as our minimum security baseline.
+Vibeforge takes security seriously. We follow **OWASP ASVS Level 1-2** as our minimum security baseline and implement defense-in-depth across all layers.
 
 ---
 
 ## 🚨 Reporting Security Vulnerabilities
 
-If you discover a security vulnerability within this framework, please follow these steps:
+**DO NOT create public GitHub issues for security vulnerabilities.**
 
-### 1. Private Disclosure
+Instead, please report via:
 
-**Do NOT** create a public GitHub issue for security vulnerabilities.
-Instead, please report directly to the project maintainer via private channels.
+| Channel | Details |
+|---------|---------|
+| **Email** | security@vibeforge.dev (or project maintainer) |
+| **PGP** | Available on request — encrypt sensitive details |
 
-### 2. Report Format
+### Report Format
+Please include:
+- **Type**: XSS, SQLi, CSRF, Auth Bypass, IDOR, RCE, etc.
+- **Location**: File path + line numbers (e.g., `core/router.php:142`)
+- **Reproduction**: Step-by-step instructions + PoC code
+- **Impact**: What an attacker could achieve
+- **Suggested Fix**: Optional but appreciated
 
-When reporting, please include:
-
-- **Type** of vulnerability (XSS, SQL Injection, CSRF, etc.)
-- **Full paths** of source file(s) that have the vulnerability
-- **Location** of the affected source code (line numbers)
-- **Step-by-step instructions** to reproduce the issue
-- **Proof-of-concept** or attack code (if possible)
-- **Suggested remediation** (optional)
-
-### 3. Response Timeline
-
-| Timeline | Action |
-|----------|--------|
-| Within 24 hours | Acknowledge receipt of your report |
-| Within 7 days | Initial response with status update |
-| Within 30 days | Detailed response with fix timeline |
-| As appropriate | Public acknowledgment (with your permission) |
+### Response Timeline
+| Timeframe | Action |
+|-----------|--------|
+| **24 hours** | Acknowledge receipt |
+| **72 hours** | Initial triage + severity assessment |
+| **7 days** | Fix timeline estimate |
+| **30 days** | Patch release (critical: sooner) |
+| **Release** | CVE request (if applicable) + public advisory |
 
 ---
 
 ## ✅ Security Checklist
 
-### For Developers
+### For Developers (Code Contributions)
 
-When contributing to this project, ensure:
+#### Authentication & Session
+- [ ] Password hashing: **Argon2ID** only (`password_hash(..., PASSWORD_ARGON2ID)`)
+- [ ] Session regeneration on login (`session_regenerate_id(true)`)
+- [ ] Secure cookie flags: `HttpOnly`, `Secure` (production), `SameSite=Lax/Strict`
+- [ ] Remember-me: selector + validator, per-device, invalidated on password change
+- [ ] Rate limiting on auth endpoints (IP + username, `core/ratelimit.php`)
 
-- [ ] **Password Hashing**: Always use `PASSWORD_ARGON2ID`
-- [ ] **CSRF Tokens**: Verify with `hash_equals()` on all POST requests
-- [ ] **SQL Injection**: Use prepared statements only
-- [ ] **XSS Prevention**: Escape output with `htmlspecialchars()`
-- [ ] **Session Security**: Regenerate session ID on login
-- [ ] **Rate Limiting**: Implement on all auth endpoints
-- [ ] **Input Validation**: Validate all user input server-side
+#### Input Validation & Output Encoding
+- [ ] **Never** trust `$_GET`, `$_POST`, `$_REQUEST`, `$_COOKIE` directly
+- [ ] Validate **server-side** (client-side is UX only)
+- [ ] Escape output: `htmlspecialchars($var, ENT_QUOTES, 'UTF-8')` → `escape()` helper
+- [ ] JSON context: `json_encode()` with `JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP`
+- [ ] URL context: `rawurlencode()`, `http_build_query()`
 
-### For Deployments
+#### Database (SQL Injection Prevention)
+- [ ] **Prepared statements only** — `Repo` layer enforces this
+- [ ] No string interpolation in queries (even for "safe" values)
+- [ ] JSON mode: validate/sanitize before write (no direct SQL risk but integrity matters)
 
-Before going to production:
+#### CSRF Protection
+- [ ] Token on **every** state-changing form (POST/PUT/DELETE)
+- [ ] Verify with `hash_equals()` (timing-safe)
+- [ ] Centralized in `core/router.php` + `core/csrf.php` — not per-file
 
-- [ ] Set `APP_ENV=production`
-- [ ] Set `APP_DEBUG=false`
-- [ ] Use MySQL (`DB_MODE=mysql`)
-- [ ] Generate strong cryptographic keys
-- [ ] Configure HTTPS (HttpOnly, Secure cookies)
-- [ ] Review `.htaccess` security rules
-- [ ] Disable directory listing
+#### XSS Prevention
+- [ ] CSP header via `.htaccess` (see `public/.htaccess`)
+- [ ] `escape()` / `t()` for all dynamic content
+- [ ] No `innerHTML` with untrusted data — use `textContent` or framework escaping
+
+#### File Uploads
+- [ ] MIME validation (`finfo_file()`, not extension)
+- [ ] Size limit (2MB default for logos)
+- [ ] Store outside document root (`docs/logo.png` is exception — read-only served)
+- [ ] Randomized filenames if user content
+
+#### Security Headers
+- [ ] CSP: `default-src 'self'`, allow CDN fonts/icons explicitly
+- [ ] `X-Frame-Options: SAMEORIGIN` (or `DENY`)
+- [ ] `X-Content-Type-Options: nosniff`
+- [ ] `Referrer-Policy: strict-origin-when-cross-origin`
+- [ ] `Permissions-Policy` (restrict camera/mic/geolocation)
+
+### For Deployments (Production)
+
+| Setting | Required Value |
+|---------|----------------|
+| `APP_ENV` | `production` |
+| `APP_DEBUG` | `false` |
+| `DB_MODE` | `mysql` (hard fail if missing) |
+| `APP_KEY` | 64-char hex (cryptographic) |
+| `CSRF_KEY` | 64-char hex |
+| `REMEMBER_ME_SECRET` | 128-char hex |
+| `SESSION_LIFETIME` | `3600` (1 hour) |
+| HTTPS | Enforced (HttpOnly + Secure cookies) |
+| `.htaccess` | Directory listing disabled, `.env`/`*.log`/`*.sql` blocked |
+
+**Generate keys:**
+```bash
+php -r "echo bin2hex(random_bytes(32)).PHP_EOL;"   # APP_KEY / CSRF_KEY
+php -r "echo bin2hex(random_bytes(64)).PHP_EOL;"   # REMEMBER_ME_SECRET
+```
 
 ---
 
-## 🛡️ Security Features
-
-### Implemented Protections
+## 🛡️ Implemented Protections
 
 | Feature | Status | Implementation |
 |---------|--------|----------------|
-| Password Hashing | ✅ | Argon2ID |
-| CSRF Protection | ✅ | Token + hash_equals() |
-| SQL Injection | ✅ | Prepared Statements |
-| XSS Prevention | ✅ | Output Escaping |
-| Session Hijacking | ✅ | Session Regeneration |
-| Rate Limiting | ✅ | Fixed-window, IP + email (`core/ratelimit.php`) |
-| Remember-Me | ✅ | Selector + Validator |
-| Clickjacking | ⚠️ | To be implemented |
+| Password Hashing | ✅ | Argon2ID (`core/auth.php`) |
+| CSRF Tokens | ✅ | Centralized (`core/csrf.php` + `core/router.php`) |
+| SQL Injection | ✅ | Prepared statements only (`core/Repo.php`) |
+| XSS (Output) | ✅ | `escape()` / `t()` helpers, CSP |
+| Session Hijacking | ✅ | Regenerate ID, secure cookies |
+| Rate Limiting | ✅ | Fixed-window IP+user (`core/ratelimit.php`) |
+| Remember-Me | ✅ | Selector/Validator, per-device |
+| Re-auth Middleware | ✅ | Sensitive actions require current password |
+| Clickjacking | ⚠️ | CSP `frame-ancestors 'self'` (`.htaccess`) |
+| Subresource Integrity | ❌ | Not yet (CDN resources) |
 
 ---
 
 ## 🔑 Security Configuration
 
-### Required Environment Variables
-
+### Required `.env` Variables (Production)
 ```env
-# Cryptographic keys (REQUIRED in production)
-APP_KEY=<64-char hex>
-CSRF_KEY=<64-char hex>
-REMEMBER_ME_SECRET=<128-char hex>
+# Cryptographic (generate fresh per deployment)
+APP_KEY=                    # 64 hex chars
+CSRF_KEY=                   # 64 hex chars
+REMEMBER_ME_SECRET=         # 128 hex chars
 
-# Environment (REQUIRED in production)
+# Environment
 APP_ENV=production
 APP_DEBUG=false
-```
+APP_URL=https://yourdomain.com
 
-### Recommended Production Settings
-
-```env
-# Database - "mysql" forces a hard fail (not a silent JSON fallback) if the
-# connection or a required table is missing. Use "auto" only while tables
-# are still being migrated incrementally (see CLAUDE.md Section 3g).
+# Database — force MySQL in production
 DB_MODE=mysql
+DB_HOST=127.0.0.1
+DB_NAME=vibeforge
+DB_USER=app_user
+DB_PASSWORD=strong_random_password
 
 # Session
-SESSION_LIFETIME=3600  # 1 hour
+SESSION_LIFETIME=3600
+SESSION_SECURE=true
+SESSION_HTTPONLY=true
+SESSION_SAMESITE=lax
 
 # Rate Limiting
 RATE_LIMIT_MAX_ATTEMPTS=10
-RATE_LIMIT_WINDOW=300  # 5 minutes
+RATE_LIMIT_WINDOW=300
+```
+
+### Development Overrides (`.env.local` or `.env` when `APP_ENV=development`)
+```env
+APP_ENV=development
+APP_DEBUG=true
+DB_MODE=auto        # or json
+SESSION_SECURE=false
 ```
 
 ---
 
-## 📋 Security Standards
+## 📋 Security Standards Compliance
 
-This project adheres to:
-
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [OWASP ASVS Level 1-2](https://owasp.org/www-project-application-security-verification-standard/)
-- [CWE](https://cwe.mitre.org/) (Common Weakness Enumeration)
-- [CVE](https://cve.mitre.org/) (if applicable)
+- **OWASP Top 10 2021** — Addressed (A01-A10)
+- **OWASP ASVS Level 1-2** — Baseline implemented
+- **CWE** — Common weakness patterns mitigated
+- **NIST SSDF** — Secure development practices
 
 ---
 
 ## 🔄 Security Updates
 
-Security updates will be released as patches when vulnerabilities are discovered.
-Users will be notified through:
+Security patches are released as:
+- **Patch version** (e.g., `v1.2.1`) for fixes
+- **CHANGELOG.md** — Security section lists CVEs/fixes
+- **GitHub Security Advisories** — For coordinated disclosure
 
-- Version bumps in CHANGELOG.md
-- Security section updates
+Subscribe to releases or watch the repo for notifications.
 
 ---
 
 ## 📞 Contact
 
-For security-related inquiries:
-- **Email**: [security@example.com](mailto:security@example.com)
-- **PGP Key**: [Available upon request]
+- **Security Email**: security@vibeforge.dev
+- **Maintainer**: [@iqbalmurtadho24](https://github.com/iqbalmurtadho24)
+- **PGP Key**: On request
+
+> **Disclaimer**: While we implement industry-standard protections, no software is 100% secure. Deployers are responsible for: keeping dependencies updated, configuring servers correctly, monitoring logs, and following security best practices for their environment.
 
 ---
 
-## ⚠️ Disclaimer
-
-While we strive to maintain the highest security standards, no software is
-completely secure. Users of this framework are responsible for:
-
-1. Keeping their deployments up to date
-2. Following security best practices
-3. Reporting vulnerabilities responsibly
-4. Configuring security settings appropriately for their use case
-
-The project maintainers are not liable for any damages resulting from
-security vulnerabilities, whether or not they are known.
+*Last updated: 2026-07-26 | Version: 1.0*

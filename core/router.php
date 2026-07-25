@@ -20,6 +20,17 @@ initSession();
 
 header('Content-Type: application/json');
 
+// Parse JSON request body if POST is empty (e.g. fetch JSON calls)
+if (empty($_POST) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $rawInput = file_get_contents('php://input');
+    if (!empty($rawInput)) {
+        $json = json_decode($rawInput, true);
+        if (is_array($json)) {
+            $_POST = $json;
+        }
+    }
+}
+
 $module = $_POST['module'] ?? $_GET['module'] ?? '';
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
@@ -38,11 +49,12 @@ if (!verifyCsrfToken($csrfToken)) {
 }
 
 $modulePath = ROOT_PATH . "/modules/{$module}/{$action}.php";
+$fallbackModulePath = ROOT_PATH . "/modules/{$module}/index.php";
 
-if (!file_exists($modulePath)) {
+if (!file_exists($modulePath) && !file_exists($fallbackModulePath)) {
     http_response_code(404);
     echo json_encode(['success' => false, 'error' => 'Module not found']);
     exit;
 }
 
-require $modulePath;
+require file_exists($modulePath) ? $modulePath : $fallbackModulePath;

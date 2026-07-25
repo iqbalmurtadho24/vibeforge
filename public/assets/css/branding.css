@@ -1,111 +1,159 @@
 /* =============================================================================
-   Brand Identity CSS Variables
-   =============================================================================
-   Sumber warna utama untuk seluruh landing page dan modul.
+   Vibeforge Brand Identity CSS Variables
+   Based on docs/branding.md
    Selector: <html data-theme="dark|light">
    ============================================================================= */
 
 /* Dark Theme (Default) */
 :root,
 [data-theme="dark"] {
-    /* Brand Colors */
-    --brand-gold: #FFC107;
-    --brand-gold-hover: #FFD54F;
-    --brand-gold-light: rgba(255, 193, 7, 0.1);
-    --brand-gold-glow: rgba(255, 193, 7, 0.3);
+    /* Brand Colors - Orange Fire */
+    --brand-primary: #F97316;
+    --brand-primary-hover: #EA580C;
+    --brand-primary-light: rgba(249, 115, 22, 0.1);
+    --brand-primary-glow: rgba(249, 115, 22, 0.3);
+    --brand-gradient: linear-gradient(135deg, #F97316 0%, #EAB308 100%);
 
     /* Dark Mode Backgrounds */
-    --bg-primary: #0A0A0C;
-    --bg-secondary: #0F0F11;
-    --bg-card: #121215;
-    --bg-surface: #1A1A1D;
-    --bg-hover: #232328;
+    --bg-primary: #0D1117;
+    --bg-secondary: #161B22;
+    --bg-card: #161B22;
+    --bg-surface: #1C2128;
+    --bg-hover: #21262D;
 
     /* Text Colors */
-    --text-primary: #FFFFFF;
-    --text-secondary: #8C8C8C;
-    --text-muted: #6B7280;
+    --text-primary: #F0F6FC;
+    --text-secondary: #8B949E;
+    --text-muted: #656D76;
 
     /* Border Colors */
-    --border-default: #1F2937;
-    --border-light: rgba(255, 255, 255, 0.1);
+    --border-default: #30363D;
+    --border-light: rgba(240, 246, 252, 0.1);
 
     /* Status Colors */
-    --status-success: #22C55E;
-    --status-danger: #EF4444;
-    --status-warning: #F59E0B;
+    --status-success: #3FB950;
+    --status-danger: #F85149;
+    --status-warning: #D29922;
+    --status-info: #58A6FF;
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
-    --shadow-gold: 0 0 30px rgba(255, 193, 7, 0.2);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 30px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 30px rgba(255, 107, 53, 0.25);
 }
 
 /* Light Theme */
 [data-theme="light"] {
-    /* Brand Colors */
-    --brand-gold: #FFC107;
-    --brand-gold-hover: #FFD54F;
-    --brand-gold-light: rgba(255, 193, 7, 0.1);
-    --brand-gold-glow: rgba(255, 193, 7, 0.3);
+    /* Brand Colors - Orange Fire */
+    --brand-primary: #F97316;
+    --brand-primary-hover: #EA580C;
+    --brand-primary-light: rgba(249, 115, 22, 0.08);
+    --brand-primary-glow: rgba(249, 115, 22, 0.2);
+    --brand-gradient: linear-gradient(135deg, #F97316 0%, #EAB308 100%);
 
     /* Light Mode Backgrounds */
-    --bg-primary: #F9FAFB;
-    --bg-secondary: #FFFFFF;
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F6F8FA;
     --bg-card: #FFFFFF;
-    --bg-surface: #F3F4F6;
-    --bg-hover: #E5E7EB;
+    --bg-surface: #F6F8FA;
+    --bg-hover: #F3F4F6;
 
     /* Text Colors */
-    --text-primary: #111827;
-    --text-secondary: #6B7280;
-    --text-muted: #9CA3AF;
+    --text-primary: #1F2328;
+    --text-secondary: #656D76;
+    --text-muted: #8B949E;
 
     /* Border Colors */
-    --border-default: #E5E7EB;
-    --border-light: rgba(0, 0, 0, 0.1);
+    --border-default: #D0D7DE;
+    --border-light: rgba(31, 35, 40, 0.1);
 
     /* Status Colors */
-    --status-success: #22C55E;
-    --status-danger: #EF4444;
-    --status-warning: #F59E0B;
+    --status-success: #1A7F37;
+    --status-danger: #CF222E;
+    --status-warning: #9A6700;
+    --status-info: #0969DA;
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
-    --shadow-gold: 0 0 30px rgba(255, 193, 7, 0.15);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 20px 30px rgba(0, 0, 0, 0.2);
+    --shadow-glow: 0 0 30px rgba(255, 107, 53, 0.15);
 }
 
 /* =============================================================================
-   CSS Custom Properties Usage Examples
+   Utility Classes
    ============================================================================= */
 
-/*
- * Background colors:
- * background-color: var(--bg-primary);
- * background-color: var(--bg-card);
- * background-color: var(--bg-surface);
- *
- * Text colors:
- * color: var(--text-primary);
- * color: var(--text-secondary);
- *
- * Brand accent:
- * color: var(--brand-gold);
- * background-color: var(--brand-gold-light);
- *
- * Borders:
- * border-color: var(--border-default);
- *
- * Shadows:
- * box-shadow: var(--shadow-lg);
- * box-shadow: var(--shadow-gold);
- *
- * Status:
- * color: var(--status-success);
- * color: var(--status-danger);
- */
+/* Brand Gradient Text */
+.text-gradient {
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Brand Colors */
+.text-brand { color: var(--brand-primary); }
+.bg-brand { background-color: var(--brand-primary); }
+.bg-brand-light { background-color: var(--brand-primary-light); }
+.border-brand { border-color: var(--brand-primary); }
+
+/* Status Colors */
+.text-success { color: var(--status-success); }
+.text-danger { color: var(--status-danger); }
+.text-warning { color: var(--status-warning); }
+.text-info { color: var(--status-info); }
+
+/* Glass Effect */
+.glass {
+    background: rgba(22, 27, 34, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* =============================================================================
+   Animations
+   ============================================================================= */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.animate-fade-in { animation: fadeIn 0.5s ease-out; }
+.animate-slide-up { animation: slideUp 0.6s ease-out; }
+.animate-pulse { animation: pulse 2s ease-in-out infinite; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+/* Scrollbar Styling */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
+
+/* Selection */
+::selection { background-color: var(--brand-primary); color: white; }
+
+/* Focus Ring */
+.focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--brand-primary-glow);
+}
