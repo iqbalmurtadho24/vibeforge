@@ -17,6 +17,7 @@ function Test-IsAdmin {
 # Auto-elevate jika belum admin (diperlukan untuk hosts file)
 if (-not (Test-IsAdmin)) {
     Write-Host "Meminta hak Administrator untuk mengupdate hosts file..." -ForegroundColor Yellow
+    # Menggunakan argumentlist untuk menjalankan script yang sama dengan hak admin
     Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
 }
@@ -173,5 +174,5 @@ if ($serverType -eq "Laragon") {
 }
 
 Write-Host "`nMembuka browser..." -ForegroundColor Cyan
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 5
 Start-Process "http://$domain"
