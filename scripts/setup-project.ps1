@@ -16,26 +16,29 @@ function Test-IsAdmin {
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-# Cek Administrator — WAJIB, jika tidak admin hentikan script
+# Cek Administrator — jika bukan admin, beri loading 3 detik lalu alihkan ke Administrator
 if (-not (Test-IsAdmin)) {
-    Write-Host "==========================================" -ForegroundColor Red
-    Write-Host "  HAK AKSES TIDAK MENCUKUPI" -ForegroundColor Red
-    Write-Host "==========================================" -ForegroundColor Red
+    Write-Host "==========================================" -ForegroundColor Yellow
+    Write-Host "  MEMERLUKAN HAK AKSES ADMINISTRATOR" -ForegroundColor Yellow
+    Write-Host "==========================================" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "Script ini memerlukan hak Administrator untuk:" -ForegroundColor Yellow
-    Write-Host "  - Update file Windows hosts (C:\Windows\System32\drivers\etc\hosts)" -ForegroundColor White
-    Write-Host "  - Restart service Apache" -ForegroundColor White
+    Write-Host "Script ini memerlukan hak Administrator untuk:" -ForegroundColor White
+    Write-Host "  - Update file Windows hosts (C:\Windows\System32\drivers\etc\hosts)" -ForegroundColor Gray
+    Write-Host "  - Restart service Apache" -ForegroundColor Gray
     Write-Host ""
-    Write-Host "Silakan jalankan ulang PowerShell sebagai Administrator:" -ForegroundColor Cyan
-    Write-Host "  1. Tutup jendela ini" -ForegroundColor White
-    Write-Host "  2. Klik kanan pada PowerShell / Terminal -> Run as Administrator" -ForegroundColor White
-    Write-Host "  3. Jalankan ulang script ini" -ForegroundColor White
+    Write-Host "Mengalihkan ke jendela Administrator dalam 3 detik..." -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "Atau dari terminal yang sudah ada:" -ForegroundColor Cyan
-    Write-Host "  Start-Process powershell -Verb RunAs" -ForegroundColor Gray
-    Write-Host ""
-    Read-Host "Tekan Enter untuk keluar"
-    exit 1
+
+    for ($i = 3; $i -gt 0; $i--) {
+        Write-Host "   [+] Mohon tunggu ($i detik)..." -ForegroundColor Yellow
+        Start-Sleep -Seconds 1
+    }
+
+    $scriptPath = $PSCommandPath
+    if (-not $scriptPath) { $scriptPath = $MyInvocation.MyCommand.Definition }
+
+    Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -NoProfile -File `"$scriptPath`" -Elevated" -Verb RunAs
+    exit 0
 }
 
 Write-Header "=========================================="
