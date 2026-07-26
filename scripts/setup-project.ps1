@@ -189,7 +189,7 @@ $apacheReloaded = $false
 
 if ($serverType -eq "Laragon") {
     # Cari executable httpd.exe di folder Laragon
-    $apacheBins = Get-ChildItem "$disk:\laragon\bin\apache\*\bin\httpd.exe" -ErrorAction SilentlyContinue
+    $apacheBins = Get-ChildItem "$($disk):\laragon\bin\apache\*\bin\httpd.exe" -ErrorAction SilentlyContinue
     if ($apacheBins) {
         $httpdPath = $apacheBins[0].FullName
         $apacheDir = $apacheBins[0].Directory.Parent.FullName
@@ -209,11 +209,11 @@ if ($serverType -eq "Laragon") {
         $apacheReloaded = $true
         Write-Host "Service XAMPP Apache berhasil di-reload!" -ForegroundColor Cyan
     } else {
-        $xamppHttpd = "$disk:\xampp\apache\bin\httpd.exe"
+        $xamppHttpd = "$($disk):\xampp\apache\bin\httpd.exe"
         if (Test-Path $xamppHttpd) {
             Get-Process httpd -ErrorAction SilentlyContinue | Stop-Process -Force
             Start-Sleep -Seconds 1
-            $xamppApacheDir = "$disk:\xampp\apache"
+            $xamppApacheDir = "$($disk):\xampp\apache"
             Start-Process -FilePath $xamppHttpd -ArgumentList '-d', "`"$xamppApacheDir`"" -WorkingDirectory $xamppApacheDir -WindowStyle Hidden
             $apacheReloaded = $true
             Write-Host "Proses XAMPP Apache berhasil di-reload!" -ForegroundColor Cyan
