@@ -3,9 +3,14 @@
 [CmdletBinding()]
 param()
 
-Write-Host "==========================================" -ForegroundColor Header
+# Fungsi helper untuk warna yang valid
+function Write-Header($text) {
+    Write-Host $text -ForegroundColor Yellow
+}
+
+Write-Header "=========================================="
 Write-Host "  Vibeforge Setup Wizard" -ForegroundColor White
-Write-Host "==========================================" -ForegroundColor Header
+Write-Header "=========================================="
 
 # 1. Pilih Local Disk
 $disk = Read-Host "Masukkan Local Disk (contoh: C, D, E)"
@@ -128,19 +133,32 @@ try {
     Write-Host "127.0.0.1 $domain" -ForegroundColor White
 }
 
-Write-Host "`n[4/5] Setup selesai!" -ForegroundColor Green
-Write-Host "==========================================" -ForegroundColor Header
+Write-Host "`n[4/5] Membuat file .env..." -ForegroundColor Green
+$envExamplePath = Join-Path $targetDir ".env.example"
+$envPath = Join-Path $targetDir ".env"
+
+if (Test-Path $envExamplePath) {
+    Copy-Item -Path $envExamplePath -Destination $envPath -Force
+    Write-Host "File .env berhasil dibuat!" -ForegroundColor Cyan
+} else {
+    Write-Warning "File .env.example tidak ditemukan di $targetDir."
+}
+
+Write-Header "=========================================="
 Write-Host "Proyek  : $appName" -ForegroundColor White
 Write-Host "Lokasi  : $targetDir" -ForegroundColor White
 Write-Host "URL App : http://$domain" -ForegroundColor Cyan
-Write-Host "==========================================" -ForegroundColor Header
+Write-Header "=========================================="
 
-# 5. Restart Apache
-Write-Host "`n[5/5] RESTART APACHE diperlukan agar perubahan berlaku:" -ForegroundColor Yellow
+# 5. Restart Apache & Buka Browser
+Write-Host "`n[5/5] MENYELESAIKAN..." -ForegroundColor Green
+Write-Host "PERINGATAN: WAJIB RESTART APACHE agar Virtual Host aktif!" -ForegroundColor Red
 if ($serverType -eq "Laragon") {
-    Write-Host "  - Buka Laragon → Menu → Apache → Reload" -ForegroundColor White
-    Write-Host "  - Atau klik kanan tray Laragon → Apache → Reload" -ForegroundColor White
+    Write-Host "  - Laragon: Menu -> Apache -> Reload" -ForegroundColor White
 } else {
-    Write-Host "  - Buka XAMPP Control Panel → Stop Apache → Start Apache" -ForegroundColor White
+    Write-Host "  - XAMPP: Stop Apache -> Start Apache" -ForegroundColor White
 }
-Write-Host "`nLalu buka browser: http://$domain" -ForegroundColor Cyan
+
+Write-Host "`nMembuka browser..." -ForegroundColor Cyan
+Start-Sleep -Seconds 2
+Start-Process "http://$domain"
