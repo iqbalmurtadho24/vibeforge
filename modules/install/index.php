@@ -56,6 +56,13 @@ switch ($action) {
         break;
 
     // -----------------------------------------------------------------------
+    // setup_vhost — create Laragon virtual host & update hosts file (auto-elevate)
+    // -----------------------------------------------------------------------
+    case 'setup_vhost':
+        handleSetupVhost($input);
+        break;
+
+    // -----------------------------------------------------------------------
     // clear_references — wipe references/*.html for redesign mode
     // -----------------------------------------------------------------------
     case 'clear_references':
@@ -272,7 +279,8 @@ function handleExecute(array $input): void
         // UTF-16LE + Base64 encode agar terhindar dari parser error tanda petik di level OS command line
         $encodedCommand = base64_encode(iconv('UTF-8', 'UTF-16LE', $innerCommand));
 
-        $cmd = 'powershell.exe -WindowStyle Hidden -Command "Start-Process powershell.exe -ArgumentList \'-NoExit\', \'-EncodedCommand\', \'' . $encodedCommand . '\'"';
+        // Tanpa -NoExit agar terminal menutup otomatis setelah script selesai
+        $cmd = 'powershell.exe -WindowStyle Hidden -Command "Start-Process powershell.exe -ArgumentList \'-EncodedCommand\', \'' . $encodedCommand . '\'"';
     } else {
         $cmd = 'powershell.exe -WindowStyle Hidden -Command "Start-Process powershell.exe -ArgumentList \'-NoExit\', \'-Command\', \'Set-Location -Path ' . $winTargetDir . '\'"';
     }
@@ -286,32 +294,52 @@ function handleExecute(array $input): void
     ]);
 }
 
-function handleClearReferences(): void
+function handleSetupVhost(array $input): void
 {
-    $refDir = ROOT_PATH . '/references';
-    $deletedCount = 0;
-
-    if (is_dir($refDir)) {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($refDir, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST
-        );
-
-        foreach ($iterator as $item) {
-            if ($item->isDir()) {
-                @rmdir($item->getPathname());
-            } else {
-                @unlink($item->getPathname());
-                $deletedCount++;
-            }
-        }
+    $projectName = trim($input['projectName'] ?? '');
+    if (empty($projectName)) {
+        echo json_encode(['success' => false, 'error' => 'Project name required']);
+        return;
     }
+
+    $domain = $projectName . '.test';
+    $vhostDir = 'D:/laragon/etc/apache2/sites-enabled';
+    $vhostFile = $vhostDir . "/auto.{$domain}.conf";
+
+    $vhostContentStr = "<VirtualHost *:80>\n" .
+        "    DocumentRoot \"D:/laragon/www/{$projectName}/public\"\n" .
+        "    ServerName {$domain}\n" .
+        "    ServerAlias *.{$domain}\n" .
+        "    <Directory \"D:/laragon/www/{$projectName}/public\">\n" .
+        "        AllowOverride All\n" .
+        "        Require all granted\n" .
+        "    </Directory>\n" .
+        "</VirtualHost>";
+
+    $innerCommand = "\$vhostContent = @'\n" . $vhostContentStr . "\n'@\n" .
+        "\$vhostFile = '{$vhostFile}'\n" .
+        "\$hostsFile = 'C:/Windows/System32/drivers/etc/hosts'\n" .
+        "[System.IO.File]::WriteAllText(\$vhostFile, \$vhostContent)\n" .
+        "\$hostsEntry = \"`r`n127.0.0.1`t{$domain}\"\n" .
+        "\$currentHosts = [System.IO.File]::ReadAllText(\$hostsFile)\n" .
+        "if (\$currentHosts -notlike \"*{$domain}*\") {\n" .
+        "    [System.IO.File]::AppendAllText(\$hostsFile, \$hostsEntry)\n" .
+        "}";
+
+    // UTF-16LE + Base64 encode
+    $encodedCommand = base64_encode(iconv('UTF-8', 'UTF-16LE', $innerCommand));
+
+    // Run with Start-Process -Verb RunAs to trigger UAC elevation
+    $cmd = "powershell.exe -WindowStyle Hidden -Command \"Start-Process powershell.exe -ArgumentList '-EncodedCommand', '$encodedCommand' -Verb RunAs\"";
+
+    pclose(popen("start /B " . $cmd, "r"));
 
     echo json_encode([
         'success' => true,
-        'deleted_count' => $deletedCount
+        'message' => "Virtual host for $domain created and hosts file updated."
     ]);
 }
+
 
 function handleListReferences(): void
 {

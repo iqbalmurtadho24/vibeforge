@@ -391,9 +391,9 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                                     </button>
                                 </template>
                                 <template x-if="folderExists">
-                                    <a :href="wizardUrl()" class="px-5 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1.5 whitespace-nowrap shadow-md glow-orange-sm">
+                                    <button type="button" @click="setupVirtualHost($el)" class="px-5 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1.5 whitespace-nowrap shadow-md glow-orange-sm">
                                         <i class="ph ph-magic-wand"></i> Masuk Setup Wizard <i class="ph ph-arrow-right"></i>
-                                    </a>
+                                    </button>
                                 </template>
                             </div>
                         </div>
@@ -697,7 +697,7 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                 fullCommand() {
                     const targetDir = this.drive + ':\\' + this.subPath();
                     const appName = this.appName.trim() || 'myapp';
-                    return `Set-Location -Path '${targetDir}'; npx -y degit iqbalmurtadho24/vibeforge ${appName}; if ($?) { Set-Location -Path '.\\${appName}'; Copy-Item -Path '.env.example' -Destination '.env' }`;
+                    return `Set-Location -Path '${targetDir}'; npx -y degit iqbalmurtadho24/vibeforge ${appName}; if ($?) { Set-Location -Path '.\\${appName}'; Copy-Item -Path '.env.example' -Destination '.env'; Exit }`;
                 },
                 wizardUrl() {
                     const name = this.appName.trim() || 'myapp';
@@ -815,6 +815,50 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                 }
             } catch(e) {
                 alert('Gagal membuka terminal.');
+                btn.innerHTML = originalHtml;
+            } finally {
+                setTimeout(() => { btn.disabled = false; btn.innerHTML = originalHtml; }, 3000);
+            }
+        }
+
+        // Setup Virtual Host Helper via AJAX
+        async function setupVirtualHost(btn) {
+            const dataEl = document.getElementById('appDownloaderComponent');
+            if (!dataEl) return;
+            const state = Alpine.$data(dataEl);
+            const appName = state.appName.trim() || 'myapp';
+            const targetUrl = 'http://' + appName + '.test/install/';
+
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i> Membuka terminal & tab baru...';
+
+            try {
+                // 1. Open new tab immediately
+                const newTab = window.open(targetUrl, '_blank');
+
+                // 2. Trigger PowerShell to setup vhost + hosts
+                const res = await fetch('/core/router.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        module: 'install',
+                        action: 'setup_vhost',
+                        projectName: appName,
+                        csrf_token: '<?= $csrfToken ?>'
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    btn.innerHTML = '<i class="ph ph-check-circle text-green-400"></i> Terminal dibuka, tab baru siap...';
+                } else {
+                    alert(data.error || 'Gagal mengaktifkan virtual host. Coba jalankan Laragon sebagai Administrator.');
+                    if (newTab) newTab.close();
+                    btn.innerHTML = originalHtml;
+                }
+            } catch(e) {
+                alert('Gagal mengaktifkan virtual host.');
                 btn.innerHTML = originalHtml;
             } finally {
                 setTimeout(() => { btn.disabled = false; btn.innerHTML = originalHtml; }, 3000);
