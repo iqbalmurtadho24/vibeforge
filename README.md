@@ -99,7 +99,31 @@ Repo::table('users')->delete($id);
 - **AI Coding CLI**: [Claude Code](https://code.claude.com) / Cursor / GitHub Copilot CLI
 - **VS Code** (disarankan: terminal + editor terintegrasi)
 
-### 1. Download Template
+### 1. Download Template & Setup Virtual Host (Interaktif)
+
+**Opsi A: Script Interaktif (Rekomendasi — otomatis tanya nama app + buat virtual host)**
+
+```bash
+# Laragon (Windows PowerShell)
+cd C:\laragon\www
+irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex
+
+# XAMPP (Windows PowerShell)
+cd C:\xampp\htdocs
+irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex
+```
+
+> Script akan menanyakan: **Nama aplikasi** (tanpa spasi, gunakan `_` atau `-`), **Server** (Laragon/XAMPP), lalu otomatis:
+> 1. Download template via `degit`
+> 2. Buat folder project
+> 3. **Setup Virtual Host** (Laragon: `nama_app.test` / XAMPP: `localhost/nama_app`)
+> 4. Restart Apache (Laragon) / instruksi restart XAMPP
+> 5. Buka folder di VS Code
+
+---
+
+**Opsi B: Manual (jika tidak ingin pakai script)**
+
 ```bash
 # Laragon
 cd C:\laragon\www
@@ -110,6 +134,10 @@ cd C:\xampp\htdocs
 # Unduh Vibeforge — GANTI nama_project_anda (tanpa spasi, gunakan _ atau -)
 npx -y degit iqbalmurtadho24/vibeforge nama_project_anda
 cd nama_project_anda
+
+# Lalu setup virtual host manual:
+# Laragon: Menu Laragon → Apache → Sites Enabled → Add `nama_project_anda.test` → Reload Apache
+# XAMPP: Edit C:\xampp\apache\conf\extra\httpd-vhosts.conf → tambah VirtualHost → restart Apache
 ```
 
 ### 2. Buka Setup Wizard (Opsional tapi Disarankan)
