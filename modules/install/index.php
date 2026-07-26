@@ -306,6 +306,11 @@ function handleSetupVhost(array $input): void
     $vhostDir = 'D:/laragon/etc/apache2/sites-enabled';
     $vhostFile = $vhostDir . "/auto.{$domain}.conf";
 
+    // Detect httpd.exe and Apache root directory automatically inside Laragon
+    $apacheBins = glob('D:/laragon/bin/apache/*/bin/httpd.exe');
+    $httpdPath = !empty($apacheBins) ? str_replace('/', '\\', $apacheBins[0]) : '';
+    $apacheDir = !empty($apacheBins) ? str_replace('/', '\\', dirname(dirname($apacheBins[0]))) : '';
+
     $vhostContentStr = "<VirtualHost *:80>\n" .
         "    DocumentRoot \"D:/laragon/www/{$projectName}/public\"\n" .
         "    ServerName {$domain}\n" .
@@ -316,15 +321,29 @@ function handleSetupVhost(array $input): void
         "    </Directory>\n" .
         "</VirtualHost>";
 
-    $innerCommand = "\$vhostContent = @'\n" . $vhostContentStr . "\n'@\n" .
-        "\$vhostFile = '{$vhostFile}'\n" .
-        "\$hostsFile = 'C:/Windows/System32/drivers/etc/hosts'\n" .
-        "[System.IO.File]::WriteAllText(\$vhostFile, \$vhostContent)\n" .
-        "\$hostsEntry = \"`r`n127.0.0.1`t{$domain}\"\n" .
-        "\$currentHosts = [System.IO.File]::ReadAllText(\$hostsFile)\n" .
-        "if (\$currentHosts -notlike \"*{$domain}*\") {\n" .
-        "    [System.IO.File]::AppendAllText(\$hostsFile, \$hostsEntry)\n" .
-        "}";
+    $innerCommand = "
+        \$domain = '{$domain}'
+        \$vhostContent = @'\n" . $vhostContentStr . "\n'@
+        \$vhostFile = '{$vhostFile}'
+        \$hostsFile = 'C:/Windows/System32/drivers/etc/hosts'
+
+        # Write vhost file
+        [System.IO.File]::WriteAllText(\$vhostFile, \$vhostContent)
+
+        # Update hosts file (requires admin)
+        \$hostsEntry = \"`r`n127.0.0.1`t{$domain}\"
+        \$currentHosts = [System.IO.File]::ReadAllText(\$hostsFile)
+        if (\$currentHosts -notlike \"*{$domain}*\") {
+            [System.IO.File]::AppendAllText(\$hostsFile, \$hostsEntry)
+        }
+
+        # Restart Apache standalone process with correct ServerRoot (-d)
+        Get-Process httpd -ErrorAction SilentlyContinue | Stop-Process -Force
+        Start-Sleep -Seconds 1
+        if ('{$httpdPath}' -ne '' -and (Test-Path '{$httpdPath}')) {
+            Start-Process -FilePath '{$httpdPath}' -ArgumentList '-d', '{$apacheDir}' -WorkingDirectory '{$apacheDir}' -WindowStyle Hidden
+        }
+    ";
 
     // UTF-16LE + Base64 encode
     $encodedCommand = base64_encode(iconv('UTF-8', 'UTF-16LE', $innerCommand));
@@ -336,7 +355,7 @@ function handleSetupVhost(array $input): void
 
     echo json_encode([
         'success' => true,
-        'message' => "Virtual host for $domain created and hosts file updated."
+        'message' => "Virtual host for $domain created, hosts updated, and Apache restarted."
     ]);
 }
 
