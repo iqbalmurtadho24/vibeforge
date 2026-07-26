@@ -1,7 +1,9 @@
 # Script Setup Proyek Vibeforge & Auto-VirtualHost
 
 [CmdletBinding()]
-param()
+param(
+    [switch]$Elevated
+)
 
 # Fungsi helper untuk warna yang valid
 function Write-Header($text) {
@@ -15,10 +17,10 @@ function Test-IsAdmin {
 }
 
 # Auto-elevate jika belum admin (diperlukan untuk hosts file)
-if (-not (Test-IsAdmin)) {
-    Write-Host "Meminta hak Administrator untuk mengupdate hosts file..." -ForegroundColor Yellow
-    # Menggunakan argumentlist untuk menjalankan script yang sama dengan hak admin
-    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+if (-not (Test-IsAdmin) -and -not $Elevated) {
+    Write-Host "Membuka jendela baru dengan hak Administrator untuk update file 'hosts'..." -ForegroundColor Yellow
+    # Jalankan script yang sama di jendela baru dengan flag -Elevated
+    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" -Elevated" -Verb RunAs
     exit
 }
 
@@ -30,6 +32,13 @@ Write-Header "=========================================="
 $disk = Read-Host "Masukkan Local Disk (contoh: C, D, E)"
 $disk = $disk.Trim().ToUpper()
 if (-not $disk) { $disk = "C" }
+
+# Cek apakah sudah running sebagai Administrator (diperlukan untuk hosts file)
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if (-not $isAdmin) {
+    Write-Host "`n! Berjalan TANPA hak Administrator. Update file 'hosts' akan dilewati." -ForegroundColor Yellow
+}
 
 # 2. Pilih Web Server
 $serverChoice = Read-Host "Pilih Web Server: [l] Laragon (default) | [x] XAMPP"
@@ -129,22 +138,27 @@ if ($serverType -eq "Laragon") {
     $domain = "$appName.test"
 }
 
-Write-Host "`n[3/5] Mengupdate file Windows hosts (127.0.0.1 $domain)..." -ForegroundColor Green
-$hostsPath = "C:\Windows\System32\drivers\etc\hosts"
-$hostsEntry = "127.0.0.1 $domain"
+# HANYA update hosts file jika berjalan sebagai Admin
+if (Test-IsAdmin) {
+    Write-Host "`n[3/5] Mengupdate file Windows hosts (127.0.0.1 $domain)..." -ForegroundColor Green
+    $hostsPath = "C:\Windows\System32\drivers\etc\hosts"
+    $hostsEntry = "127.0.0.1 $domain"
 
-try {
-    $hostsContent = Get-Content $hostsPath -ErrorAction Stop
-    if ($hostsContent -notcontains $hostsEntry -and ($hostsContent -match [regex]::Escape($domain)).Length -eq 0) {
-        Add-Content -Path $hostsPath -Value "`n$hostsEntry" -ErrorAction Stop
-        Write-Host "Domain $domain berhasil ditambahkan ke C:\Windows\System32\drivers\etc\hosts" -ForegroundColor Cyan
-    } else {
-        Write-Host "Domain $domain sudah ada di file hosts." -ForegroundColor Yellow
+    try {
+        $hostsContent = Get-Content $hostsPath -ErrorAction Stop
+        if ($hostsContent -notcontains $hostsEntry -and ($hostsContent -match [regex]::Escape($domain)).Length -eq 0) {
+            Add-Content -Path $hostsPath -Value "`n$hostsEntry" -ErrorAction Stop
+            Write-Host "Domain $domain berhasil ditambahkan ke C:\Windows\System32\drivers\etc\hosts" -ForegroundColor Cyan
+        } else {
+            Write-Host "Domain $domain sudah ada di file hosts." -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Warning "Gagal menulis ke file hosts."
+        Write-Host "Silakan tambahkan secara manual baris berikut ke file hosts Anda:" -ForegroundColor Yellow
+        Write-Host "127.0.0.1 $domain" -ForegroundColor White
     }
-} catch {
-    Write-Warning "Gagal menulis ke file hosts."
-    Write-Host "Silakan tambahkan secara manual baris berikut ke file hosts Anda:" -ForegroundColor Yellow
-    Write-Host "127.0.0.1 $domain" -ForegroundColor White
+} else {
+    Write-Host "`n[3/5] MELEWATI update file hosts (memerlukan hak Administrator)..." -ForegroundColor Yellow
 }
 
 Write-Host "`n[4/5] Membuat file .env..." -ForegroundColor Green
@@ -190,14 +204,57 @@ Write-Host "URL App : http://$domain" -ForegroundColor Cyan
 Write-Header "=========================================="
 
 # 5. Restart Apache & Buka Browser
-Write-Host "`n[5/5] MENYELESAIKAN..." -ForegroundColor Green
-Write-Host "PERINGATAN: WAJIB RESTART APACHE agar Virtual Host aktif!" -ForegroundColor Red
+Write-Host "`n[5/5] Reload Apache service..." -ForegroundColor Green
+
+$apacheReloaded = $false
+
 if ($serverType -eq "Laragon") {
-    Write-Host "  - Laragon: Menu -> Apache -> Reload" -ForegroundColor White
+    # Cek service httpd / httpd24.exe dari Laragon
+    $apacheProc = Get-Process -Name "httpd" -ErrorAction SilentlyContinue
+    if ($apacheProc) {
+        try {
+            # Restart service httpd jika berjalan sebagai service Windows
+            $service = Get-Service -Name "*apache*" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($service) {
+                Restart-Service -Name $service.Name -ErrorAction Stop
+                $apacheReloaded = $true
+                Write-Host "Service Apache ($($service.Name)) berhasil di-restart!" -ForegroundColor Cyan
+            } else {
+                # Alternatif: panggil httpd -k restart via executable
+                $httpdExe = Get-Command "httpd.exe" -ErrorAction SilentlyContinue
+                if ($httpdExe) {
+                    & $httpdExe.Source -k restart 2>$null
+                    $apacheReloaded = $true
+                    Write-Host "Apache berhasil di-reload via httpd.exe" -ForegroundColor Cyan
+                }
+            }
+        } catch {
+            Write-Warning "Gagal reload Apache secara otomatis: $_"
+        }
+    }
 } else {
-    Write-Host "  - XAMPP: Stop Apache -> Start Apache" -ForegroundColor White
+    # XAMPP Apache Service
+    $service = Get-Service -Name "Apache2.4" -ErrorAction SilentlyContinue
+    if ($service -and $service.Status -eq 'Running') {
+        try {
+            Restart-Service -Name "Apache2.4" -ErrorAction Stop
+            $apacheReloaded = $true
+            Write-Host "Service Apache XAMPP berhasil di-restart!" -ForegroundColor Cyan
+        } catch {
+            Write-Warning "Gagal restart service XAMPP Apache."
+        }
+    }
+}
+
+if (-not $apacheReloaded) {
+    Write-Host "PERINGATAN: Silakan reload Apache secara manual agar Virtual Host aktif!" -ForegroundColor Yellow
+    if ($serverType -eq "Laragon") {
+        Write-Host "  - Laragon: Menu -> Apache -> Reload" -ForegroundColor White
+    } else {
+        Write-Host "  - XAMPP: Stop Apache -> Start Apache" -ForegroundColor White
+    }
 }
 
 Write-Host "`nMembuka browser..." -ForegroundColor Cyan
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 3
 Start-Process "http://$domain"
