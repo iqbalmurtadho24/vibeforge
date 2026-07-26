@@ -8,6 +8,19 @@ function Write-Header($text) {
     Write-Host $text -ForegroundColor Yellow
 }
 
+# Cek apakah sudah running sebagai Administrator
+function Test-IsAdmin {
+    $principal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+# Auto-elevate jika belum admin (diperlukan untuk hosts file)
+if (-not (Test-IsAdmin)) {
+    Write-Host "Meminta hak Administrator untuk mengupdate hosts file..." -ForegroundColor Yellow
+    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
 Write-Header "=========================================="
 Write-Host "  Vibeforge Setup Wizard" -ForegroundColor White
 Write-Header "=========================================="
@@ -128,7 +141,7 @@ try {
         Write-Host "Domain $domain sudah ada di file hosts." -ForegroundColor Yellow
     }
 } catch {
-    Write-Warning "Tidak dapat menulis ke C:\Windows\System32\drivers\etc\hosts (butuh privilege Administrator)."
+    Write-Warning "Gagal menulis ke file hosts."
     Write-Host "Silakan tambahkan secara manual baris berikut ke file hosts Anda:" -ForegroundColor Yellow
     Write-Host "127.0.0.1 $domain" -ForegroundColor White
 }
