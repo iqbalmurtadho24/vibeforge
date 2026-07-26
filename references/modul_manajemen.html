@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id" class="dark" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,7 +48,7 @@
 <body class="antialiased h-screen flex flex-col overflow-hidden tech-grid bg-[var(--bg-primary)]">
 
 <div class="flex flex-1 overflow-hidden">
-    <!-- Sidebar -->
+    <!-- Desktop Sidebar -->
     <aside class="hidden md:flex flex-col w-64 bg-gray-950 border-r border-[var(--border-default)] shrink-0 font-mono">
         <div class="h-16 flex items-center px-6 border-b border-[var(--border-default)]">
             <a href="/" class="flex items-center gap-3 group">
@@ -62,7 +62,7 @@
             </a>
         </div>
         <nav class="flex-1 py-4 px-3 space-y-1 text-xs">
-            <button onclick="nav('dashboard')" id="s-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-orange-500/10 text-[var(--brand-primary)] border border-orange-500/20 transition-all"><i class="ph-fill ph-squares-four text-lg"></i> Dashboard</button>
+            <button onclick="nav('dashboard')" id="s-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 transition-all"><i class="ph-fill ph-squares-four text-lg"></i> Dashboard</button>
             <button onclick="nav('users')" id="s-users" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-users text-lg"></i> Users & Roles</button>
             <button onclick="nav('system')" id="s-system" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-gear text-lg"></i> System Specs</button>
             <button onclick="nav('profile')" id="s-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-user text-lg"></i> Profil</button>
@@ -78,49 +78,44 @@
         </div>
     </aside>
 
-    <!-- Main -->
+    <!-- Main Content Area -->
     <main class="flex-1 flex flex-col overflow-hidden">
         <header class="h-16 flex items-center justify-between px-6 bg-gray-950/80 border-b border-[var(--border-default)] shrink-0 font-mono text-xs">
             <div class="flex items-center gap-3">
-                <h1 id="pageTitle" class="font-heading font-extrabold text-sm text-white tracking-wide uppercase">// DASHBOARD</h1>
-                <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px]">LIVE_METRICS</span>
+                <h1 id="pageTitle" class="font-heading font-extrabold text-sm text-white tracking-wide uppercase">// DASHBOARD MANAJEMEN</h1>
+                <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[10px]">LIVE_METRICS</span>
             </div>
             <div class="flex items-center gap-3">
                 <!-- Language Selector -->
                 <div class="relative group" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-orange-500 transition-colors text-xs" aria-label="Change Language">
+                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-purple-500 transition-colors text-xs" aria-label="Change Language">
                         <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="id" class="w-4 h-3 rounded-sm">
                         <span class="hidden sm:inline uppercase font-bold text-gray-300">id</span>
                         <i class="ph ph-caret-down text-xs text-gray-500"></i>
                     </button>
                     <div x-show="open" x-transition class="absolute right-0 mt-1 bg-gray-900 rounded-xl shadow-2xl border border-gray-800 py-1 min-w-[150px] z-50 text-xs">
-                        <a href="?lang=id" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-orange-400 font-bold bg-orange-500/10">
+                        <a href="?lang=id" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-purple-400 font-bold bg-purple-500/10">
                             <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> Bahasa Indonesia
                         </a>
                         <a href="?lang=en" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-gray-300">
                             <img src="/assets/flags/en.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> English
                         </a>
-                        <a href="?lang=ja" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-gray-300">
-                            <img src="/assets/flags/ja.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> 日本語
-                        </a>
-                        <a href="?lang=ar" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-gray-300">
-                            <img src="/assets/flags/ar.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> العربية
-                        </a>
                     </div>
                 </div>
 
                 <button id="themeToggle" class="p-2 hover:bg-gray-800 rounded-lg text-amber-400" aria-label="Toggle theme"><i class="ph ph-moon text-base"></i></button>
-                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400" title="Keluar"><i class="ph ph-sign-out text-base"></i></a>
+                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400" title="Logout"><i class="ph ph-sign-out text-base"></i></a>
             </div>
         </header>
+
         <div id="content" class="flex-1 overflow-y-auto p-6 pb-24 md:pb-6 font-sans"></div>
     </main>
 </div>
 
-<!-- Mobile Nav -->
+<!-- Mobile Bottom Navigation -->
 <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 z-50 font-mono text-xs">
     <div class="flex justify-around items-center h-16">
-        <button onclick="nav('dashboard')" class="flex flex-col items-center gap-1 text-orange-400" id="m-dashboard"><i class="ph-fill ph-squares-four text-xl"></i><span class="text-[9px]">Dashboard</span></button>
+        <button onclick="nav('dashboard')" class="flex flex-col items-center gap-1 text-purple-400" id="m-dashboard"><i class="ph-fill ph-squares-four text-xl"></i><span class="text-[9px]">Dashboard</span></button>
         <button onclick="nav('users')" class="flex flex-col items-center gap-1 text-gray-400" id="m-users"><i class="ph ph-users text-xl"></i><span class="text-[9px]">Users</span></button>
         <button onclick="nav('system')" class="flex flex-col items-center gap-1 text-gray-400" id="m-system"><i class="ph ph-gear text-xl"></i><span class="text-[9px]">System</span></button>
         <button onclick="nav('profile')" class="flex flex-col items-center gap-1 text-gray-400" id="m-profile"><i class="ph ph-user text-xl"></i><span class="text-[9px]">Profil</span></button>
@@ -131,177 +126,195 @@
 const V = {
     dashboard: `
         <div class="space-y-6">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber font-mono space-y-2">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white">Selamat Datang, Super Admin!</h2>
+                    <span class="px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-bold">MANAJEMEN LEVEL</span>
+                </div>
+                <p class="text-xs text-gray-400 font-sans">Ringkasan kesehatan sistem, metrik repositori dual-engine, dan aktivitas pengguna.</p>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-gray-400 uppercase font-bold">Total Users</span>
+                    <div class="flex items-center justify-between text-gray-400">
+                        <span>Total Users</span>
                         <i class="ph ph-users text-purple-400 text-xl"></i>
                     </div>
-                    <p class="text-3xl font-extrabold text-white">3</p>
-                    <span class="text-[10px] text-emerald-400 flex items-center gap-1"><i class="ph ph-trend-up"></i> Active System Accounts</span>
+                    <p class="text-2xl font-bold text-white">3</p>
+                    <span class="text-[10px] text-emerald-400">1 Manajemen · 1 Admin · 1 Client</span>
                 </div>
+
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-gray-400 uppercase font-bold">Data Engine</span>
+                    <div class="flex items-center justify-between text-gray-400">
+                        <span>Repo Engine Mode</span>
                         <i class="ph ph-database text-amber-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-extrabold text-amber-400">JSON/SQL</p>
-                    <span class="text-[10px] text-gray-400">Auto-Switch Dual Engine</span>
+                    <p class="text-2xl font-bold text-amber-400">AUTO</p>
+                    <span class="text-[10px] text-gray-400">SQL detected / JSON Fallback</span>
                 </div>
+
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-gray-400 uppercase font-bold">Security Grade</span>
+                    <div class="flex items-center justify-between text-gray-400">
+                        <span>Security Level</span>
                         <i class="ph ph-shield-check text-emerald-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-extrabold text-emerald-400">Argon2ID</p>
-                    <span class="text-[10px] text-gray-400">OWASP ASVS Compliant</span>
+                    <p class="text-2xl font-bold text-emerald-400">ASVS-2</p>
+                    <span class="text-[10px] text-gray-400">Argon2ID + CSRF Active</span>
                 </div>
+
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-gray-400 uppercase font-bold">Environment</span>
-                        <i class="ph ph-code text-indigo-400 text-xl"></i>
+                    <div class="flex items-center justify-between text-gray-400">
+                        <span>Audit Trail Log</span>
+                        <i class="ph ph-list-bullets text-indigo-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-extrabold text-indigo-400">DEV_MODE</p>
-                    <span class="text-[10px] text-gray-400">PHP 8.3+ Native</span>
+                    <p class="text-2xl font-bold text-white">128</p>
+                    <span class="text-[10px] text-indigo-400">Append-Only Active</span>
                 </div>
             </div>
 
-            <!-- Setup Wizard CTA Banner -->
-            <div class="bg-gradient-brand rounded-2xl p-6 text-white shadow-xl glow-box-cyber font-mono">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
-                            <i class="ph ph-magic-wand text-2xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-heading font-extrabold text-lg">Setup Wizard Vibeforge</h3>
-                            <p class="text-white/80 text-xs font-sans">Siapkan proyek baru dengan AI assistant dalam hitungan menit.</p>
-                        </div>
-                    </div>
-                    <a href="/install/" class="px-6 py-3 bg-gray-950 text-orange-400 font-bold text-xs rounded-xl hover:bg-gray-900 transition-colors shadow-lg flex items-center gap-2 shrink-0">
-                        <i class="ph ph-rocket-launch text-base"></i> LAUNCH WIZARD (12 STEPS)
-                    </a>
-                </div>
-            </div>
-
-            <!-- Security Specs Grid -->
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 space-y-4 glow-box-cyber font-mono">
-                <h3 class="font-bold text-xs uppercase text-orange-400 flex items-center gap-2">
-                    <i class="ph ph-shield-check text-base"></i> Fitur Keamanan & Arsitektur Vibeforge
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber space-y-4">
+                <h3 class="font-mono font-bold text-sm text-white flex items-center gap-2">
+                    <i class="ph ph-activity text-purple-400"></i> SYSTEM LOG & AUDIT TRAIL
                 </h3>
-                <div class="grid md:grid-cols-2 gap-4 text-xs font-sans">
-                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800">
-                        <p class="font-bold font-mono text-orange-400 mb-1">Argon2ID Password Hashing</p>
-                        <p class="text-gray-400 text-xs leading-relaxed">Password di-hash dengan PASSWORD_ARGON2ID untuk keamanan tingkat tinggi melawan serangan GPU/ASIC brute-force.</p>
-                    </div>
-                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800">
-                        <p class="font-bold font-mono text-orange-400 mb-1">CSRF Protection</p>
-                        <p class="text-gray-400 text-xs leading-relaxed">Token CSRF terpusat di core/router.php yang diverifikasi via hash_equals() timing-safe comparison.</p>
-                    </div>
-                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800">
-                        <p class="font-bold font-mono text-orange-400 mb-1">Rate Limiting</p>
-                        <p class="text-gray-400 text-xs leading-relaxed">Proteksi brute-force login berbasis kombinasi IP address dan Username dengan windowing fixed-time.</p>
-                    </div>
-                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800">
-                        <p class="font-bold font-mono text-orange-400 mb-1">Dual-Mode Repo Access</p>
-                        <p class="text-gray-400 text-xs leading-relaxed">Repo::table('entitas') secara otomatis berpindah antara MySQL PDO dan JSON storage secara transparan.</p>
-                    </div>
+                <div class="bg-gray-900 rounded-xl border border-gray-800 p-4 font-mono text-xs text-gray-300 space-y-2 overflow-x-auto">
+                    <div class="text-emerald-400">[2026-07-27 10:14:02] LOGIN_SUCCESS - admin@app.com (Role: manajemen) via IP 127.0.0.1</div>
+                    <div class="text-gray-400">[2026-07-27 09:30:15] REPO_INIT - Dual-engine switch evaluated: JSON storage fallback active</div>
+                    <div class="text-amber-400">[2026-07-27 08:12:00] SECURITY_AUDIT - Argon2ID verification check passed</div>
                 </div>
             </div>
         </div>
     `,
     users: `
-        <div class="space-y-6 font-mono">
-            <h2 class="text-xl font-bold uppercase text-white">// Daftar Pengguna & Akses Role</h2>
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 overflow-x-auto glow-box-cyber">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-gray-900 text-gray-400 border-b border-gray-800">
-                        <tr>
-                            <th class="px-6 py-3 font-bold uppercase">User</th>
-                            <th class="px-6 py-3 font-bold uppercase">Email</th>
-                            <th class="px-6 py-3 font-bold uppercase">Role</th>
-                            <th class="px-6 py-3 font-bold uppercase">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-800 text-gray-300">
-                        <tr class="hover:bg-gray-900/50 transition-colors">
-                            <td class="px-6 py-4 flex items-center gap-3 font-bold text-white">
-                                <div class="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-xs">S</div>
-                                Super Admin
-                            </td>
-                            <td class="px-6 py-4 text-gray-400">admin@app.com</td>
-                            <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">MANAJEMEN</span></td>
-                            <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ACTIVE</span></td>
-                        </tr>
-                        <tr class="hover:bg-gray-900/50 transition-colors">
-                            <td class="px-6 py-4 flex items-center gap-3 font-bold text-white">
-                                <div class="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400 font-bold text-xs">A</div>
-                                Admin Creator
-                            </td>
-                            <td class="px-6 py-4 text-gray-400">admin@app.id</td>
-                            <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">ADMIN (CREATOR)</span></td>
-                            <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ACTIVE</span></td>
-                        </tr>
-                        <tr class="hover:bg-gray-900/50 transition-colors">
-                            <td class="px-6 py-4 flex items-center gap-3 font-bold text-white">
-                                <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs">C</div>
-                                Client User
-                            </td>
-                            <td class="px-6 py-4 text-gray-400">client@app.com</td>
-                            <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">CLIENT</span></td>
-                            <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ACTIVE</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div class="space-y-6">
+            <div class="flex items-center justify-between font-mono">
+                <div>
+                    <h2 class="text-lg font-bold text-white">User & Role Management (RBAC)</h2>
+                    <p class="text-xs text-gray-400">Kelola daftar akun pengguna dan hak akses shell.</p>
+                </div>
+                <button class="px-4 py-2 bg-purple-500/20 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-purple-500/30 transition-colors">
+                    <i class="ph ph-user-plus text-sm"></i> Tambah User
+                </button>
+            </div>
+
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 overflow-hidden glow-box-cyber font-mono text-xs">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-800 bg-gray-900/60 text-gray-400">
+                                <th class="p-4">User ID</th>
+                                <th class="p-4">Nama User</th>
+                                <th class="p-4">Email</th>
+                                <th class="p-4">Role Shell</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800/60 text-gray-300">
+                            <tr>
+                                <td class="p-4 font-mono text-purple-400 font-bold">usr_001</td>
+                                <td class="p-4 font-bold text-white">Super Admin</td>
+                                <td class="p-4">admin@app.com</td>
+                                <td class="p-4"><span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30 text-[10px]">manajemen</span></td>
+                                <td class="p-4"><span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active</span></td>
+                                <td class="p-4 text-right"><button class="text-gray-400 hover:text-white"><i class="ph ph-pencil-simple text-base"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 font-mono text-orange-400 font-bold">usr_002</td>
+                                <td class="p-4 font-bold text-white">Admin Creator</td>
+                                <td class="p-4">admin@app.id</td>
+                                <td class="p-4"><span class="px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30 text-[10px]">admin</span></td>
+                                <td class="p-4"><span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active</span></td>
+                                <td class="p-4 text-right"><button class="text-gray-400 hover:text-white"><i class="ph ph-pencil-simple text-base"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 font-mono text-emerald-400 font-bold">usr_003</td>
+                                <td class="p-4 font-bold text-white">Client User</td>
+                                <td class="p-4">client@app.com</td>
+                                <td class="p-4"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px]">client</span></td>
+                                <td class="p-4"><span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active</span></td>
+                                <td class="p-4 text-right"><button class="text-gray-400 hover:text-white"><i class="ph ph-pencil-simple text-base"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     `,
     system: `
-        <div class="space-y-6 max-w-2xl font-mono text-xs">
-            <h2 class="text-xl font-bold uppercase text-white">// Sistem & Environment Config</h2>
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 divide-y divide-gray-800 glow-box-cyber">
-                <div class="p-4 flex justify-between"><span class="text-gray-400">APP_DISPLAY_NAME</span><span class="font-bold text-white">Vibeforge</span></div>
-                <div class="p-4 flex justify-between"><span class="text-gray-400">APP_ENV</span><span class="font-bold text-amber-400">development</span></div>
-                <div class="p-4 flex justify-between"><span class="text-gray-400">DB_MODE</span><span class="font-bold text-orange-400">auto (SQL/JSON)</span></div>
-                <div class="p-4 flex justify-between"><span class="text-gray-400">Data Storage</span><span class="font-bold text-gray-300">data/*.json</span></div>
-                <div class="p-4 flex justify-between"><span class="text-gray-400">PHP Version</span><span class="font-bold text-emerald-400">8.3+ Native</span></div>
+        <div class="space-y-6 font-mono text-xs">
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber space-y-4">
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="ph ph-cpu text-purple-400 text-lg"></i> SYSTEM SPECIFICATIONS & STATUS
+                </h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
+                        <span class="text-gray-400">PHP Runtime</span>
+                        <p class="text-sm font-bold text-white">PHP 8.3+ Native (CLI/FPM)</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
+                        <span class="text-gray-400">Repo Data Layer</span>
+                        <p class="text-sm font-bold text-amber-400">Auto-Switch Dual-Engine (PDO SQL / JSON)</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
+                        <span class="text-gray-400">Password Hashing Algorithm</span>
+                        <p class="text-sm font-bold text-emerald-400">Argon2ID (m=65536, t=4, p=1)</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
+                        <span class="text-gray-400">Routing Paradigm</span>
+                        <p class="text-sm font-bold text-indigo-400">SPA Shell Proxy Pattern (/core/router.php)</p>
+                    </div>
+                </div>
             </div>
         </div>
     `,
     profile: `
         <div class="max-w-xl space-y-6 font-mono text-xs">
-            <h2 class="text-xl font-bold uppercase text-white">// Profil Super Admin</h2>
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 text-center glow-box-cyber space-y-3">
-                <div class="w-20 h-20 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 text-2xl font-bold mx-auto shadow-lg">SA</div>
-                <h3 class="text-lg font-bold text-white">Super Admin</h3>
-                <p class="text-gray-400">admin@app.com</p>
-                <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">MANAJEMEN ROLE</span>
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber space-y-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-xl">SA</div>
+                    <div>
+                        <h2 class="text-base font-bold text-white">Super Admin</h2>
+                        <p class="text-gray-400">admin@app.com</p>
+                        <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30 text-[10px] uppercase font-bold mt-1 inline-block">Role: manajemen</span>
+                    </div>
+                </div>
             </div>
-            <a href="/logout/" class="flex items-center justify-center gap-2 py-3.5 bg-red-500/10 text-red-400 border border-red-500/30 font-bold rounded-xl hover:bg-red-500/20 transition-colors"><i class="ph ph-sign-out text-base"></i> LOGOUT SYSTEM</a>
         </div>
     `
 };
 
-function nav(p) {
-    document.getElementById('content').innerHTML = V[p] || V.dashboard;
-    document.getElementById('pageTitle').textContent = {dashboard:'// DASHBOARD',users:'// USERS & ROLES',system:'// SYSTEM SPECS',profile:'// PROFIL'}[p]||'// DASHBOARD';
-    ['dashboard','users','system','profile'].forEach(k => {
-        const d = document.getElementById('s-'+k);
-        const m = document.getElementById('m-'+k);
-        if(d) {
-            if(k===p) { d.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-orange-500/10 text-[var(--brand-primary)] border border-orange-500/20 transition-all'; }
-            else { d.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors'; }
-        }
-        if(m) {
-            if(k===p) { m.className='flex flex-col items-center gap-1 text-orange-400'; }
-            else { m.className='flex flex-col items-center gap-1 text-gray-400'; }
-        }
+function nav(key) {
+    const titles = {
+        dashboard: '// DASHBOARD MANAJEMEN',
+        users: '// USER & ROLE MANAGEMENT',
+        system: '// SYSTEM SPECIFICATIONS',
+        profile: '// PROFIL SUPER ADMIN'
+    };
+    document.getElementById('pageTitle').innerText = titles[key] || '// DASHBOARD';
+    document.getElementById('content').innerHTML = V[key] || V.dashboard;
+
+    ['dashboard', 'users', 'system', 'profile'].forEach(k => {
+        const d = document.getElementById(`s-${k}`);
+        const m = document.getElementById(`m-${k}`);
+        if (d) d.className = (k === key) ? 'w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 transition-all' : 'w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors';
+        if (m) m.className = (k === key) ? 'flex flex-col items-center gap-1 text-purple-400' : 'flex flex-col items-center gap-1 text-gray-400';
     });
 }
-const html=document.documentElement;
-document.getElementById('themeToggle')?.addEventListener('click',()=>{const d=html.classList.toggle('dark');localStorage.setItem('theme',d?'dark':'light')});
-(()=>{const s=localStorage.getItem('theme')||'dark';html.classList.toggle('dark',s==='dark')})();
 nav('dashboard');
+
+const html = document.documentElement;
+function initTheme() {
+    const saved = localStorage.getItem('theme') || 'dark';
+    html.classList.toggle('dark', saved === 'dark');
+    html.setAttribute('data-theme', saved);
+}
+document.getElementById('themeToggle')?.addEventListener('click', () => {
+    const isDark = html.classList.toggle('dark');
+    const mode = isDark ? 'dark' : 'light';
+    html.setAttribute('data-theme', mode);
+    localStorage.setItem('theme', mode);
+});
+initTheme();
 </script>
 </body>
 </html>

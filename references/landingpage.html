@@ -62,22 +62,22 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased tech-grid bg-[var(--bg-primary)]">
 
-    <!-- Top Status Bar (IT Professional Touch) -->
-    <div class="bg-[var(--bg-secondary)] border-b border-[var(--border-default)] py-1 px-4 text-[11px] font-mono text-[var(--text-secondary)] hidden sm:flex items-center justify-between z-50">
+    <!-- Top Status Bar (Developer Engine Metrics) -->
+    <div class="bg-gray-950 border-b border-[var(--border-default)] py-1.5 px-4 text-[11px] font-mono text-[var(--text-secondary)] hidden sm:flex items-center justify-between z-50">
         <div class="flex items-center gap-4">
             <span class="flex items-center gap-1.5 text-emerald-400">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 SYSTEM: ONLINE
             </span>
-            <span class="text-[var(--border-default)]">|</span>
+            <span class="text-gray-700">|</span>
             <span>PHP 8.3+ Native</span>
-            <span class="text-[var(--border-default)]">|</span>
+            <span class="text-gray-700">|</span>
             <span>Architecture: SPA Shell Proxy</span>
         </div>
         <div class="flex items-center gap-4">
             <span>Repo Mode: Dual-Engine (Auto SQL/JSON)</span>
-            <span class="text-[var(--border-default)]">|</span>
-            <span class="text-[var(--brand-primary)]">v3.2.0-STABLE</span>
+            <span class="text-gray-700">|</span>
+            <span class="text-[var(--brand-primary)] font-bold">v3.2.0-STABLE</span>
         </div>
     </div>
 
@@ -253,7 +253,7 @@
             </div>
         </section>
 
-        <!-- Feature Grid (IT Pro Bento-style) -->
+        <!-- Feature Grid (Bento Cyber style) -->
         <section id="fitur" class="py-20 sm:py-28">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
@@ -269,7 +269,7 @@
                             <i class="ph ph-file-doc text-2xl"></i>
                         </div>
                         <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Dokumen ke Kode</h3>
-                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Cukup update <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">docs/prd.md</code> & <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">docs/branding.md</code>. AI akan mengeksekusi fitur secara presisi.</p>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Cukup update <code class="px-1.5 py-0.5 bg-gray-900 text-[var(--brand-primary)] font-mono rounded border border-gray-800">docs/prd.md</code> & <code class="px-1.5 py-0.5 bg-gray-900 text-[var(--brand-primary)] font-mono rounded border border-gray-800">docs/branding.md</code>. AI akan mengeksekusi fitur secara presisi.</p>
                     </div>
 
                     <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
@@ -292,8 +292,126 @@
                         <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
                             <i class="ph ph-translate text-2xl"></i>
                         </div>
-                        <h3 class="font-heading font-semibold text-lg text-[var(--text-primary)]">Native i18n & RTL</h3>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Native i18n & RTL</h3>
                         <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Sistem terjemahan multi-bahasa terpusat dengan deteksi GeoIP dan dukungan penuh layout RTL (Arabic).</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Portals Role Showcase Section -->
+        <section id="demo" class="py-20 bg-gray-950/60 border-t border-[var(--border-default)] relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                    <span class="font-mono text-xs text-amber-400 tracking-widest uppercase font-bold">// DEMO PORTAL ROLES //</span>
+                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">Tiga Portal Role Siap Pakai</h2>
+                    <p class="text-[var(--text-secondary)] text-base">Cobalah login dengan role yang berbeda untuk melihat arsitektur pembagian shell dan hak akses secara langsung.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Super Admin -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-purple-500/30 p-6 space-y-6 hover:border-purple-500/60 transition-all glow-box-cyber">
+                        <div class="flex justify-between items-start">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 font-mono font-bold">
+                                SA
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-mono font-bold uppercase">Manajemen Role</span>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="font-heading font-bold text-xl text-white">Super Admin Portal</h3>
+                            <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Akses dashboard overview, manajemen user & role RBAC, audit log trail, serta konfigurasi sistem terpusat.</p>
+                        </div>
+                        <div class="pt-2 border-t border-[var(--border-default)] font-mono text-xs text-gray-400 space-y-1">
+                            <div>Email: <span class="text-white">admin@app.com</span></div>
+                            <div>Password: <span class="text-white">password123</span></div>
+                        </div>
+                        <a href="/login/" class="w-full py-3 bg-purple-500/20 border border-purple-500/40 text-purple-300 hover:bg-purple-500/30 font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors">
+                            <i class="ph ph-shield-chevron text-base"></i> LOGIN SUPER ADMIN
+                        </a>
+                    </div>
+
+                    <!-- Creator Admin -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-orange-500/30 p-6 space-y-6 hover:border-orange-500/60 transition-all glow-box-cyber">
+                        <div class="flex justify-between items-start">
+                            <div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 font-mono font-bold">
+                                CR
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-[10px] font-mono font-bold uppercase">Creator Role</span>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="font-heading font-bold text-xl text-white">Creator Studio</h3>
+                            <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Ruang kerja creator untuk memantau performa, mengelola file project tree, serta panduan workflow vibe coding.</p>
+                        </div>
+                        <div class="pt-2 border-t border-[var(--border-default)] font-mono text-xs text-gray-400 space-y-1">
+                            <div>Email: <span class="text-white">admin@app.id</span></div>
+                            <div>Password: <span class="text-white">password123</span></div>
+                        </div>
+                        <a href="/login/" class="w-full py-3 bg-orange-500/20 border border-orange-500/40 text-orange-300 hover:bg-orange-500/30 font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors">
+                            <i class="ph ph-paint-brush-broad text-base"></i> LOGIN CREATOR
+                        </a>
+                    </div>
+
+                    <!-- Client Playground -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-emerald-500/30 p-6 space-y-6 hover:border-emerald-500/60 transition-all glow-box-cyber">
+                        <div class="flex justify-between items-start">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-mono font-bold">
+                                CL
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold uppercase">Client Role</span>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="font-heading font-bold text-xl text-white">Client Playground</h3>
+                            <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Area eksplorasi user client untuk mencoba template starter, membaca dokumentasi, dan setting profil pribadi.</p>
+                        </div>
+                        <div class="pt-2 border-t border-[var(--border-default)] font-mono text-xs text-gray-400 space-y-1">
+                            <div>Email: <span class="text-white">client@app.com</span></div>
+                            <div>Password: <span class="text-white">password123</span></div>
+                        </div>
+                        <a href="/login/" class="w-full py-3 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30 font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors">
+                            <i class="ph ph-user text-base"></i> LOGIN CLIENT
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installer & Quick Setup Section -->
+        <section id="cara-pasang" class="py-20 sm:py-28">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                    <span class="font-mono text-xs text-[var(--brand-primary)] tracking-widest uppercase font-bold">// QUICK INSTALLATION //</span>
+                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">Instalasi 3 Langkah</h2>
+                    <p class="text-[var(--text-secondary)] text-base">Setup otomatis seluruh lingkungan kerja Laragon/Apache dalam hitungan detik.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] relative space-y-4 glow-box-cyber">
+                        <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-[var(--brand-primary)] font-mono font-bold flex items-center justify-center text-sm">01</div>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Jalankan Script Powershell</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Jalankan command installer di terminal PowerShell untuk clone dan membuat virtual host Laragon secara otomatis.</p>
+                        <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 font-mono text-[11px] text-emerald-400 overflow-x-auto">
+                            irm .../setup-project.ps1 | iex
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] relative space-y-4 glow-box-cyber">
+                        <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-[var(--brand-primary)] font-mono font-bold flex items-center justify-center text-sm">02</div>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Tulis Spesifikasi di PRD</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Definisikan fitur aplikasi Anda di <code class="px-1 py-0.5 bg-gray-900 text-orange-400 rounded">docs/prd.md</code> & warna brand di <code class="px-1 py-0.5 bg-gray-900 text-orange-400 rounded">docs/branding.md</code>.</p>
+                        <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 font-mono text-[11px] text-amber-400">
+                            # PRD — My Project App
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] relative space-y-4 glow-box-cyber">
+                        <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-[var(--brand-primary)] font-mono font-bold flex items-center justify-center text-sm">03</div>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Instruksikan AI Coding</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Perintahkan Claude Code CLI atau Cursor untuk membaca PRD dan mengeksekusi pembuatan fitur secara komprehensif.</p>
+                        <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 font-mono text-[11px] text-indigo-400">
+                            claude "baca docs/prd.md & buat modul"
+                        </div>
                     </div>
 
                 </div>
@@ -303,7 +421,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-[var(--bg-secondary)] border-t border-[var(--border-default)] py-8 font-mono text-xs">
+    <footer class="bg-gray-950 border-t border-[var(--border-default)] py-8 font-mono text-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[var(--text-muted)]">
             <p>&copy; 2026 Vibeforge. Developer-Grade Vibe Coding Architecture.</p>
             <div class="flex gap-6">
@@ -319,12 +437,22 @@
         function initTheme() {
             const saved = localStorage.getItem('theme') || 'dark';
             html.classList.toggle('dark', saved === 'dark');
+            html.setAttribute('data-theme', saved);
         }
         document.getElementById('themeToggle')?.addEventListener('click', () => {
             const isDark = html.classList.toggle('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            const mode = isDark ? 'dark' : 'light';
+            html.setAttribute('data-theme', mode);
+            localStorage.setItem('theme', mode);
         });
         initTheme();
+
+        function copySnippet(btn, text) {
+            navigator.clipboard.writeText(text);
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i class="ph ph-check text-sm text-emerald-400"></i> Copied!`;
+            setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+        }
     </script>
 </body>
 </html>
