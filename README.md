@@ -77,17 +77,24 @@ Repo::table('users')->delete($id);
 - **Mode `mysql`**: Force MySQL, gagal keras kalau koneksi/tabel tidak ada
 - **Atomic JSON Write**: File lock terpisah (`.lock`), `rename()` atomic, tidak corrupt
 
-### ⚡ Setup Wizard Interaktif (`/install/`)
-| Mode | Langkah | Deskripsi |
-|------|---------|-----------|
-| **New App** | 12 langkah | PRD → Branding → Logo → 6 HTML Templates → Server → Path |
-| **Redesign** | 5 langkah | Overview → Kelola `references/` → Logo → Server → Path |
-
-- Monaco Editor (Markdown/HTML) dengan fallback textarea
-- Upload file/folder (drag-drop + `webkitdirectory`)
-- Auto-generate `docs/install.md` (protokol 3 tahap AI)
-- Buka folder `references/` di File Explorer via AJAX
-- **Buka PowerShell + jalankan `npx degit` + `claude` otomatis** dari landing page
+### ⚡ Setup Wizard Interaktif (`/install/`) & Deployment Console
+- **Automated Setup Script (`scripts/setup-project.ps1`)**:
+  - Auto-detection hak Administrator: jika dijalankan dari terminal non-admin, tampilkan countdown 3 detik lalu otomatis alihkan ke jendela PowerShell Administrator (`RunAs`).
+  - Wizard interaktif pilih Local Disk (C/D/E/dll), Server (Laragon/XAMPP), dan Nama Aplikasi.
+  - Otomatis `npx degit`, pembuatan Virtual Host (`nama_app.test`), penulisan Windows `hosts`, restart service/proses Apache, dan flush DNS.
+- **Automated Deployment Console (Landing Page `public/index.php`)**:
+  - Form interaktif langsung di landing page untuk memilih Disk & Server, sanitasi nama app, jalankan setup terminal, dan redirect ke Wizard.
+- **Setup Wizard Dual-Mode (`public/install/`)**:
+  | Mode | Langkah | Deskripsi |
+  |------|---------|-----------|
+  | **Aplikasi Baru (Greenfield)** | 12 langkah | Overview → PRD → Branding → Logo → 6 HTML References → Config → Path |
+  | **Redesain (Refit)** | 5 langkah | Overview → Upload/Kelola `references/` (Codebase Lama) → Logo → Target Server → AI Re-architecting |
+- **Monaco Editor Integrasi**: Text editor browser profesional untuk Markdown (`prd.md`, `branding.md`) dan HTML (`references/*.html`) dengan fallback automatic textarea.
+- **Instant Role Demo Portals**:
+  - Login 1-klik via AJAX di landing page untuk menguji RBAC tanpa ngetik kredensial:
+    - **Manajemen** (Super Admin): `admin@app.com`
+    - **Admin** (Creator): `admin@app.id`
+    - **Client** (Pendengar): `client@app.com`
 
 ---
 
@@ -101,16 +108,18 @@ Repo::table('users')->delete($id);
 
 ### 1. Download Template & Setup Virtual Host (Interaktif)
 
-> Windows PowerShell (jalankan di Terminal Admin)
+> Windows PowerShell (Jalankan langsung di terminal PowerShell / CMD):
 ```bash
 irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex
 ```
 
+> 💡 **Auto Admin Elevation**: Jika terminal yang Anda gunakan **bukan Administrator**, script secara otomatis menampilkan loading/countdown 3 detik dan langsung mengalihkan eksekusi ke jendela PowerShell Administrator baru (`RunAs`).
+
 > Script akan memandu Anda:
-> 1. **Pilih Local Disk** (C: / D: / dst)
+> 1. **Pilih Local Disk** (C: / D: / E: / dst)
 > 2. **Pilih Server** (ketik `l` untuk Laragon atau `x` untuk XAMPP lalu Enter)
 > 3. **Masukkan Nama Aplikasi** (tanpa spasi, gunakan `_` atau `-`)
-> 4. Lalu otomatis: Download template, setup Virtual Host + Windows Hosts (`nama_app.test`), berikan petunjuk restart Apache
+> 4. Lalu otomatis: Download template via `npx degit`, buat Virtual Host + update Windows Hosts (`nama_app.test`), restart service Apache, flush DNS, dan membuka browser.
 
 ---
 
@@ -146,15 +155,23 @@ http://nama_project_anda.test/  →  Pilih Server, Disk, Nama App  →  "Proses"
 ```
 
 ### 3. Isi Konsep Aplikasi (WAJIB Sebelum Menjalankan AI)
-**Mode Baru (12 langkah)**:
-1. **PRD** (`docs/prd.md`) — Nama, fitur, aktor, user flow, bisnis
-2. **Branding** (`docs/branding.md`) — Warna, font, logo, tone of voice
-3. **Logo** — Upload PNG (max 2MB)
-4. **6 HTML Templates** — Sesuaikan teks/komponen di `references/*.html`
+**Mode Aplikasi Baru (12 langkah)**:
+1. **Overview**: Pemilihan mode & penjelasan arsitektur.
+2. **PRD** (`docs/prd.md`): Spesifikasi aplikasi, aktor, & alur fitur.
+3. **Branding** (`docs/branding.md`): Token warna, font, logo, tone.
+4. **Logo**: Upload asset logo (`docs/logo.png`).
+5. **Template Landing**: `references/landingpage.html`.
+6. **Form Auth**: `references/login.html` & `references/register.html`.
+7. **Modul Roles**: `modul_manajemen.html`, `modul_admin.html`, `modul_client.html`.
+8. **Config & Environment**: Variabel `.env` & koneksi data/DB.
+9. **AI Execution**: Buka CLI dan eksekusi `baca @docs/install.md`.
 
-**Mode Redesign (5 langkah)**:
-1. Masukkan codebase lama ke `references/` (folder bebas, PHP/JS/HTML/CSS)
-2. AI baca semua → tulis ulang `prd.md` & `branding.md` → konsolidasi ke 6 HTML standar
+**Mode Redesain / Refit (5 langkah)**:
+1. **Overview**: Pilih Mode Redesain.
+2. **Upload References**: Masukkan codebase lama ke `references/`.
+3. **Logo Assets**: Upload asset logo baru.
+4. **Target Host**: Tentukan web server lokal (Laragon/XAMPP).
+5. **AI Re-architecting**: Jalankan AI CLI untuk auto-generate PRD & menyerap struktur lama.
 
 > ⚠️ **Jangan lewati langkah ini.** Kalau `prd.md`/`branding.md` kosong, AI akan berhenti dan minta Anda mengisi — ini disengaja supaya AI tidak menebak-nebak konsep aplikasi Anda.
 

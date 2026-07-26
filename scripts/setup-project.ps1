@@ -37,7 +37,12 @@ if (-not (Test-IsAdmin)) {
     $scriptPath = $PSCommandPath
     if (-not $scriptPath) { $scriptPath = $MyInvocation.MyCommand.Definition }
 
-    Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -NoProfile -File `"$scriptPath`" -Elevated" -Verb RunAs
+    if ($scriptPath -and (Test-Path $scriptPath)) {
+        Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -File `"$scriptPath`" -Elevated" -Verb RunAs
+    } else {
+        $remoteCmd = "irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex"
+        Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -Command `"$remoteCmd`"" -Verb RunAs
+    }
     exit 0
 }
 
