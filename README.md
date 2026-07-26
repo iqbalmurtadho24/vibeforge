@@ -113,12 +113,11 @@ cd C:\xampp\htdocs
 irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex
 ```
 
-> Script akan menanyakan: **Nama aplikasi** (tanpa spasi, gunakan `_` atau `-`), **Server** (Laragon/XAMPP), lalu otomatis:
-> 1. Download template via `degit`
-> 2. Buat folder project
-> 3. **Setup Virtual Host** (Laragon: `nama_app.test` / XAMPP: `localhost/nama_app`)
-> 4. Restart Apache (Laragon) / instruksi restart XAMPP
-> 5. Buka folder di VS Code
+> Script akan menanyakan **Nama aplikasi** (tanpa spasi, gunakan `_` atau `-`), lalu otomatis:
+> 1. Deteksi server dari direktori kerja (`laragon` atau `xampp`)
+> 2. Download template via `degit`
+> 3. Buat folder project & setup Virtual Host + Windows Hosts (`nama_app.test`)
+> 4. Memberikan petunjuk untuk restart Apache/server
 
 ---
 
