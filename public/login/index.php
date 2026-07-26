@@ -41,7 +41,7 @@ if ($isDev) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk - <?= APP_DISPLAY_NAME ?></title>
+    <title><?= t('auth_login') ?> - <?= APP_DISPLAY_NAME ?></title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF6B35'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
@@ -113,7 +113,7 @@ if ($isDev) {
                 </button>
                 <div x-show="open" x-transition class="absolute right-0 mt-1 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[150px] z-50">
                     <?php foreach (getAvailableLanguages() as $code => $lang): ?>
-                    <a href="?lang=<?= $code ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[var(--bg-hover)] transition-colors <?= $currentLang === $code ? 'text-[var(--brand-primary)] font-bold bg-[var(--brand-primary-light)]/10' : 'text-[var(--text-secondary)]' ?>">
+                    <a href="<?= escape(buildLangUrl($code)) ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[var(--bg-hover)] transition-colors <?= $currentLang === $code ? 'text-[var(--brand-primary)] font-bold bg-[var(--brand-primary-light)]/10' : 'text-[var(--text-secondary)]' ?>">
                         <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-5 h-3.5 rounded-sm">
                         <span><?= escape($lang['name']) ?></span>
                     </a>
@@ -134,8 +134,8 @@ if ($isDev) {
             <!-- Login Card -->
             <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-8 glow-orange">
                 <div class="text-center mb-8">
-                    <h1 class="text-2xl font-heading font-bold mb-2">Selamat Datang Kembali</h1>
-                    <p class="text-[var(--text-secondary)] text-sm">Masuk untuk melanjutkan pembangunan aplikasi Anda.</p>
+                    <h1 class="text-2xl font-heading font-bold mb-2"><?= t('login.welcome') ?></h1>
+                    <p class="text-[var(--text-secondary)] text-sm"><?= t('login.subtitle') ?></p>
                 </div>
 
                 <!-- Messages -->
@@ -146,7 +146,7 @@ if ($isDev) {
                     <input type="hidden" name="csrf_token" value="<?= escape($csrfToken) ?>">
 
                     <div>
-                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]">Email</label>
+                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]"><?= t('login.email_label') ?></label>
                         <div class="relative">
                             <input type="email" name="email" required class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] transition-colors" placeholder="nama@email.com">
                             <i class="ph ph-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
@@ -154,7 +154,7 @@ if ($isDev) {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]">Kata Sandi</label>
+                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]"><?= t('login.password_label') ?></label>
                         <div class="relative">
                             <input type="password" name="password" required class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 pr-11 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] transition-colors" placeholder="••••••••">
                             <i class="ph ph-lock absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
@@ -167,20 +167,20 @@ if ($isDev) {
                     <div class="flex items-center justify-between">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" name="remember" class="w-4 h-4 rounded border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">
-                            <span class="text-sm text-[var(--text-secondary)]">Ingat saya</span>
+                            <span class="text-sm text-[var(--text-secondary)]"><?= t('auth.remember_me') ?></span>
                         </label>
-                        <a href="#" class="text-sm text-[var(--brand-primary)] hover:underline">Lupa password?</a>
+                        <a href="#" class="text-sm text-[var(--brand-primary)] hover:underline"><?= t('auth.forgot_password') ?></a>
                     </div>
 
                     <button type="submit" id="submitBtn" class="w-full py-3.5 bg-gradient-brand text-white font-semibold rounded-xl hover:opacity-90 transition-opacity shadow-lg">
-                        Masuk
+                        <?= t('login.submit') ?>
                     </button>
                 </form>
 
                 <!-- Demo Quick Login -->
                 <?php if ($isDev && !empty($demoUsers)): ?>
                 <div class="mt-6 pt-6 border-t border-[var(--border-default)]">
-                    <p class="text-xs text-center text-[var(--text-muted)] mb-3">Demo Quick Login:</p>
+                    <p class="text-xs text-center text-[var(--text-muted)] mb-3"><?= t('login.demo') ?></p>
                     <div class="grid grid-cols-3 gap-2">
                         <?php if (isset($demoUsers['manajemen'])): ?>
                         <button type="button" onclick="quickLogin('<?= escape($demoUsers['manajemen']['email']) ?>')" class="py-2 px-3 text-xs font-medium rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 transition-colors">
@@ -202,13 +202,13 @@ if ($isDev) {
                 <?php endif; ?>
 
                 <div class="mt-6 text-center text-sm text-[var(--text-secondary)]">
-                    Belum punya akun? <a href="/register/" class="text-[var(--brand-primary)] font-medium hover:underline">Daftar Sekarang</a>
+                    <?= t('auth.no_account') ?> <a href="/register/" class="text-[var(--brand-primary)] font-medium hover:underline"><?= t('auth.register_now') ?></a>
                 </div>
             </div>
 
             <div class="text-center mt-6">
                 <a href="/" class="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
-                    <i class="ph ph-arrow-left"></i> Kembali ke Beranda
+                    <i class="ph ph-arrow-left"></i> <?= t('common.back_home') ?>
                 </a>
             </div>
         </div>
@@ -219,16 +219,26 @@ if ($isDev) {
         const html = document.documentElement;
         const themeBtn = document.getElementById('themeToggle');
 
+        function updateThemeUI(theme) {
+            const isDark = theme === 'dark';
+            html.classList.toggle('dark', isDark);
+            html.setAttribute('data-theme', theme);
+            const icon = themeBtn?.querySelector('i');
+            if (icon) {
+                icon.className = isDark ? 'ph ph-moon text-lg text-amber-400' : 'ph ph-sun text-lg text-amber-500';
+            }
+        }
+
         function initTheme() {
             const saved = localStorage.getItem('theme') || 'dark';
-            html.classList.toggle('dark', saved === 'dark');
-            html.setAttribute('data-theme', saved);
+            updateThemeUI(saved);
         }
 
         function toggleTheme() {
-            const isDark = html.classList.toggle('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            html.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            const current = html.classList.contains('dark') ? 'dark' : 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', next);
+            updateThemeUI(next);
         }
 
         themeBtn?.addEventListener('click', toggleTheme);

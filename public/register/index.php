@@ -31,7 +31,7 @@ $themePreference = 'dark';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar - <?= APP_DISPLAY_NAME ?></title>
+    <title><?= t('auth_register') ?> - <?= APP_DISPLAY_NAME ?></title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF6B35'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,7 +75,7 @@ $themePreference = 'dark';
                 </button>
                 <div x-show="open" x-transition class="absolute right-0 mt-1 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[150px] z-50">
                     <?php foreach (getAvailableLanguages() as $code => $lang): ?>
-                    <a href="?lang=<?= $code ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[var(--bg-hover)] transition-colors <?= $currentLang === $code ? 'text-[var(--brand-primary)] font-bold bg-[var(--brand-primary-light)]/10' : 'text-[var(--text-secondary)]' ?>">
+                    <a href="<?= escape(buildLangUrl($code)) ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[var(--bg-hover)] transition-colors <?= $currentLang === $code ? 'text-[var(--brand-primary)] font-bold bg-[var(--brand-primary-light)]/10' : 'text-[var(--text-secondary)]' ?>">
                         <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-5 h-3.5 rounded-sm">
                         <span><?= escape($lang['name']) ?></span>
                     </a>
@@ -94,8 +94,8 @@ $themePreference = 'dark';
         <div class="w-full max-w-md">
             <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-8">
                 <div class="text-center mb-8">
-                    <h1 class="text-2xl font-heading font-bold mb-2">Bergabung dengan Vibeforge</h1>
-                    <p class="text-[var(--text-secondary)] text-sm">Buat akun untuk mulai membangun aplikasi.</p>
+                    <h1 class="text-2xl font-heading font-bold mb-2"><?= t('register.heading') ?></h1>
+                    <p class="text-[var(--text-secondary)] text-sm"><?= t('register.subtitle') ?></p>
                 </div>
 
                 <div id="message" class="hidden mb-6 p-4 rounded-xl text-sm"></div>
@@ -104,15 +104,15 @@ $themePreference = 'dark';
                     <input type="hidden" name="csrf_token" value="<?= escape($csrfToken) ?>">
 
                     <div>
-                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]">Nama Lengkap</label>
+                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]"><?= t('register.name_label') ?></label>
                         <div class="relative">
-                            <input type="text" name="name" required class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="Nama Anda">
+                            <input type="text" name="name" required class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="<?= t('register.name_label') ?>">
                             <i class="ph ph-user absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]">Email</label>
+                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]"><?= t('register.email_label') ?></label>
                         <div class="relative">
                             <input type="email" name="email" required class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="nama@email.com">
                             <i class="ph ph-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
@@ -120,9 +120,9 @@ $themePreference = 'dark';
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]">Kata Sandi</label>
+                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]"><?= t('register.password_label') ?></label>
                         <div class="relative">
-                            <input type="password" name="password" required minlength="8" class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 pr-11 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="Minimal 8 karakter">
+                            <input type="password" name="password" required minlength="8" class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 pr-11 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="<?= t('register.password_ph') ?>">
                             <i class="ph ph-lock absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
                             <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
                                 <i class="ph ph-eye text-lg"></i>
@@ -131,31 +131,31 @@ $themePreference = 'dark';
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]">Konfirmasi Kata Sandi</label>
+                        <label class="block text-sm font-medium mb-2 text-[var(--text-secondary)]"><?= t('register.confirm_label') ?></label>
                         <div class="relative">
-                            <input type="password" name="password_confirm" required minlength="8" class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="Ulangi kata sandi">
+                            <input type="password" name="password_confirm" required minlength="8" class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors" placeholder="<?= t('register.confirm_ph') ?>">
                             <i class="ph ph-lock-simple absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
                         </div>
                     </div>
 
                     <div class="flex items-start gap-2">
                         <input type="checkbox" required class="w-4 h-4 mt-1 rounded border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">
-                        <span class="text-sm text-[var(--text-secondary)]">Saya setuju dengan <a href="#" class="text-[var(--brand-primary)] hover:underline">Syarat & Ketentuan</a> dan <a href="#" class="text-[var(--brand-primary)] hover:underline">Kebijakan Privasi</a></span>
+                        <span class="text-sm text-[var(--text-secondary)]"><?= t('register.terms_agree') ?> <a href="#" class="text-[var(--brand-primary)] hover:underline"><?= t('register.terms') ?></a> <?= t('register.and') ?> <a href="#" class="text-[var(--brand-primary)] hover:underline"><?= t('register.privacy') ?></a></span>
                     </div>
 
                     <button type="submit" id="submitBtn" class="w-full py-3.5 bg-gradient-brand text-white font-semibold rounded-xl hover:opacity-90 transition-opacity shadow-lg">
-                        Buat Akun
+                        <?= t('register.submit') ?>
                     </button>
                 </form>
 
                 <div class="mt-6 text-center text-sm text-[var(--text-secondary)]">
-                    Sudah punya akun? <a href="/login/" class="text-[var(--brand-primary)] font-medium hover:underline">Masuk di sini</a>
+                    <?= t('auth.have_account') ?> <a href="/login/" class="text-[var(--brand-primary)] font-medium hover:underline"><?= t('auth.login_here') ?></a>
                 </div>
             </div>
 
             <div class="text-center mt-6">
                 <a href="/" class="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
-                    <i class="ph ph-arrow-left"></i> Kembali ke Beranda
+                    <i class="ph ph-arrow-left"></i> <?= t('common.back_home') ?>
                 </a>
             </div>
         </div>
@@ -163,13 +163,24 @@ $themePreference = 'dark';
 
     <script>
         const html = document.documentElement;
+        function updateThemeUI(theme) {
+            const isDark = theme === 'dark';
+            html.classList.toggle('dark', isDark);
+            html.setAttribute('data-theme', theme);
+            const icon = document.querySelector('#themeToggle i');
+            if (icon) {
+                icon.className = isDark ? 'ph ph-moon text-lg text-amber-400' : 'ph ph-sun text-lg text-amber-500';
+            }
+        }
         function initTheme() {
             const saved = localStorage.getItem('theme') || 'dark';
-            html.classList.toggle('dark', saved === 'dark');
+            updateThemeUI(saved);
         }
         document.getElementById('themeToggle')?.addEventListener('click', () => {
-            const isDark = html.classList.toggle('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            const current = html.classList.contains('dark') ? 'dark' : 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', next);
+            updateThemeUI(next);
         });
         initTheme();
 

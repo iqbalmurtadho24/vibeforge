@@ -3,60 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creator Studio - Vibeforge</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF6B35'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
+    <title>Creator Studio - Vibeforge (Dev Engine)</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F97316'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/assets/css/branding.css">
-    <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{brand:{primary:'#F97316',dark:'#0D1117',card:'#161B22'}}}}}</script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { brand: { primary: '#F97316', dark: '#0B0F17', card: '#111726', border: '#1E293B' } },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        heading: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body{font-family:'Inter',sans-serif;background-color:var(--bg-primary);color:var(--text-primary)}
-        h1,h2,h3{font-family:'Poppins',sans-serif}
-        .text-gradient{background:linear-gradient(135deg,#FF6B35,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .bg-gradient-brand{background:linear-gradient(135deg,#FF6B35,#F59E0B)}
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .tech-grid {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); }
+        .glow-box-cyber { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
     </style>
 </head>
-<body class="antialiased h-screen flex flex-col overflow-hidden">
+<body class="antialiased h-screen flex flex-col overflow-hidden tech-grid bg-[var(--bg-primary)]">
 
 <div class="flex flex-1 overflow-hidden">
     <!-- Sidebar -->
-    <aside class="hidden md:flex flex-col w-64 bg-[var(--bg-card)] border-r border-[var(--border-default)] shrink-0">
+    <aside class="hidden md:flex flex-col w-64 bg-gray-950 border-r border-[var(--border-default)] shrink-0 font-mono">
         <div class="h-16 flex items-center px-6 border-b border-[var(--border-default)]">
-            <a href="/" class="flex items-center gap-2">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#FF6B35"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
-                <span class="font-heading font-bold text-lg">
-                    <span class="text-[var(--text-primary)]">Vibe</span><span class="text-gradient">forge</span>
-                </span>
-                <span class="text-xs text-[var(--text-muted)] ml-1">Studio</span>
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-8 h-8 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center group-hover:border-orange-500 transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#F97316"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-heading font-extrabold text-base tracking-tight leading-none"><span class="text-white">Vibe</span><span class="text-gradient">forge</span></span>
+                    <span class="text-[9px] text-orange-400 font-bold tracking-wider uppercase">CREATOR_STUDIO</span>
+                </div>
             </a>
         </div>
 
-        <nav class="flex-1 py-4 px-3 space-y-1">
-            <button onclick="nav('overview')" id="s-overview" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-[var(--brand-primary-light)] text-[var(--brand-primary)]">
-                <i class="ph-fill ph-squares-four text-xl"></i> Overview
-            </button>
-            <button onclick="nav('howto')" id="s-howto" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors">
-                <i class="ph ph-book-open text-xl"></i> Cara Kerja
-            </button>
-            <button onclick="nav('structure')" id="s-structure" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors">
-                <i class="ph ph-tree-structure text-xl"></i> Struktur
-            </button>
-            <button onclick="nav('profile')" id="s-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors">
-                <i class="ph ph-user text-xl"></i> Profil
-            </button>
+        <nav class="flex-1 py-4 px-3 space-y-1 text-xs">
+            <button onclick="nav('overview')" id="s-overview" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-orange-500/10 text-[var(--brand-primary)] border border-orange-500/20 transition-all"><i class="ph-fill ph-squares-four text-lg"></i> Overview</button>
+            <button onclick="nav('howto')" id="s-howto" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-book-open text-lg"></i> Workflow</button>
+            <button onclick="nav('structure')" id="s-structure" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-tree-structure text-lg"></i> Project Tree</button>
+            <button onclick="nav('profile')" id="s-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-user text-lg"></i> Profil</button>
         </nav>
 
-        <div class="p-4 border-t border-[var(--border-default)]">
-            <div class="flex items-center gap-3 px-2 py-2">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF6B35] to-orange-400 flex items-center justify-center text-white font-bold">
-                    AC
-                </div>
-                <div>
-                    <p class="text-sm font-medium">Admin Creator</p>
-                    <p class="text-xs text-[var(--brand-primary)]">Creator</p>
+        <div class="p-4 border-t border-[var(--border-default)] bg-gray-900/50">
+            <div class="flex items-center gap-3 px-2 py-1.5">
+                <div class="w-9 h-9 rounded-xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400 font-bold text-xs">AC</div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold text-white truncate">Admin Creator</p>
+                    <p class="text-[10px] text-orange-400 uppercase font-semibold">Creator Role</p>
                 </div>
             </div>
         </div>
@@ -64,61 +82,51 @@
 
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-16 flex items-center justify-between px-6 bg-[var(--bg-secondary)] border-b border-[var(--border-default)] shrink-0">
-            <h1 id="pageTitle" class="font-heading font-semibold">Overview</h1>
-            <div class="flex items-center gap-2">
+        <header class="h-16 flex items-center justify-between px-6 bg-gray-950/80 border-b border-[var(--border-default)] shrink-0 font-mono text-xs">
+            <div class="flex items-center gap-3">
+                <h1 id="pageTitle" class="font-heading font-extrabold text-sm text-white tracking-wide uppercase">// CREATOR OVERVIEW</h1>
+                <span class="px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px]">BUILD_ACTIVE</span>
+            </div>
+            <div class="flex items-center gap-3">
                 <!-- Language Selector -->
                 <div class="relative group" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors text-xs font-medium" aria-label="Change Language">
-                        <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="id" class="w-5 h-3.5 rounded-sm shadow-sm">
-                        <span class="hidden sm:inline uppercase font-bold text-[var(--text-secondary)]">id</span>
-                        <i class="ph ph-caret-down text-xs text-[var(--text-muted)]"></i>
+                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-orange-500 transition-colors text-xs" aria-label="Change Language">
+                        <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="id" class="w-4 h-3 rounded-sm">
+                        <span class="hidden sm:inline uppercase font-bold text-gray-300">id</span>
+                        <i class="ph ph-caret-down text-xs text-gray-500"></i>
                     </button>
-                    <div x-show="open" x-transition class="absolute right-0 mt-1 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[150px] z-50">
-                        <a href="?lang=id" class="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[var(--bg-hover)] transition-colors text-[var(--brand-primary)] font-bold bg-[var(--brand-primary-light)]/10">
-                            <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-5 h-3.5 rounded-sm"> Bahasa Indonesia
+                    <div x-show="open" x-transition class="absolute right-0 mt-1 bg-gray-900 rounded-xl shadow-2xl border border-gray-800 py-1 min-w-[150px] z-50 text-xs">
+                        <a href="?lang=id" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-orange-400 font-bold bg-orange-500/10">
+                            <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> Bahasa Indonesia
                         </a>
-                        <a href="?lang=en" class="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)]">
-                            <img src="/assets/flags/en.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-5 h-3.5 rounded-sm"> English
+                        <a href="?lang=en" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-gray-300">
+                            <img src="/assets/flags/en.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> English
                         </a>
-                        <a href="?lang=ar" class="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)]">
-                            <img src="/assets/flags/ar.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-5 h-3.5 rounded-sm"> العربية
+                        <a href="?lang=ja" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-gray-300">
+                            <img src="/assets/flags/ja.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> 日本語
+                        </a>
+                        <a href="?lang=ar" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-gray-300">
+                            <img src="/assets/flags/ar.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> العربية
                         </a>
                     </div>
                 </div>
 
-                <button id="themeToggle" class="p-2 hover:bg-[var(--bg-hover)] rounded-lg" aria-label="Toggle theme">
-                    <i class="ph ph-moon text-lg text-[var(--brand-primary)]"></i>
-                </button>
-                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400" title="Logout">
-                    <i class="ph ph-sign-out text-lg"></i>
-                </a>
+                <button id="themeToggle" class="p-2 hover:bg-gray-800 rounded-lg text-amber-400" aria-label="Toggle theme"><i class="ph ph-moon text-base"></i></button>
+                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400" title="Logout"><i class="ph ph-sign-out text-base"></i></a>
             </div>
         </header>
 
-        <div id="content" class="flex-1 overflow-y-auto p-6 pb-24 md:pb-6"></div>
+        <div id="content" class="flex-1 overflow-y-auto p-6 pb-24 md:pb-6 font-sans"></div>
     </main>
 </div>
 
-<!-- Mobile Navigation -->
-<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-card)] border-t border-[var(--border-default)] z-50">
+<!-- Mobile Nav -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 z-50 font-mono text-xs">
     <div class="flex justify-around items-center h-16">
-        <button onclick="nav('overview')" class="flex flex-col items-center gap-1 text-[var(--brand-primary)]" id="m-overview">
-            <i class="ph-fill ph-squares-four text-2xl"></i>
-            <span class="text-[10px] font-medium">Overview</span>
-        </button>
-        <button onclick="nav('howto')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]" id="m-howto">
-            <i class="ph ph-book-open text-2xl"></i>
-            <span class="text-[10px] font-medium">Cara Kerja</span>
-        </button>
-        <button onclick="nav('structure')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]" id="m-structure">
-            <i class="ph ph-tree-structure text-2xl"></i>
-            <span class="text-[10px] font-medium">Struktur</span>
-        </button>
-        <button onclick="nav('profile')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]" id="m-profile">
-            <i class="ph ph-user text-2xl"></i>
-            <span class="text-[10px] font-medium">Profil</span>
-        </button>
+        <button onclick="nav('overview')" class="flex flex-col items-center gap-1 text-orange-400" id="m-overview"><i class="ph-fill ph-squares-four text-xl"></i><span class="text-[9px]">Overview</span></button>
+        <button onclick="nav('howto')" class="flex flex-col items-center gap-1 text-gray-400" id="m-howto"><i class="ph ph-book-open text-xl"></i><span class="text-[9px]">Workflow</span></button>
+        <button onclick="nav('structure')" class="flex flex-col items-center gap-1 text-gray-400" id="m-structure"><i class="ph ph-tree-structure text-xl"></i><span class="text-[9px]">Tree</span></button>
+        <button onclick="nav('profile')" class="flex flex-col items-center gap-1 text-gray-400" id="m-profile"><i class="ph ph-user text-xl"></i><span class="text-[9px]">Profil</span></button>
     </div>
 </nav>
 
@@ -126,209 +134,137 @@
 const V = {
     overview: `
         <div class="space-y-6">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="w-10 h-10 rounded-lg bg-[var(--brand-primary-light)] flex items-center justify-center mb-3">
-                        <i class="ph ph-layout text-xl text-[var(--brand-primary)]"></i>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
+                    <div class="flex items-center justify-between text-gray-400">
+                        <span class="text-xs uppercase font-bold">Workspace Role</span>
+                        <i class="ph ph-code text-orange-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-bold">6</p>
-                    <p class="text-sm text-[var(--text-muted)]">Reference HTML</p>
+                    <p class="text-2xl font-extrabold text-orange-400">Creator</p>
+                    <span class="text-[10px] text-gray-400">Full Template Auth</span>
                 </div>
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center mb-3">
-                        <i class="ph ph-file-php text-xl text-green-500"></i>
+                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
+                    <div class="flex items-center justify-between text-gray-400">
+                        <span class="text-xs uppercase font-bold">Active Shells</span>
+                        <i class="ph ph-layout text-blue-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-bold">6</p>
-                    <p class="text-sm text-[var(--text-muted)]">Shell PHP</p>
+                    <p class="text-3xl font-extrabold text-white">6</p>
+                    <span class="text-[10px] text-emerald-400">Clean URL Proxied</span>
                 </div>
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center mb-3">
-                        <i class="ph ph-users text-xl text-blue-500"></i>
+                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
+                    <div class="flex items-center justify-between text-gray-400">
+                        <span class="text-xs uppercase font-bold">PRD Engine</span>
+                        <i class="ph ph-file-doc text-purple-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-bold">3</p>
-                    <p class="text-sm text-[var(--text-muted)]">Demo Users</p>
+                    <p class="text-2xl font-extrabold text-purple-400">READY</p>
+                    <span class="text-[10px] text-gray-400">docs/prd.md Loaded</span>
                 </div>
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center mb-3">
-                        <i class="ph ph-translate text-xl text-purple-500"></i>
+                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
+                    <div class="flex items-center justify-between text-gray-400">
+                        <span class="text-xs uppercase font-bold">Virtual Host</span>
+                        <i class="ph ph-terminal-window text-emerald-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-bold">3</p>
-                    <p class="text-sm text-[var(--text-muted)]">Bahasa (i18n)</p>
+                    <p class="text-2xl font-extrabold text-emerald-400">AUTOMATED</p>
+                    <span class="text-[10px] text-gray-400">Laragon/XAMPP Auto-detect</span>
                 </div>
             </div>
 
-            <!-- Setup Wizard CTA -->
-            <div class="bg-gradient-to-r from-[var(--brand-primary)] to-orange-400 rounded-xl p-6 text-white shadow-lg glow-orange-sm">
+            <!-- Developer Banner -->
+            <div class="bg-gradient-brand rounded-2xl p-6 text-white shadow-xl glow-box-cyber font-mono">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                            <i class="ph ph-magic-wand text-3xl"></i>
+                        <div class="w-12 h-12 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
+                            <i class="ph ph-rocket-launch text-2xl"></i>
                         </div>
                         <div>
-                            <h3 class="font-heading font-bold text-xl mb-1">Setup Wizard Vibeforge</h3>
-                            <p class="text-white/80 text-sm">Siapkan project baru dengan AI assistant dalam hitungan menit</p>
+                            <h3 class="font-heading font-extrabold text-lg">Vibeforge Creator Dashboard</h3>
+                            <p class="text-white/80 text-xs font-sans">Mengembangkan aplikasi berbasis template untuk bisnis Anda.</p>
                         </div>
                     </div>
-                    <a href="/install/" class="px-6 py-3 bg-white text-[var(--brand-primary)] font-bold rounded-xl hover:bg-white/90 transition-colors shadow-md flex items-center gap-2 whitespace-nowrap">
-                        <i class="ph ph-rocket-launch"></i> Mulai Menyiapkan Instalasi
+                    <a href="/install/" class="px-6 py-3 bg-gray-950 text-orange-400 font-bold text-xs rounded-xl hover:bg-gray-900 transition-colors shadow-lg flex items-center gap-2 shrink-0">
+                        <i class="ph ph-magic-wand text-base"></i> EXECUTE SETUP WIZARD
                     </a>
                 </div>
-            </div>
-
-            <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-6">
-                <h3 class="font-semibold mb-4 flex items-center gap-2">
-                    <i class="ph ph-info text-[var(--brand-primary)]"></i> Tentang Vibeforge Studio
-                </h3>
-                <p class="text-[var(--text-secondary)] leading-relaxed mb-4">Vibeforge adalah template starter untuk membangun aplikasi web (PHP) dengan pendekatan <strong>vibe coding</strong>: Anda menjelaskan aplikasi yang diinginkan lewat dokumen (<code class="text-[var(--brand-primary)]">docs/prd.md</code>, <code class="text-[var(--brand-primary)]">docs/branding.md</code>), lalu AI coding assistant yang menempanya secara terstruktur.</p>
-                <p class="text-[var(--text-secondary)] leading-relaxed">Cocok dipakai dengan XAMPP (<code class="text-[var(--brand-primary)]">htdocs/</code>) atau Laragon (<code class="text-[var(--brand-primary)]">www/</code>).</p>
-            </div>
-
-            <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-6">
-                <h3 class="font-semibold mb-4 flex items-center gap-2">
-                    <i class="ph ph-database text-[var(--brand-primary)]"></i> Data & Login
-                </h3>
-                <ul class="space-y-3 text-sm text-[var(--text-secondary)]">
-                    <li class="flex items-start gap-2"><i class="ph ph-check-circle text-green-500 mt-0.5 shrink-0"></i>Belum ada MySQL? CRUD otomatis pakai <code class="text-[var(--brand-primary)]">data/*.json</code> (file locking + atomic write)</li>
-                    <li class="flex items-start gap-2"><i class="ph ph-check-circle text-green-500 mt-0.5 shrink-0"></i>Sudah ada MySQL? Otomatis pindah ke SQL tanpa ubah kode</li>
-                    <li class="flex items-start gap-2"><i class="ph ph-check-circle text-green-500 mt-0.5 shrink-0"></i>3 akun demo (manajemen/admin/client, password: <code class="text-[var(--brand-primary)]">password123</code>)</li>
-                </ul>
-            </div>
-
-            <div class="text-center">
-                <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl hover:border-[var(--brand-primary)] transition-colors"><i class="ph ph-github-logo text-xl"></i> Lihat di GitHub</a>
             </div>
         </div>
     `,
     howto: `
-        <div class="space-y-6 max-w-3xl">
-            <h2 class="text-2xl font-bold">Cara Kerja Vibeforge</h2>
-
-            <div class="space-y-4">
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF6B35] to-orange-400 flex items-center justify-center text-white font-bold">1</div>
-                        <h3 class="font-semibold">Download Template</h3>
+        <div class="space-y-6 font-mono text-xs">
+            <h2 class="text-xl font-bold uppercase text-white">// ALUR PENGEMBANGAN CREATOR</h2>
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 space-y-4 glow-box-cyber font-sans">
+                <p class="text-gray-300 text-sm">Sebagai Creator/Admin, Anda menggunakan <strong>Vibeforge</strong> untuk membangun aplikasi apapun dalam 3 langkah mudah:</p>
+                <div class="grid md:grid-cols-3 gap-4 font-mono text-xs">
+                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800 space-y-2">
+                        <span class="text-orange-400 font-bold">01. TULIS DOKUMEN</span>
+                        <p class="text-gray-400 font-sans text-xs">Isi <code class="text-orange-400">docs/prd.md</code> dengan ide aplikasi Anda.</p>
                     </div>
-                    <div class="bg-[var(--bg-primary)] rounded-lg p-4 font-mono text-sm border border-[var(--border-default)] space-y-2">
-                        <p class="text-[var(--text-muted)]"># Laragon</p>
-                        <p class="text-[var(--brand-primary)]">cd C:\\laragon\\www</p>
-                        <p class="text-[var(--text-primary)]">npx -y degit iqbalmurtadho24/vibeforge vibeforge</p>
-                        <p class="text-[var(--text-primary)]">cd vibeforge</p>
-                        <p class="text-[var(--text-muted)] mt-2"># XAMPP</p>
-                        <p class="text-[var(--brand-primary)]">cd C:\\xampp\\htdocs</p>
-                        <p class="text-[var(--text-primary)]">npx -y degit iqbalmurtadho24/vibeforge vibeforge</p>
-                        <p class="text-[var(--text-primary)]">cd vibeforge</p>
+                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800 space-y-2">
+                        <span class="text-orange-400 font-bold">02. SET BRANDING</span>
+                        <p class="text-gray-400 font-sans text-xs">Atur warna & font di <code class="text-orange-400">docs/branding.md</code>.</p>
+                    </div>
+                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800 space-y-2">
+                        <span class="text-orange-400 font-bold">03. JALANKAN AI</span>
+                        <p class="text-gray-400 font-sans text-xs">Jalankan CLI Claude Code / Cursor AI untuk membuat kodenya.</p>
                     </div>
                 </div>
-
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF6B35] to-orange-400 flex items-center justify-center text-white font-bold">2</div>
-                        <h3 class="font-semibold">Isi Konsep Aplikasi</h3>
-                    </div>
-                    <ul class="space-y-2 text-sm text-[var(--text-secondary)]">
-                        <li>• <code class="text-[var(--brand-primary)]">docs/prd.md</code> — nama, fitur, target pengguna</li>
-                        <li>• <code class="text-[var(--brand-primary)]">docs/branding.md</code> — warna, font, logo</li>
-                        <li>• <code class="text-[var(--brand-primary)]">references/*.html</code> — acuan struktur UI</li>
-                    </ul>
-                </div>
-
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF6B35] to-orange-400 flex items-center justify-center text-white font-bold">3</div>
-                        <h3 class="font-semibold">Jalankan AI</h3>
-                    </div>
-                    <div class="bg-[var(--bg-primary)] rounded-lg p-4 font-mono text-sm border border-[var(--border-default)]">
-                        <p class="text-[var(--brand-primary)]">claude</p>
-                        <p class="text-[var(--text-muted)] mt-1">> Baca dan jalankan docs/install.md</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-5">
-                <h4 class="font-medium text-yellow-400 flex items-center gap-2 mb-2"><i class="ph ph-warning-circle"></i> Penting</h4>
-                <p class="text-sm text-[var(--text-secondary)]">Proses ini bukan "tekan yes sampai selesai". AI berhenti di 3 tahap: Audit & Rencana, Eksekusi Kode, Preview Lokal — masing-masing menunggu review Anda.</p>
             </div>
         </div>
     `,
     structure: `
-        <div class="space-y-6 max-w-3xl">
-            <h2 class="text-2xl font-bold">Struktur Project</h2>
-            <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-6 font-mono text-sm overflow-x-auto">
-<pre class="text-[var(--text-secondary)] leading-loose whitespace-pre">
-docs/
-  install.md      <span class="text-[var(--brand-primary)]">← protokol kerja AI (3 tahap)</span>
-  prd.md          <span class="text-[var(--brand-primary)]">← WAJIB diisi</span>
-  branding.md     <span class="text-[var(--brand-primary)]">← WAJIB diisi</span>
-references/       <span class="text-[var(--brand-primary)]">← 6 file HTML acuan struktur</span>
-CLAUDE.md         <span class="text-[var(--brand-primary)]">← aturan arsitektur</span>
-core/Repo.php     <span class="text-[var(--brand-primary)]">← data access layer</span>
-public/           <span class="text-[var(--brand-primary)]">← document root Apache</span>
-  index.php       <span class="text-[var(--text-muted)]">landing page</span>
-  login/          <span class="text-[var(--text-muted)]">halaman login</span>
-  register/       <span class="text-[var(--text-muted)]">halaman daftar</span>
-  admin/          <span class="text-[var(--text-muted)]">creator studio</span>
-  client/         <span class="text-[var(--text-muted)]">client dashboard</span>
-  manajemen/      <span class="text-[var(--text-muted)]">super admin</span>
-data/
-  users.json      <span class="text-[var(--text-muted)]">demo users</span>
-locales/          <span class="text-[var(--text-muted)]">id.json, en.json, ar.json</span>
-</pre>
+        <div class="space-y-6 font-mono text-xs">
+            <h2 class="text-xl font-bold uppercase text-white">// STRUKTUR DIREKTORI REPO</h2>
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber text-emerald-400 leading-relaxed overflow-x-auto">
+                <pre>
+vibeforge/
+├── public/                 <- Document Root Apache
+│   ├── index.php           <- Landing Page
+│   ├── login/              <- Shell Login
+│   ├── register/           <- Shell Register
+│   ├── manajemen/          <- Shell Super Admin
+│   ├── admin/              <- Shell Creator Studio
+│   ├── client/             <- Shell Client Application
+│   └── core/router.php     <- Router Proxy (WAJIB ADA)
+├── core/                   <- Router, Auth, Session, Repo Dual-Engine
+├── include/                <- Config, Helper, i18n
+├── modules/                <- Modul AJAX per Role
+└── docs/                   <- PRD & Branding Specification
+                </pre>
             </div>
         </div>
     `,
     profile: `
-        <div class="max-w-xl space-y-6">
-            <h2 class="text-2xl font-bold">Profil Creator</h2>
-            <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-6 text-center">
-                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-[#FF6B35] to-orange-400 flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4 shadow-lg" style="box-shadow:0 0 30px rgba(255,107,53,.3)">AC</div>
-                <h3 class="text-xl font-semibold">Admin Creator</h3>
-                <p class="text-[var(--text-muted)]">admin@example.com</p>
-                <span class="inline-block mt-2 px-3 py-1 rounded-full text-sm bg-[var(--brand-primary-light)] text-[var(--brand-primary)]">Creator Studio</span>
+        <div class="max-w-xl space-y-6 font-mono text-xs">
+            <h2 class="text-xl font-bold uppercase text-white">// PROFIL CREATOR</h2>
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 text-center glow-box-cyber space-y-3">
+                <div class="w-20 h-20 rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400 text-2xl font-bold mx-auto shadow-lg">AC</div>
+                <h3 class="text-lg font-bold text-white">Admin Creator</h3>
+                <p class="text-gray-400">admin@app.id</p>
+                <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">CREATOR ROLE</span>
             </div>
-            <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] divide-y divide-[var(--border-default)]">
-                <div class="p-4 flex justify-between text-sm"><span class="text-[var(--text-secondary)]">Role</span><span class="font-medium text-[var(--brand-primary)]">Admin (Creator)</span></div>
-                <div class="p-4 flex justify-between text-sm"><span class="text-[var(--text-secondary)]">Bergabung</span><span>26 Jul 2026</span></div>
-            </div>
-            <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="flex items-center justify-center gap-2 py-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl hover:border-[var(--brand-primary)] transition-colors"><i class="ph ph-github-logo text-xl"></i> GitHub Repository</a>
-            <a href="/logout/" class="flex items-center justify-center gap-2 py-3 bg-red-500/10 text-red-400 font-medium rounded-xl hover:bg-red-500/20 transition-colors"><i class="ph ph-sign-out"></i> Logout</a>
+            <a href="/logout/" class="flex items-center justify-center gap-2 py-3.5 bg-red-500/10 text-red-400 border border-red-500/30 font-bold rounded-xl hover:bg-red-500/20 transition-colors"><i class="ph ph-sign-out text-base"></i> LOGOUT SYSTEM</a>
         </div>
     `
 };
 
 function nav(p) {
     document.getElementById('content').innerHTML = V[p] || V.overview;
-    document.getElementById('pageTitle').textContent = {overview:'Overview',howto:'Cara Kerja',structure:'Struktur',profile:'Profil'}[p]||'Overview';
-
+    document.getElementById('pageTitle').textContent = {overview:'// CREATOR OVERVIEW',howto:'// WORKFLOW',structure:'// PROJECT TREE',profile:'// PROFIL'}[p]||'// CREATOR OVERVIEW';
     ['overview','howto','structure','profile'].forEach(k => {
-        const d = document.getElementById('s-' + k);
-        const m = document.getElementById('m-' + k);
-        if (d) {
-            if (k === p) {
-                d.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-[var(--brand-primary-light)] text-[var(--brand-primary)]';
-            } else {
-                d.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors';
-            }
+        const d = document.getElementById('s-'+k);
+        const m = document.getElementById('m-'+k);
+        if(d) {
+            if(k===p) { d.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-orange-500/10 text-[var(--brand-primary)] border border-orange-500/20 transition-all'; }
+            else { d.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors'; }
         }
-        if (m) {
-            if (k === p) {
-                m.className = 'flex flex-col items-center gap-1 text-[var(--brand-primary)]';
-            } else {
-                m.className = 'flex flex-col items-center gap-1 text-[var(--text-muted)]';
-            }
+        if(m) {
+            if(k===p) { m.className='flex flex-col items-center gap-1 text-orange-400'; }
+            else { m.className='flex flex-col items-center gap-1 text-gray-400'; }
         }
     });
 }
-
-const html = document.documentElement;
-document.getElementById('themeToggle')?.addEventListener('click', () => {
-    const isDark = html.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-});
-(() => {
-    const saved = localStorage.getItem('theme') || 'dark';
-    html.classList.toggle('dark', saved === 'dark');
-})();
+const html=document.documentElement;
+document.getElementById('themeToggle')?.addEventListener('click',()=>{const d=html.classList.toggle('dark');localStorage.setItem('theme',d?'dark':'light')});
+(()=>{const s=localStorage.getItem('theme')||'dark';html.classList.toggle('dark',s==='dark')})();
 nav('overview');
 </script>
 </body>

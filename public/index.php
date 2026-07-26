@@ -179,16 +179,16 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
 
                 <div class="hidden md:flex items-center gap-8 font-medium text-sm">
                     <a href="#fitur" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
-                        <i class="ph ph-cpu text-base text-[var(--brand-primary)]"></i> Arsitektur
+                        <i class="ph ph-cpu text-base text-[var(--brand-primary)]"></i> <?= t('index.arch_link') ?>
                     </a>
                     <a href="#cara-pasang" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
-                        <i class="ph ph-terminal-window text-base text-[var(--brand-primary)]"></i> Installer
+                        <i class="ph ph-terminal-window text-base text-[var(--brand-primary)]"></i> <?= t('index.installer_link') ?>
                     </a>
                     <a href="#demo" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
-                        <i class="ph ph-shield-check text-base text-[var(--brand-primary)]"></i> Demo Roles
+                        <i class="ph ph-shield-check text-base text-[var(--brand-primary)]"></i> <?= t('index.demo_roles_link') ?>
                     </a>
                     <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1">
-                        <i class="ph ph-github-logo text-base"></i> GitHub
+                        <i class="ph ph-github-logo text-base"></i> <?= t('index.github_link') ?>
                     </a>
                 </div>
 
@@ -202,7 +202,7 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                         </button>
                         <div x-show="open" x-transition class="absolute right-0 mt-1.5 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[160px] z-50 font-mono text-xs">
                             <?php foreach (getAvailableLanguages() as $code => $lang): ?>
-                            <a href="?lang=<?= $code ?>" class="flex items-center gap-2.5 px-3.5 py-2 hover:bg-[var(--bg-hover)] transition-colors <?= $currentLang === $code ? 'text-[var(--brand-primary)] font-bold bg-orange-500/10' : 'text-[var(--text-secondary)]' ?>">
+                            <a href="<?= escape(buildLangUrl($code)) ?>" class="flex items-center gap-2.5 px-3.5 py-2 hover:bg-[var(--bg-hover)] transition-colors <?= $currentLang === $code ? 'text-[var(--brand-primary)] font-bold bg-orange-500/10' : 'text-[var(--text-secondary)]' ?>">
                                 <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm">
                                 <span><?= escape($lang['name']) ?></span>
                             </a>
@@ -243,16 +243,16 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
                         </span>
-                        <span>AI-POWERED VIBE CODING TEMPLATE // ARCHITECTURE READY</span>
+                        <span><?= t('index.badge') ?></span>
                     </div>
 
                     <h1 class="text-4xl sm:text-6xl lg:text-7xl font-heading font-extrabold tracking-tight leading-[1.1]">
-                        Tempakan Aplikasi Anda<br>
-                        <span class="text-gradient">dari Dokumen ke Kode Jadi</span>
+                        <?= t('index.hero_title') ?><br>
+                        <span class="text-gradient"><?= t('index.hero_title_highlight') ?></span>
                     </h1>
 
                     <p class="text-base sm:text-xl text-[var(--text-secondary)] max-w-3xl mx-auto leading-relaxed font-normal">
-                        <strong class="text-[var(--text-primary)]"><?= APP_DISPLAY_NAME ?></strong> adalah template starter professional untuk membangun aplikasi web dengan metode <span class="text-[var(--brand-primary)] font-semibold">vibe coding</span>: definisikan kebutuhan di dokumen, biarkan AI coding assistant menempa seluruh struktur kode fungsional.
+                        <strong class="text-[var(--text-primary)]"><?= APP_DISPLAY_NAME ?></strong> <?= t('index.hero_desc') ?>
                     </p>
 
                     <!-- Quick Terminal Command Bar in Hero -->
@@ -336,8 +336,8 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
                     <span class="font-mono text-xs text-[var(--brand-primary)] tracking-widest uppercase font-bold">// KEY ARCHITECTURE //</span>
-                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">Kenapa Harus Vibeforge?</h2>
-                    <p class="text-[var(--text-secondary)] text-base">Arsitektur bersih yang dirancang khusus untuk mempermudah AI CLI (Claude Code, Cursor, Copilot) bekerja tanpa kebingungan.</p>
+                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight"><?= t('index.why_title') ?></h2>
+                    <p class="text-[var(--text-secondary)] text-base"><?= t('index.why_subtitle') ?></p>
                 </div>
 
                 <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -346,32 +346,32 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                         <div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)] group-hover:scale-110 transition-transform">
                             <i class="ph ph-file-doc text-2xl"></i>
                         </div>
-                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Dokumen ke Kode</h3>
-                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Cukup update <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">docs/prd.md</code> & <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">docs/branding.md</code>. AI akan mengeksekusi fitur secara presisi.</p>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]"><?= t('index.feat_doc_title') ?></h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed"><?= t('index.feat_doc_desc') ?></p>
                     </div>
 
                     <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
                         <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
                             <i class="ph ph-layout text-2xl"></i>
                         </div>
-                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Shell SPA Clean-URL</h3>
-                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Landing page, login, register, manajemen, admin, client — terisolasi via Shell tipis dengan router proxy AJAX.</p>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]"><?= t('index.feat_shell_title') ?></h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed"><?= t('index.feat_shell_desc') ?></p>
                     </div>
 
                     <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
                         <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
                             <i class="ph ph-shield-check text-2xl"></i>
                         </div>
-                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Enterprise Security</h3>
-                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Password hashing Argon2ID, proteksi CSRF otomatis, rate-limiting IP/Username, serta RBAC middleware.</p>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]"><?= t('index.feat_security_title') ?></h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed"><?= t('index.feat_security_desc') ?></p>
                     </div>
 
                     <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
                         <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
                             <i class="ph ph-translate text-2xl"></i>
                         </div>
-                        <h3 class="font-heading font-semibold text-lg text-[var(--text-primary)]">Native i18n & RTL</h3>
-                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Sistem terjemahan multi-bahasa terpusat dengan deteksi GeoIP dan dukungan penuh layout RTL (Arabic).</p>
+                        <h3 class="font-heading font-semibold text-lg text-[var(--text-primary)]"><?= t('index.feat_i18n_title') ?></h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed"><?= t('index.feat_i18n_desc') ?></p>
                     </div>
 
                 </div>
@@ -880,13 +880,24 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
         });
 
         const html = document.documentElement;
+        function updateThemeUI(theme) {
+            const isDark = theme === 'dark';
+            html.classList.toggle('dark', isDark);
+            html.setAttribute('data-theme', theme);
+            const icon = document.querySelector('#themeToggle i');
+            if (icon) {
+                icon.className = isDark ? 'ph ph-moon text-lg dark:text-amber-400' : 'ph ph-sun text-lg text-amber-500';
+            }
+        }
         function initTheme() {
             const saved = localStorage.getItem('theme') || 'dark';
-            html.classList.toggle('dark', saved === 'dark');
+            updateThemeUI(saved);
         }
         document.getElementById('themeToggle')?.addEventListener('click', () => {
-            const isDark = html.classList.toggle('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            const current = html.classList.contains('dark') ? 'dark' : 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', next);
+            updateThemeUI(next);
         });
         initTheme();
 

@@ -1,5 +1,6 @@
 {
     "id": { "name": "Bahasa Indonesia", "flag": "/assets/flags/id.svg", "rtl": false },
     "en": { "name": "English", "flag": "/assets/flags/en.svg", "rtl": false },
+    "ja": { "name": "日本語", "flag": "/assets/flags/ja.svg", "rtl": false },
     "ar": { "name": "العربية", "flag": "/assets/flags/ar.svg", "rtl": true }
 }

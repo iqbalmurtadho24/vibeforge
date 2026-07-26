@@ -1,19 +1,33 @@
 <?php
 /**
  * Vibeforge - Administrator Dashboard (Super Admin)
+ * IT Professional / Cyber-Tech Edition
  */
 defined('APP_ENTRY') or define('APP_ENTRY', true);
+
 require_once __DIR__ . '/../../include/config.php';
 require_once __DIR__ . '/../../include/helper.php';
 require_once __DIR__ . '/../../core/session.php';
 require_once __DIR__ . '/../../core/csrf.php';
+
 initSession();
-if (!empty($_GET['lang']) && in_array($_GET['lang'], getAvailableLocaleCodes(), true)) { $_SESSION['language'] = $_GET['lang']; }
+
+if (!empty($_GET['lang']) && in_array($_GET['lang'], getAvailableLocaleCodes(), true)) {
+    $_SESSION['language'] = $_GET['lang'];
+}
+
 $currentLang = $_SESSION['language'] ?? detectLanguage();
 $_SESSION['language'] = $currentLang;
+$isRtl = isRtlLanguage();
+
 $isLoggedIn = isLoggedIn();
 $user = getCurrentUser();
-if (!$isLoggedIn || ($user['role'] ?? null) !== 'manajemen') { header('Location: /login/'); exit; }
+
+if (!$isLoggedIn || ($user['role'] ?? null) !== 'manajemen') {
+    header('Location: /login/');
+    exit;
+}
+
 $themePreference = $user['theme_preference'] ?? 'dark';
 $userName = escape($user['name'] ?? 'Admin');
 $userInitial = strtoupper(substr($userName, 0, 2));
@@ -21,179 +35,241 @@ $userEmail = escape($user['email'] ?? '');
 $allUsers = Repo::table('users')->all();
 ?>
 <!DOCTYPE html>
-<html lang="<?= $currentLang ?>" class="<?= $themePreference === 'light' ? '' : 'dark' ?>">
+<html lang="<?= $currentLang ?>" dir="<?= $isRtl ? 'rtl' : 'ltr' ?>" class="<?= $themePreference === 'light' ? '' : 'dark' ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $userName ?> - <?= APP_DISPLAY_NAME ?> Admin</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF6B35'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap">
+    <title><?= $userName ?> - <?= APP_DISPLAY_NAME ?> Super Admin</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F97316'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/assets/css/branding.css">
-    <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{brand:{primary:'#F97316',dark:'#0D1117',card:'#161B22'}}}}}</script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { brand: { primary: '#F97316', dark: '#0B0F17', card: '#111726', border: '#1E293B' } },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        heading: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--text-primary)}
-        h1,h2,h3{font-family:'Poppins',sans-serif}
-        .text-gradient{background:linear-gradient(135deg,#F97316,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .tech-grid {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); }
+        .glow-box-cyber { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
     </style>
 </head>
-<body class="antialiased h-screen flex flex-col overflow-hidden">
+<body class="antialiased h-screen flex flex-col overflow-hidden tech-grid bg-[var(--bg-primary)]">
 
 <div class="flex flex-1 overflow-hidden">
     <!-- Sidebar -->
-    <aside class="hidden md:flex flex-col w-64 bg-[var(--bg-card)] border-r border-[var(--border-default)] shrink-0">
+    <aside class="hidden md:flex flex-col w-64 bg-gray-950 border-r border-[var(--border-default)] shrink-0 font-mono">
         <div class="h-16 flex items-center px-6 border-b border-[var(--border-default)]">
-            <a href="/" class="flex items-center gap-2">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#F97316"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
-                <span class="font-heading font-bold text-lg"><span class="text-[var(--text-primary)]">Vibe</span><span class="text-gradient">forge</span></span>
-                <span class="text-xs text-[var(--text-muted)] ml-1">Admin</span>
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center group-hover:border-purple-500 transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#F97316"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-heading font-extrabold text-base tracking-tight leading-none"><span class="text-white">Vibe</span><span class="text-gradient">forge</span></span>
+                    <span class="text-[9px] text-purple-400 font-bold tracking-wider uppercase">SUPER_ADMIN</span>
+                </div>
             </a>
         </div>
-        <nav class="flex-1 py-4 px-3 space-y-1">
-            <button onclick="nav('dashboard')" id="s-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-[var(--brand-primary-light)] text-[var(--brand-primary)]"><i class="ph-fill ph-squares-four text-xl"></i> Dashboard</button>
-            <button onclick="nav('users')" id="s-users" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors"><i class="ph ph-users text-xl"></i> Users</button>
-            <button onclick="nav('system')" id="s-system" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors"><i class="ph ph-gear text-xl"></i> System</button>
-            <button onclick="nav('profile')" id="s-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors"><i class="ph ph-user text-xl"></i> Profil</button>
+        <nav class="flex-1 py-4 px-3 space-y-1 text-xs">
+            <button onclick="nav('dashboard')" id="s-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-orange-500/10 text-[var(--brand-primary)] border border-orange-500/20 transition-all"><i class="ph-fill ph-squares-four text-lg"></i> <?= t('mgmt.dashboard') ?></button>
+            <button onclick="nav('users')" id="s-users" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-users text-lg"></i> <?= t('mgmt.users') ?></button>
+            <button onclick="nav('system')" id="s-system" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-gear text-lg"></i> <?= t('mgmt.settings') ?></button>
+            <button onclick="nav('profile')" id="s-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-user text-lg"></i> <?= t('client.profile') ?></button>
         </nav>
-        <div class="p-4 border-t border-[var(--border-default)]">
-            <div class="flex items-center gap-3 px-2 py-2">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#F97316] to-orange-400 flex items-center justify-center text-white font-bold"><?= $userInitial ?></div>
-                <div><p class="text-sm font-medium"><?= $userName ?></p><p class="text-xs text-[var(--brand-primary)]">Super Admin</p></div>
+        <div class="p-4 border-t border-[var(--border-default)] bg-gray-900/50">
+            <div class="flex items-center gap-3 px-2 py-1.5">
+                <div class="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-xs"><?= $userInitial ?></div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold text-white truncate"><?= $userName ?></p>
+                    <p class="text-[10px] text-purple-400 uppercase font-semibold">Super Admin</p>
+                </div>
             </div>
         </div>
     </aside>
 
     <!-- Main -->
     <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-16 flex items-center justify-between px-6 bg-[var(--bg-secondary)] border-b border-[var(--border-default)] shrink-0">
-            <h1 id="pageTitle" class="font-heading font-semibold">Dashboard</h1>
-            <div class="flex items-center gap-2">
+        <header class="h-16 flex items-center justify-between px-6 bg-gray-950/80 border-b border-[var(--border-default)] shrink-0 font-mono text-xs">
+            <div class="flex items-center gap-3">
+                <h1 id="pageTitle" class="font-heading font-extrabold text-sm text-white tracking-wide uppercase">// DASHBOARD</h1>
+                <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px]">LIVE_METRICS</span>
+            </div>
+            <div class="flex items-center gap-3">
                 <!-- Language Selector -->
                 <div class="relative group" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors text-xs font-medium" aria-label="Change Language">
-                        <img src="<?= escape(getAvailableLanguages()[$currentLang]['flag'] ?? '/assets/flags/_default.svg') ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="<?= $currentLang ?>" class="w-5 h-3.5 rounded-sm shadow-sm">
-                        <span class="hidden sm:inline uppercase font-bold text-[var(--text-secondary)]"><?= escape($currentLang) ?></span>
-                        <i class="ph ph-caret-down text-xs text-[var(--text-muted)]"></i>
+                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-orange-500 transition-colors text-xs font-mono" aria-label="Change Language">
+                        <img src="<?= escape(getAvailableLanguages()[$currentLang]['flag'] ?? '/assets/flags/_default.svg') ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="<?= $currentLang ?>" class="w-4 h-3 rounded-sm">
+                        <span class="hidden sm:inline uppercase font-bold text-gray-300"><?= escape($currentLang) ?></span>
+                        <i class="ph ph-caret-down text-xs text-gray-500"></i>
                     </button>
-                    <div x-show="open" x-transition class="absolute right-0 mt-1 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[150px] z-50">
+                    <div x-show="open" x-transition class="absolute right-0 mt-1 bg-gray-900 rounded-xl shadow-2xl border border-gray-800 py-1 min-w-[160px] z-50 text-xs">
                         <?php foreach (getAvailableLanguages() as $code => $lang): ?>
-                        <a href="?lang=<?= $code ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[var(--bg-hover)] transition-colors <?= $currentLang === $code ? 'text-[var(--brand-primary)] font-bold bg-[var(--brand-primary-light)]/10' : 'text-[var(--text-secondary)]' ?>">
-                            <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-5 h-3.5 rounded-sm">
+                        <a href="<?= escape(buildLangUrl($code)) ?>" class="flex items-center gap-2.5 px-3.5 py-2 hover:bg-gray-800 transition-colors <?= $currentLang === $code ? 'text-orange-400 font-bold bg-orange-500/10' : 'text-gray-300' ?>">
+                            <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm">
                             <span><?= escape($lang['name']) ?></span>
                         </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
 
-                <button id="themeToggle" class="p-2 hover:bg-[var(--bg-hover)] rounded-lg" aria-label="Toggle theme"><i class="ph ph-moon text-lg text-[var(--brand-primary)]"></i></button>
-                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400" title="Keluar"><i class="ph ph-sign-out text-lg"></i></a>
+                <button id="themeToggle" class="p-2 hover:bg-gray-800 rounded-lg text-amber-400" aria-label="Toggle theme"><i class="ph ph-moon text-base"></i></button>
+                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400" title="<?= t('auth_logout') ?>"><i class="ph ph-sign-out text-base"></i></a>
             </div>
         </header>
-        <div id="content" class="flex-1 overflow-y-auto p-6 pb-24 md:pb-6"></div>
+        <div id="content" class="flex-1 overflow-y-auto p-6 pb-24 md:pb-6 font-sans"></div>
     </main>
 </div>
 
 <!-- Mobile Nav -->
-<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-card)] border-t border-[var(--border-default)] z-50">
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 z-50 font-mono text-xs">
     <div class="flex justify-around items-center h-16">
-        <button onclick="nav('dashboard')" class="flex flex-col items-center gap-1 text-[var(--brand-primary)]"><i class="ph-fill ph-squares-four text-2xl"></i><span class="text-[10px]">Dashboard</span></button>
-        <button onclick="nav('users')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]"><i class="ph ph-users text-2xl"></i><span class="text-[10px]">Users</span></button>
-        <button onclick="nav('system')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]"><i class="ph ph-gear text-2xl"></i><span class="text-[10px]">System</span></button>
-        <button onclick="nav('profile')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]"><i class="ph ph-user text-2xl"></i><span class="text-[10px]">Profil</span></button>
+        <button onclick="nav('dashboard')" class="flex flex-col items-center gap-1 text-orange-400" id="m-dashboard"><i class="ph-fill ph-squares-four text-xl"></i><span class="text-[9px]">Dashboard</span></button>
+        <button onclick="nav('users')" class="flex flex-col items-center gap-1 text-gray-400" id="m-users"><i class="ph ph-users text-xl"></i><span class="text-[9px]">Users</span></button>
+        <button onclick="nav('system')" class="flex flex-col items-center gap-1 text-gray-400" id="m-system"><i class="ph ph-gear text-xl"></i><span class="text-[9px]">System</span></button>
+        <button onclick="nav('profile')" class="flex flex-col items-center gap-1 text-gray-400" id="m-profile"><i class="ph ph-user text-xl"></i><span class="text-[9px]">Profil</span></button>
     </div>
 </nav>
 
 <script>
+window._i18n = {
+    dashboard: <?= json_encode(t('mgmt.dashboard')) ?>,
+    users: <?= json_encode(t('mgmt.users')) ?>,
+    system: <?= json_encode(t('mgmt.settings')) ?>,
+    profile: <?= json_encode(t('client.profile')) ?>
+};
+
 const V = {
     dashboard: `
         <div class="space-y-6">
-            <div class="flex items-center justify-between">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="w-10 h-10 rounded-lg bg-[var(--brand-primary-light)] flex items-center justify-center mb-3"><i class="ph ph-users text-xl text-[var(--brand-primary)]"></i></div>
-                    <p class="text-2xl font-bold"><?= count($allUsers) ?></p><p class="text-sm text-[var(--text-muted)]">Total User</p>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400 uppercase font-bold"><?= t('mgmt.total_users') ?></span>
+                        <i class="ph ph-users text-purple-400 text-xl"></i>
+                    </div>
+                    <p class="text-3xl font-extrabold text-white"><?= count($allUsers) ?></p>
+                    <span class="text-[10px] text-emerald-400 flex items-center gap-1"><i class="ph ph-trend-up"></i> Active Accounts</span>
                 </div>
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center mb-3"><i class="ph ph-database text-xl text-green-500"></i></div>
-                    <p class="text-2xl font-bold">JSON</p><p class="text-sm text-[var(--text-muted)]">Database Mode</p>
+                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400 uppercase font-bold">Data Engine</span>
+                        <i class="ph ph-database text-amber-400 text-xl"></i>
+                    </div>
+                    <p class="text-2xl font-extrabold text-amber-400">JSON/SQL</p>
+                    <span class="text-[10px] text-gray-400">Auto-Switch Dual Engine</span>
                 </div>
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center mb-3"><i class="ph ph-shield-check text-xl text-blue-500"></i></div>
-                    <p class="text-2xl font-bold">Argon2ID</p><p class="text-sm text-[var(--text-muted)]">Password Hash</p>
+                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400 uppercase font-bold">Security Grade</span>
+                        <i class="ph ph-shield-check text-emerald-400 text-xl"></i>
+                    </div>
+                    <p class="text-2xl font-extrabold text-emerald-400">Argon2ID</p>
+                    <span class="text-[10px] text-gray-400">OWASP ASVS Guarded</span>
                 </div>
-                <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-5">
-                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center mb-3"><i class="ph ph-code text-xl text-purple-500"></i></div>
-                    <p class="text-2xl font-bold"><?= APP_ENV ?></p><p class="text-sm text-[var(--text-muted)]">Environment</p>
+                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400 uppercase font-bold">Environment</span>
+                        <i class="ph ph-code text-indigo-400 text-xl"></i>
+                    </div>
+                    <p class="text-2xl font-extrabold text-indigo-400"><?= escape(APP_ENV) ?></p>
+                    <span class="text-[10px] text-gray-400">PHP 8.3+ Native</span>
                 </div>
-            </div>
             </div>
 
-            <!-- Setup Wizard CTA -->
-            <div class="bg-gradient-to-r from-[var(--brand-primary)] to-orange-400 rounded-xl p-6 text-white">
+            <!-- Setup Wizard CTA Banner -->
+            <div class="bg-gradient-brand rounded-2xl p-6 text-white shadow-xl glow-box-cyber font-mono">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
-                            <i class="ph ph-magic-wand text-3xl"></i>
+                        <div class="w-12 h-12 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
+                            <i class="ph ph-magic-wand text-2xl"></i>
                         </div>
                         <div>
-                            <h3 class="font-heading font-bold text-xl mb-1">Setup Wizard Vibeforge</h3>
-                            <p class="text-white/80 text-sm">Siapkan project baru dengan AI assistant dalam hitungan menit</p>
+                            <h3 class="font-heading font-extrabold text-lg">Setup Wizard Vibeforge</h3>
+                            <p class="text-white/80 text-xs font-sans">Siapkan proyek baru dengan AI assistant dalam hitungan menit.</p>
                         </div>
                     </div>
-                    <a href="/install/" class="px-6 py-3 bg-white text-[var(--brand-primary)] font-bold rounded-xl hover:bg-white/90 transition-colors shadow-lg flex items-center gap-2">
-                        <i class="ph ph-rocket-launch"></i> Mulai Menyiapkan Instalasi
+                    <a href="/install/" class="px-6 py-3 bg-gray-950 text-orange-400 font-bold text-xs rounded-xl hover:bg-gray-900 transition-colors shadow-lg flex items-center gap-2 shrink-0">
+                        <i class="ph ph-rocket-launch text-base"></i> LAUNCH WIZARD (12 STEPS)
                     </a>
                 </div>
             </div>
 
-            <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-6">
-                <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="ph ph-shield-check text-[var(--brand-primary)]"></i> Fitur Keamanan Vibeforge</h3>
-                <div class="grid md:grid-cols-2 gap-4 text-sm">
-                    <div class="p-4 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)]">
-                        <p class="font-bold text-[var(--brand-primary)] mb-1">Argon2ID Password Hashing</p>
-                        <p class="text-[var(--text-muted)]">Password di-hash dengan PASSWORD_ARGON2ID untuk keamanan maksimal.</p>
+            <!-- Security Specs Grid -->
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 space-y-4 glow-box-cyber font-mono">
+                <h3 class="font-bold text-xs uppercase text-orange-400 flex items-center gap-2">
+                    <i class="ph ph-shield-check text-base"></i> Fitur Keamanan & Arsitektur Vibeforge
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4 text-xs font-sans">
+                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800">
+                        <p class="font-bold font-mono text-orange-400 mb-1">Argon2ID Password Hashing</p>
+                        <p class="text-gray-400 text-xs leading-relaxed">Password di-hash dengan PASSWORD_ARGON2ID untuk keamanan tingkat tinggi.</p>
                     </div>
-                    <div class="p-4 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)]">
-                        <p class="font-bold text-[var(--brand-primary)] mb-1">CSRF Protection</p>
-                        <p class="text-[var(--text-muted)]">Token CSRF terpusat di core/router.php yang diverifikasi via hash_equals().</p>
+                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800">
+                        <p class="font-bold font-mono text-orange-400 mb-1">CSRF Protection</p>
+                        <p class="text-gray-400 text-xs leading-relaxed">Token CSRF terpusat di core/router.php yang diverifikasi via hash_equals().</p>
                     </div>
-                    <div class="p-4 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)]">
-                        <p class="font-bold text-[var(--brand-primary)] mb-1">Rate Limiting</p>
-                        <p class="text-[var(--text-muted)]">Mencegah brute force login berbasis IP + username.</p>
+                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800">
+                        <p class="font-bold font-mono text-orange-400 mb-1">Rate Limiting</p>
+                        <p class="text-gray-400 text-xs leading-relaxed">Proteksi brute-force login berbasis kombinasi IP address dan Username.</p>
                     </div>
-                    <div class="p-4 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)]">
-                        <p class="font-bold text-[var(--brand-primary)] mb-1">Dual-Mode Repo</p>
-                        <p class="text-[var(--text-muted)]">Auto-switch MySQL / JSON per entitas secara transparan.</p>
+                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800">
+                        <p class="font-bold font-mono text-orange-400 mb-1">Dual-Mode Repo Access</p>
+                        <p class="text-gray-400 text-xs leading-relaxed">Repo::table('entitas') secara otomatis berpindah antara MySQL PDO dan JSON storage.</p>
                     </div>
                 </div>
             </div>
         </div>
     `,
     users: `
-        <div class="space-y-6">
-            <h2 class="text-2xl font-bold">Daftar Pengguna</h2>
-            <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-[var(--bg-surface)] text-[var(--text-muted)] border-b border-[var(--border-default)]">
+        <div class="space-y-6 font-mono text-xs">
+            <h2 class="text-xl font-bold uppercase text-white">// <?= t('mgmt.users') ?></h2>
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 overflow-x-auto glow-box-cyber">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-gray-900 text-gray-400 border-b border-gray-800">
                         <tr>
-                            <th class="px-6 py-3 font-medium">User</th>
-                            <th class="px-6 py-3 font-medium">Email</th>
-                            <th class="px-6 py-3 font-medium">Role</th>
-                            <th class="px-6 py-3 font-medium">Status</th>
+                            <th class="px-6 py-3 font-bold uppercase">User</th>
+                            <th class="px-6 py-3 font-bold uppercase">Email</th>
+                            <th class="px-6 py-3 font-bold uppercase">Role</th>
+                            <th class="px-6 py-3 font-bold uppercase">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-[var(--border-default)]">
+                    <tbody class="divide-y divide-gray-800 text-gray-300">
                         <?php foreach($allUsers as $u): ?>
-                        <tr class="hover:bg-[var(--bg-hover)] transition-colors">
-                            <td class="px-6 py-4 flex items-center gap-3 font-medium">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#F97316] to-orange-400 flex items-center justify-center text-white font-bold text-xs"><?= strtoupper(substr($u['name'], 0, 1)) ?></div>
+                        <tr class="hover:bg-gray-900/50 transition-colors">
+                            <td class="px-6 py-4 flex items-center gap-3 font-bold text-white">
+                                <div class="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-xs"><?= strtoupper(substr($u['name'], 0, 1)) ?></div>
                                 <?= escape($u['name']) ?>
                             </td>
-                            <td class="px-6 py-4 text-[var(--text-muted)]"><?= escape($u['email']) ?></td>
-                            <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-medium <?= $u['role']==='manajemen'?'bg-purple-500/20 text-purple-400':($u['role']==='admin'?'bg-blue-500/20 text-blue-400':'bg-green-500/20 text-green-400') ?>"><?= ucfirst($u['role']) ?></span></td>
-                            <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs bg-green-500/20 text-green-400">Active</span></td>
+                            <td class="px-6 py-4 text-gray-400"><?= escape($u['email']) ?></td>
+                            <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold <?= $u['role']==='manajemen'?'bg-purple-500/10 text-purple-400 border border-purple-500/20':($u['role']==='admin'?'bg-orange-500/10 text-orange-400 border border-orange-500/20':'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20') ?>"><?= strtoupper($u['role']) ?></span></td>
+                            <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><?= t('status.active') ?></span></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -202,47 +278,65 @@ const V = {
         </div>
     `,
     system: `
-        <div class="space-y-6 max-w-2xl">
-            <h2 class="text-2xl font-bold">Sistem & Konfigurasi</h2>
-            <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] divide-y divide-[var(--border-default)] text-sm">
-                <div class="p-4 flex justify-between"><span class="text-[var(--text-secondary)]">APP_DISPLAY_NAME</span><span class="font-mono"><?= APP_DISPLAY_NAME ?></span></div>
-                <div class="p-4 flex justify-between"><span class="text-[var(--text-secondary)]">APP_ENV</span><span class="font-mono text-yellow-400"><?= APP_ENV ?></span></div>
-                <div class="p-4 flex justify-between"><span class="text-[var(--text-secondary)]">DB_MODE</span><span class="font-mono text-[var(--brand-primary)]"><?= DB_MODE ?></span></div>
-                <div class="p-4 flex justify-between"><span class="text-[var(--text-secondary)]">Data Path</span><span class="font-mono">data/*.json</span></div>
-                <div class="p-4 flex justify-between"><span class="text-[var(--text-secondary)]">PHP Version</span><span class="font-mono"><?= PHP_VERSION ?></span></div>
-            </div>
-            <div class="text-center">
-                <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl hover:border-[var(--brand-primary)] transition-colors"><i class="ph ph-github-logo text-xl"></i> Repository GitHub</a>
+        <div class="space-y-6 max-w-2xl font-mono text-xs">
+            <h2 class="text-xl font-bold uppercase text-white">// <?= t('mgmt.settings') ?></h2>
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 divide-y divide-gray-800 glow-box-cyber">
+                <div class="p-4 flex justify-between"><span class="text-gray-400">APP_DISPLAY_NAME</span><span class="font-bold text-white"><?= APP_DISPLAY_NAME ?></span></div>
+                <div class="p-4 flex justify-between"><span class="text-gray-400">APP_ENV</span><span class="font-bold text-amber-400"><?= escape(APP_ENV) ?></span></div>
+                <div class="p-4 flex justify-between"><span class="text-gray-400">DB_MODE</span><span class="font-bold text-orange-400">auto (SQL/JSON)</span></div>
+                <div class="p-4 flex justify-between"><span class="text-gray-400">Data Storage</span><span class="font-bold text-gray-300">data/*.json</span></div>
+                <div class="p-4 flex justify-between"><span class="text-gray-400">PHP Version</span><span class="font-bold text-emerald-400">8.3+ Native</span></div>
             </div>
         </div>
     `,
     profile: `
-        <div class="max-w-xl space-y-6">
-            <h2 class="text-2xl font-bold">Profil Admin</h2>
-            <div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-6 text-center">
-                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-[#F97316] to-orange-400 flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4 shadow-lg"><?= $userInitial ?></div>
-                <h3 class="text-xl font-semibold"><?= $userName ?></h3>
-                <p class="text-[var(--text-muted)]"><?= $userEmail ?></p>
-                <span class="inline-block mt-2 px-3 py-1 rounded-full text-sm bg-purple-500/20 text-purple-400">Super Admin</span>
+        <div class="max-w-xl space-y-6 font-mono text-xs">
+            <h2 class="text-xl font-bold uppercase text-white">// <?= t('client.profile') ?></h2>
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 text-center glow-box-cyber space-y-3">
+                <div class="w-20 h-20 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 text-2xl font-bold mx-auto shadow-lg"><?= $userInitial ?></div>
+                <h3 class="text-lg font-bold text-white"><?= $userName ?></h3>
+                <p class="text-gray-400"><?= $userEmail ?></p>
+                <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">SUPER ADMIN</span>
             </div>
-            <a href="/logout/" class="flex items-center justify-center gap-2 py-3 bg-red-500/10 text-red-400 font-medium rounded-xl hover:bg-red-500/20 transition-colors"><i class="ph ph-sign-out"></i> Logout</a>
+            <a href="/logout/" class="flex items-center justify-center gap-2 py-3.5 bg-red-500/10 text-red-400 border border-red-500/30 font-bold rounded-xl hover:bg-red-500/20 transition-colors"><i class="ph ph-sign-out text-base"></i> <?= t('auth_logout') ?></a>
         </div>
     `
 };
 
 function nav(p) {
     document.getElementById('content').innerHTML = V[p] || V.dashboard;
-    document.getElementById('pageTitle').textContent = {dashboard:'Dashboard',users:'Users',system:'System',profile:'Profil'}[p]||'Dashboard';
+    document.getElementById('pageTitle').textContent = '// ' + (window._i18n[p] || window._i18n.dashboard).toUpperCase();
     ['dashboard','users','system','profile'].forEach(k => {
-        const el = document.getElementById('s-'+k);
-        if(!el) return;
-        if(k===p) { el.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-[var(--brand-primary-light)] text-[var(--brand-primary)]'; }
-        else { el.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors'; }
+        const d = document.getElementById('s-'+k);
+        const m = document.getElementById('m-'+k);
+        if(d) {
+            if(k===p) { d.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-orange-500/10 text-[var(--brand-primary)] border border-orange-500/20 transition-all'; }
+            else { d.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors'; }
+        }
+        if(m) {
+            if(k===p) { m.className='flex flex-col items-center gap-1 text-orange-400'; }
+            else { m.className='flex flex-col items-center gap-1 text-gray-400'; }
+        }
     });
 }
-const html=document.documentElement;
-document.getElementById('themeToggle')?.addEventListener('click',()=>{const d=html.classList.toggle('dark');localStorage.setItem('theme',d?'dark':'light')});
-(()=>{const s=localStorage.getItem('theme')||'dark';html.classList.toggle('dark',s==='dark')})();
+
+const html = document.documentElement;
+function updateThemeUI(theme) {
+    const isDark = theme === 'dark';
+    html.classList.toggle('dark', isDark);
+    html.setAttribute('data-theme', theme);
+    const icon = document.querySelector('#themeToggle i');
+    if (icon) {
+        icon.className = isDark ? 'ph ph-moon text-base text-amber-400' : 'ph ph-sun text-base text-amber-500';
+    }
+}
+document.getElementById('themeToggle')?.addEventListener('click', () => {
+    const current = html.classList.contains('dark') ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    updateThemeUI(next);
+});
+updateThemeUI(localStorage.getItem('theme') || 'dark');
 nav('dashboard');
 </script>
 </body>
