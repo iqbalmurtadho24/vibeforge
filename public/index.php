@@ -1,7 +1,7 @@
-﻿<?php
+<?php
 /**
  * Vibeforge Landing Page
- * Full informational page with installation guide
+ * Full informational page with installation guide - IT Professional Edition
  */
 
 defined('APP_ENTRY') or define('APP_ENTRY', true);
@@ -73,11 +73,11 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= APP_DISPLAY_NAME ?> - <?= escape(APP_TAGLINE) ?></title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF6B35'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
+    <title><?= APP_DISPLAY_NAME ?> - Developer-Grade Vibe Coding Architecture</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F97316'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
@@ -95,62 +95,115 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { brand: { primary: '#F97316', dark: '#0D1117', card: '#161B22' } },
-                    fontFamily: { sans: ['Inter', 'sans-serif'], heading: ['Poppins', 'sans-serif'] }
+                    colors: {
+                        brand: {
+                            primary: '#F97316',
+                            hover: '#EA580C',
+                            dark: '#0B0F17',
+                            card: '#111726',
+                            border: '#1E293B'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        heading: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
-        h1, h2, h3 { font-family: 'Poppins', sans-serif; }
-        .text-gradient { background: linear-gradient(135deg, #F97316 0%, #F59E0B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #F59E0B 100%); }
-        .glow-orange { box-shadow: 0 0 40px rgba(255, 107, 53, 0.3); }
-        .glow-orange-sm { box-shadow: 0 0 20px rgba(255, 107, 53, 0.2); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .tech-grid {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        .glow-mesh {
+            background: radial-gradient(circle at 50% 20%, rgba(249, 115, 22, 0.15) 0%, rgba(13, 17, 23, 0) 65%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); }
+        .glow-orange { box-shadow: 0 0 35px rgba(249, 115, 22, 0.25); }
+        .glow-orange-sm { box-shadow: 0 0 20px rgba(249, 115, 22, 0.15); }
+        .glow-box-cyber { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased">
+<body class="min-h-screen flex flex-col antialiased tech-grid bg-[var(--bg-primary)]">
+
+    <!-- Top Status Bar (IT Professional Touch) -->
+    <div class="bg-[var(--bg-secondary)] border-b border-[var(--border-default)] py-1 px-4 text-[11px] font-mono text-[var(--text-secondary)] hidden sm:flex items-center justify-between z-50">
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5 text-emerald-400">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                SYSTEM: ONLINE
+            </span>
+            <span class="text-[var(--border-default)]">|</span>
+            <span>PHP 8.3+ Native</span>
+            <span class="text-[var(--border-default)]">|</span>
+            <span>Architecture: SPA Shell Proxy</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span>Repo Mode: Dual-Engine (Auto SQL/JSON)</span>
+            <span class="text-[var(--border-default)]">|</span>
+            <span class="text-[var(--brand-primary)]">v3.2.0-STABLE</span>
+        </div>
+    </div>
 
     <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 bg-[var(--bg-secondary)]/90 backdrop-blur-md border-b border-[var(--border-default)]">
+    <nav class="sticky top-0 w-full z-50 bg-[var(--bg-primary)]/85 backdrop-blur-xl border-b border-[var(--border-default)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <a href="/" class="flex items-center gap-2">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#F97316">
-                        <path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/>
-                    </svg>
-                    <span class="font-heading font-bold text-xl">
-                        <span class="text-[var(--text-primary)]">Vibe</span><span class="text-gradient">forge</span>
-                    </span>
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center group-hover:border-orange-500 transition-colors shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="#F97316">
+                            <path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/>
+                        </svg>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-heading font-extrabold text-lg tracking-tight leading-none">
+                            <span class="text-[var(--text-primary)]">Vibe</span><span class="text-gradient">forge</span>
+                        </span>
+                        <span class="font-mono text-[9px] text-[var(--text-muted)] tracking-wider">DEV_ENGINE</span>
+                    </div>
                 </a>
 
-                <div class="hidden md:flex items-center gap-8">
-                    <a href="#fitur" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">Fitur</a>
-                    <a href="#cara-pasang" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">Cara Pasang</a>
-                    <a href="#demo" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">Demo</a>
-                    <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1">
-                        <i class="ph ph-github-logo"></i> GitHub
+                <div class="hidden md:flex items-center gap-8 font-medium text-sm">
+                    <a href="#fitur" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
+                        <i class="ph ph-cpu text-base text-[var(--brand-primary)]"></i> Arsitektur
                     </a>
-                    <a href="/install/" class="px-4 py-2 bg-[var(--brand-primary)] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg glow-orange-sm">
-                        <i class="ph ph-magic-wand mr-1"></i> Setup Wizard
+                    <a href="#cara-pasang" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
+                        <i class="ph ph-terminal-window text-base text-[var(--brand-primary)]"></i> Installer
+                    </a>
+                    <a href="#demo" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
+                        <i class="ph ph-shield-check text-base text-[var(--brand-primary)]"></i> Demo Roles
+                    </a>
+                    <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1">
+                        <i class="ph ph-github-logo text-base"></i> GitHub
                     </a>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <!-- Language Selector -->
                     <div class="relative group" x-data="{ open: false }">
-                        <button @click="open = !open" @click.away="open = false" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors text-xs font-medium" aria-label="Change Language">
-                            <img src="<?= escape(getAvailableLanguages()[$currentLang]['flag'] ?? '/assets/flags/_default.svg') ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="<?= $currentLang ?>" class="w-5 h-3.5 rounded-sm shadow-sm">
-                            <span class="hidden sm:inline uppercase font-bold text-[var(--text-secondary)]"><?= escape($currentLang) ?></span>
+                        <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors text-xs font-mono" aria-label="Change Language">
+                            <img src="<?= escape(getAvailableLanguages()[$currentLang]['flag'] ?? '/assets/flags/_default.svg') ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="<?= $currentLang ?>" class="w-4 h-3 rounded-sm shadow-sm">
+                            <span class="uppercase font-bold text-[var(--text-secondary)]"><?= escape($currentLang) ?></span>
                             <i class="ph ph-caret-down text-xs text-[var(--text-muted)]"></i>
                         </button>
-                        <div x-show="open" x-transition class="absolute right-0 mt-1 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[150px] z-50">
+                        <div x-show="open" x-transition class="absolute right-0 mt-1.5 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[160px] z-50 font-mono text-xs">
                             <?php foreach (getAvailableLanguages() as $code => $lang): ?>
-                            <a href="?lang=<?= $code ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[var(--bg-hover)] transition-colors <?= $currentLang === $code ? 'text-[var(--brand-primary)] font-bold bg-[var(--brand-primary-light)]/10' : 'text-[var(--text-secondary)]' ?>">
-                                <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-5 h-3.5 rounded-sm">
+                            <a href="?lang=<?= $code ?>" class="flex items-center gap-2.5 px-3.5 py-2 hover:bg-[var(--bg-hover)] transition-colors <?= $currentLang === $code ? 'text-[var(--brand-primary)] font-bold bg-orange-500/10' : 'text-[var(--text-secondary)]' ?>">
+                                <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm">
                                 <span><?= escape($lang['name']) ?></span>
                             </a>
                             <?php endforeach; ?>
@@ -158,499 +211,603 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                     </div>
 
                     <!-- Theme Toggle -->
-                    <button id="themeToggle" class="w-9 h-9 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] flex items-center justify-center transition-colors" aria-label="Toggle theme">
-                        <i class="ph ph-moon text-base text-[var(--text-muted)] dark:text-yellow-400"></i>
+                    <button id="themeToggle" class="w-9 h-9 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] flex items-center justify-center transition-colors text-[var(--text-muted)] hover:text-amber-400" aria-label="Toggle theme">
+                        <i class="ph ph-moon text-lg dark:text-amber-400"></i>
                     </button>
+
                     <?php if ($isLoggedIn): ?>
-                    <a href="<?= $dashboardUrl ?>" class="px-4 py-2 bg-[var(--brand-primary)] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Dashboard</a>
+                    <a href="<?= $dashboardUrl ?>" class="px-4 py-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white text-xs font-bold rounded-lg transition-all shadow-md flex items-center gap-1.5 font-mono">
+                        <i class="ph ph-squares-four text-base"></i> DASHBOARD
+                    </a>
                     <?php else: ?>
-                    <a href="/login/" class="px-3.5 py-1.5 text-[var(--text-secondary)] text-sm font-medium rounded-lg hover:bg-[var(--bg-hover)] transition-colors">Masuk</a>
-                    <a href="/register/" class="px-4 py-2 bg-gradient-brand text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg glow-orange-sm">Daftar</a>
+                    <a href="/login/" class="px-3.5 py-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold rounded-lg hover:bg-[var(--bg-hover)] transition-colors">Masuk</a>
+                    <a href="/register/" class="px-4 py-2 bg-gradient-brand text-white text-xs font-bold rounded-lg hover:opacity-95 transition-all shadow-md glow-orange-sm flex items-center gap-1">
+                        <i class="ph ph-user-plus text-sm"></i> Daftar
+                    </a>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="flex-grow pt-20">
+    <main class="flex-grow relative glow-mesh">
 
-        <!-- Hero -->
-        <section class="py-16 sm:py-24 bg-[var(--bg-primary)]">
+        <!-- Hero Section -->
+        <section class="py-16 sm:py-24 relative overflow-hidden">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-4xl mx-auto">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--brand-primary-light)] border border-[var(--brand-primary)]/20 mb-6">
-                        <i class="ph ph-robot text-[var(--brand-primary)]"></i>
-                        <span class="text-sm font-medium text-[var(--brand-primary)]">AI-Powered Web Template</span>
+                <div class="text-center max-w-4xl mx-auto space-y-6">
+
+                    <!-- Tech Status Badge -->
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 font-mono text-xs shadow-[0_0_20px_rgba(249,115,22,0.15)]">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                        </span>
+                        <span>AI-POWERED VIBE CODING TEMPLATE // ARCHITECTURE READY</span>
                     </div>
 
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-6 leading-tight">
+                    <h1 class="text-4xl sm:text-6xl lg:text-7xl font-heading font-extrabold tracking-tight leading-[1.1]">
                         Tempakan Aplikasi Anda<br>
                         <span class="text-gradient">dari Dokumen ke Kode Jadi</span>
                     </h1>
 
-                    <p class="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto">
-                        <?= APP_DISPLAY_NAME ?> adalah template starter untuk membangun aplikasi web dengan pendekatan vibe coding: jelaskan aplikasi lewat dokumen, AI coding assistant yang mengubahnya jadi kode fungsional lengkap.
+                    <p class="text-base sm:text-xl text-[var(--text-secondary)] max-w-3xl mx-auto leading-relaxed font-normal">
+                        <strong class="text-[var(--text-primary)]"><?= APP_DISPLAY_NAME ?></strong> adalah template starter professional untuk membangun aplikasi web dengan metode <span class="text-[var(--brand-primary)] font-semibold">vibe coding</span>: definisikan kebutuhan di dokumen, biarkan AI coding assistant menempa seluruh struktur kode fungsional.
                     </p>
 
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="#cara-pasang" class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-brand text-white font-bold rounded-xl hover:opacity-90 transition-opacity shadow-lg glow-orange">
-                            <i class="ph ph-rocket-launch text-xl"></i> Mulai Pasang Sekarang
+                    <!-- Quick Terminal Command Bar in Hero -->
+                    <div class="pt-2 max-w-3xl mx-auto">
+                        <div class="bg-gray-950/90 backdrop-blur-md border border-[var(--border-default)] rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs text-emerald-400 shadow-2xl group hover:border-orange-500/50 transition-all glow-box-cyber">
+                            <div class="flex items-center gap-2.5 overflow-x-auto hide-scrollbar py-0.5 min-w-0">
+                                <span class="text-xs font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded select-none shrink-0">PS</span>
+                                <span class="text-gray-500 select-none font-bold">&gt;</span>
+                                <span class="truncate sm:whitespace-normal font-mono text-emerald-400 font-medium tracking-tight">irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex</span>
+                            </div>
+                            <button onclick="copySnippet(this, 'irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex')" class="self-end sm:self-auto px-4 py-2 bg-gradient-brand hover:opacity-90 text-white rounded-lg text-xs font-sans font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-md glow-orange-sm">
+                                <i class="ph ph-copy text-sm"></i> Copy Command
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Call To Actions -->
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                        <a href="#cara-pasang" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-brand text-white font-bold rounded-xl hover:opacity-95 transition-all shadow-xl glow-orange text-sm font-mono tracking-wide">
+                            <i class="ph ph-rocket-launch text-xl"></i> SETUP APPLICATION
                         </a>
-                        <a href="/install/" class="inline-flex items-center gap-2 px-8 py-4 bg-[var(--bg-card)] text-[var(--text-primary)] font-medium rounded-xl border border-[var(--brand-primary)] hover:bg-[var(--brand-primary-light)]/10 transition-colors shadow-lg glow-orange-sm">
-                            <i class="ph ph-magic-wand text-xl text-[var(--brand-primary)]"></i> Mulai Menyiapkan Instalasi
+                        <a href="/install/" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[var(--bg-card)] text-[var(--text-primary)] font-bold rounded-xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] hover:bg-orange-500/5 transition-all shadow-lg text-sm font-mono tracking-wide">
+                            <i class="ph ph-magic-wand text-xl text-[var(--brand-primary)]"></i> WIZARD (12 STEPS)
                         </a>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Prerequisites -->
-        <section class="py-12 bg-[var(--bg-surface)] border-y border-[var(--border-default)]">
+        <!-- Technical Specification Bar -->
+        <section class="py-10 bg-[var(--bg-secondary)]/70 border-y border-[var(--border-default)] backdrop-blur-md">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-lg font-heading font-semibold mb-6 text-center">Prasyarat</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <div class="p-4">
-                        <i class="ph ph-file-code text-3xl text-[var(--brand-primary)] mb-2 block"></i>
-                        <p class="text-sm font-medium">AI Coding CLI</p>
-                        <p class="text-xs text-[var(--text-muted)]">Claude/Cursor/Copilot</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+
+                    <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] flex items-center gap-4 hover:border-orange-500/40 transition-colors">
+                        <div class="w-12 h-12 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[var(--brand-primary)] shrink-0">
+                            <i class="ph ph-code text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-mono text-xs font-bold text-[var(--text-primary)]">Native PHP 8.3+</div>
+                            <div class="text-[11px] text-[var(--text-muted)]">Zero Heavy Framework Overhead</div>
+                        </div>
                     </div>
-                    <div class="p-4">
-                        <i class="ph ph-browser text-3xl text-[var(--brand-primary)] mb-2 block"></i>
-                        <p class="text-sm font-medium">XAMPP / Laragon</p>
-                        <p class="text-xs text-[var(--text-muted)]">PHP 8.x runtime</p>
+
+                    <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] flex items-center gap-4 hover:border-orange-500/40 transition-colors">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                            <i class="ph ph-database text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-mono text-xs font-bold text-[var(--text-primary)]">Dual-Engine Repo</div>
+                            <div class="text-[11px] text-[var(--text-muted)]">Auto Switch SQL / JSON Storage</div>
+                        </div>
                     </div>
-                    <div class="p-4">
-                        <i class="ph ph-git-branch text-3xl text-[var(--brand-primary)] mb-2 block"></i>
-                        <p class="text-sm font-medium">Git (opsional)</p>
-                        <p class="text-xs text-[var(--text-muted)]">Clone repo</p>
+
+                    <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] flex items-center gap-4 hover:border-orange-500/40 transition-colors">
+                        <div class="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                            <i class="ph ph-shield-check text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-mono text-xs font-bold text-[var(--text-primary)]">OWASP ASVS Guarded</div>
+                            <div class="text-[11px] text-[var(--text-muted)]">Argon2ID + CSRF + Rate Limiter</div>
+                        </div>
                     </div>
-                    <div class="p-4">
-                        <i class="ph ph-folder-simple text-3xl text-[var(--brand-primary)] mb-2 block"></i>
-                        <p class="text-sm font-medium">Folder project</p>
-                        <p class="text-xs text-[var(--text-muted)]">htdocs/ atau www/</p>
+
+                    <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] flex items-center gap-4 hover:border-orange-500/40 transition-colors">
+                        <div class="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
+                            <i class="ph ph-browser text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-mono text-xs font-bold text-[var(--text-primary)]">SPA Shell Architecture</div>
+                            <div class="text-[11px] text-[var(--text-muted)]">Router Proxy Pattern No-Reload</div>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </section>
 
-        <!-- Features -->
-        <section id="fitur" class="py-16 sm:py-24">
+        <!-- Feature Grid (IT Pro Bento-style) -->
+        <section id="fitur" class="py-20 sm:py-28">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-3xl sm:text-4xl font-heading font-bold text-center mb-4">Kenapa <?= APP_DISPLAY_NAME ?>?</h2>
-                <p class="text-center text-[var(--text-secondary)] max-w-2xl mx-auto mb-12">Template yang dirancang untuk developer modern yang ingin bangun aplikasi cepat dengan AI coding assistant.</p>
+                <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                    <span class="font-mono text-xs text-[var(--brand-primary)] tracking-widest uppercase font-bold">// KEY ARCHITECTURE //</span>
+                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">Kenapa Harus Vibeforge?</h2>
+                    <p class="text-[var(--text-secondary)] text-base">Arsitektur bersih yang dirancang khusus untuk mempermudah AI CLI (Claude Code, Cursor, Copilot) bekerja tanpa kebingungan.</p>
+                </div>
 
                 <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-all group">
-                        <div class="w-14 h-14 rounded-xl bg-[var(--brand-primary-light)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <i class="ph ph-file-doc text-2xl text-[var(--brand-primary)]"></i>
+
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
+                        <div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)] group-hover:scale-110 transition-transform">
+                            <i class="ph ph-file-doc text-2xl"></i>
                         </div>
-                        <h3 class="font-heading font-semibold text-lg mb-2">Dokumen ke Kode</h3>
-                        <p class="text-sm text-[var(--text-secondary)]">Jelaskan aplikasi lewat docs/prd.md, AI yang mengubahnya jadi kode fungsional lengkap.</p>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Dokumen ke Kode</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Cukup update <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">docs/prd.md</code> & <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">docs/branding.md</code>. AI akan mengeksekusi fitur secara presisi.</p>
                     </div>
-                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-all group">
-                        <div class="w-14 h-14 rounded-xl bg-[var(--brand-primary-light)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <i class="ph ph-layout text-2xl text-[var(--brand-primary)]"></i>
+
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-layout text-2xl"></i>
                         </div>
-                        <h3 class="font-heading font-semibold text-lg mb-2">Template Siap Pakai</h3>
-                        <p class="text-sm text-[var(--text-secondary)]">Landing page, login, register, dashboard — semua sudah ada dan tinggal konfigurasi.</p>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Shell SPA Clean-URL</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Landing page, login, register, manajemen, admin, client — terisolasi via Shell tipis dengan router proxy AJAX.</p>
                     </div>
-                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-all group">
-                        <div class="w-14 h-14 rounded-xl bg-[var(--brand-primary-light)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <i class="ph ph-shield-check text-2xl text-[var(--brand-primary)]"></i>
+
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-shield-check text-2xl"></i>
                         </div>
-                        <h3 class="font-heading font-semibold text-lg mb-2">Auth & Security</h3>
-                        <p class="text-sm text-[var(--text-secondary)]">Argon2ID, CSRF, rate limiting, remember-me, role-based access.</p>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]">Enterprise Security</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Password hashing Argon2ID, proteksi CSRF otomatis, rate-limiting IP/Username, serta RBAC middleware.</p>
                     </div>
-                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-all group">
-                        <div class="w-14 h-14 rounded-xl bg-[var(--brand-primary-light)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <i class="ph ph-palette text-2xl text-[var(--brand-primary)]"></i>
+
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-translate text-2xl"></i>
                         </div>
-                        <h3 class="font-heading font-semibold text-lg mb-2">Dark/Light Theme</h3>
-                        <p class="text-sm text-[var(--text-secondary)]">Tema modern dengan switcher dan CSS variables yang mudah dikustomisasi.</p>
+                        <h3 class="font-heading font-semibold text-lg text-[var(--text-primary)]">Native i18n & RTL</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Sistem terjemahan multi-bahasa terpusat dengan deteksi GeoIP dan dukungan penuh layout RTL (Arabic).</p>
                     </div>
+
                 </div>
             </div>
         </section>
 
-        <!-- Installation Steps -->
-        <section id="cara-pasang" class="py-16 sm:py-24 bg-[var(--bg-surface)] border-y border-[var(--border-default)]">
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-12">
-                    <span class="px-3 py-1 bg-[var(--brand-primary-light)] text-[var(--brand-primary)] text-xs font-semibold uppercase tracking-wider rounded-full">Panduan Instalasi & Eksekusi Interaktif</span>
-                    <h2 class="text-3xl sm:text-4xl font-heading font-bold mt-3 mb-4">Unduh & Konfigurasi Aplikasi</h2>
-                    <p class="text-[var(--text-secondary)] max-w-2xl mx-auto">Pilih jenis server, tentukan nama aplikasi Anda, lalu unduh dan jalankan setup wizard otomatis.</p>
+        <!-- Interactive Setup Console Component -->
+        <section id="cara-pasang" class="py-20 sm:py-28 bg-[var(--bg-secondary)]/50 border-y border-[var(--border-default)]">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+                    <span class="font-mono text-xs text-[var(--brand-primary)] tracking-widest uppercase font-bold">// AUTOMATED DEPLOYMENT CONSOLE //</span>
+                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">Unduh & Konfigurasi Aplikasi</h2>
+                    <p class="text-[var(--text-secondary)] text-sm sm:text-base">Gunakan console interaktif di bawah untuk membuat Virtual Host & workspace project baru di server lokal Anda.</p>
                 </div>
 
-                <!-- Notice Banner: Pembuatan Aplikasi Baru -->
-                <div class="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-xs">
-                    <i class="ph ph-warning-circle text-amber-400 text-xl shrink-0 mt-0.5"></i>
+                <!-- Notice Banner -->
+                <div class="mb-8 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3.5 text-xs font-sans">
+                    <i class="ph ph-warning-circle text-amber-400 text-2xl shrink-0 mt-0.5"></i>
                     <div class="space-y-1">
-                        <p class="font-bold text-amber-300">Penting: Fitur ini Khusus untuk Membuat Aplikasi Baru</p>
+                        <p class="font-bold text-amber-300">Penting: Pembuatan Aplikasi Baru Terpisah</p>
                         <p class="text-[var(--text-secondary)] leading-relaxed">
-                            Form di bawah ini akan mengunduh template Vibeforge dan mengonfigurasi Virtual Host untuk <strong>aplikasi baru yang terpisah</strong> di folder server Anda.<br>
-                            Jika Anda ingin <strong>mengedit aplikasi ini</strong> atau melakukan <strong>redesain proyek</strong>, silakan ikuti panduan dan gunakan tombol pada bagian <a href="#alur-aplikasi" class="text-[var(--brand-primary)] underline font-medium hover:opacity-80">Alur Aplikasi Baru / Redesain di bawah</a>.
+                            Form console di bawah ini mengunduh template Vibeforge dan mengonfigurasi Virtual Host untuk <strong>aplikasi baru terpisah</strong> di server lokal.<br>
+                            Jika Anda ingin <strong>mengedit aplikasi ini</strong> atau melakukan <strong>redesain proyek</strong>, silakan ikuti alur pada tab <a href="#alur-aplikasi" class="text-[var(--brand-primary)] underline font-semibold hover:opacity-80">Alur Redesain Aplikasi di bawah</a>.
                         </p>
                     </div>
                 </div>
 
-                <!-- Interactive App Downloader Component -->
-                <div id="appDownloaderComponent" x-data="appDownloader()" class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6 shadow-xl glow-orange-sm mb-12">
+                <!-- IDE Terminal-Style Window Downloader Component -->
+                <div id="appDownloaderComponent" x-data="appDownloader()" class="bg-gray-950 rounded-2xl border border-[var(--border-default)] shadow-2xl overflow-hidden mb-16 glow-box-cyber">
 
-                    <form @submit.prevent="startFullSetup()" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Server Type Selector -->
-                        <div>
-                            <div class="flex items-center justify-between mb-3">
-                                <label class="block text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider">1. Web Server</label>
-                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20" title="Terdeteksi Otomatis">
-                                    <i class="ph ph-check-circle"></i> Auto: <?= strtoupper($detectedServer) ?>
-                                </span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button type="button" @click="server = 'laragon'" :class="server === 'laragon' ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="py-2.5 px-3 rounded-xl border text-xs font-medium transition-all flex items-center justify-center gap-1.5">
-                                    <i class="ph ph-bug text-base"></i> Laragon
-                                </button>
-                                <button type="button" @click="server = 'xampp'" :class="server === 'xampp' ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="py-2.5 px-3 rounded-xl border text-xs font-medium transition-all flex items-center justify-center gap-1.5">
-                                    <i class="ph ph-file-css text-base"></i> XAMPP
-                                </button>
-                            </div>
+                    <!-- IDE Window Title Bar -->
+                    <div class="px-5 py-3 bg-gray-900 border-b border-gray-800 flex items-center justify-between font-mono text-xs text-gray-400">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                            <span class="ml-2 font-semibold text-gray-300">vibeforge-cli ~ automated-setup</span>
                         </div>
+                        <div class="flex items-center gap-3 text-[11px] text-gray-500">
+                            <span>ENV: <strong class="text-orange-400"><?= escape(APP_ENV) ?></strong></span>
+                            <span>PHP: <strong class="text-emerald-400">8.3</strong></span>
+                        </div>
+                    </div>
 
-                        <!-- Disk Drive Selector -->
-                        <div>
-                            <div class="flex items-center justify-between mb-3">
-                                <label class="block text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider">2. Local Disk</label>
-                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20" title="Terdeteksi Otomatis">
-                                    <i class="ph ph-hard-drive"></i> Auto: Disk <?= $detectedDrive ?>:
-                                </span>
-                            </div>
-                            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
-                                <template x-for="d in drives" :key="d">
-                                    <button type="button" @click="drive = d" :class="drive === d ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="px-3 py-2.5 rounded-xl border text-xs font-medium transition-all flex items-center gap-1 shrink-0">
-                                        <i class="ph ph-hard-drive"></i> (<span x-text="d"></span>:)
+                    <div class="p-6 sm:p-8 space-y-6">
+                        <form @submit.prevent="startFullSetup()" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                            <!-- Server Type Selector -->
+                            <div>
+                                <div class="flex items-center justify-between mb-3 font-mono">
+                                    <label class="block text-xs font-bold uppercase text-gray-400">1. Web Server</label>
+                                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                        Auto: <?= strtoupper($detectedServer) ?>
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <button type="button" @click="server = 'laragon'" :class="server === 'laragon' ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-gray-900 text-gray-400 border-gray-800 hover:bg-gray-850 hover:text-gray-200'" class="py-3 px-3 rounded-xl border text-xs font-mono transition-all flex items-center justify-center gap-2">
+                                        <i class="ph ph-bug text-lg"></i> Laragon
                                     </button>
-                                </template>
+                                    <button type="button" @click="server = 'xampp'" :class="server === 'xampp' ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-gray-900 text-gray-400 border-gray-800 hover:bg-gray-850 hover:text-gray-200'" class="py-3 px-3 rounded-xl border text-xs font-mono transition-all flex items-center justify-center gap-2">
+                                        <i class="ph ph-file-css text-lg"></i> XAMPP
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- App Name Input + Tombol Unduh & Setup Otomatis (Langsung di Pojok Kanan) -->
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider mb-3">3. Nama Aplikasi <span class="text-red-400">*</span></label>
-                            <div class="flex items-center gap-2">
-                                <div class="relative flex-1">
-                                    <input type="text" x-model="appName" @input="sanitizeAppName()" required placeholder="Tulis nama aplikasimu" pattern="^[a-zA-Z0-9][a-zA-Z0-9_-]*$" title="Hanya huruf, angka, underscore (_), dan hyphen (-). Tidak boleh spasi, titik, koma, atau simbol lain." class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors font-mono" :class="{ 'border-red-400': appNameError }">
+                            <!-- Disk Drive Selector -->
+                            <div>
+                                <div class="flex items-center justify-between mb-3 font-mono">
+                                    <label class="block text-xs font-bold uppercase text-gray-400">2. Local Disk</label>
+                                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                        Disk <?= $detectedDrive ?>:
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                                    <template x-for="d in drives" :key="d">
+                                        <button type="button" @click="drive = d" :class="drive === d ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-gray-900 text-gray-400 border-gray-800 hover:bg-gray-850 hover:text-gray-200'" class="px-3.5 py-3 rounded-xl border text-xs font-mono transition-all flex items-center gap-1.5 shrink-0">
+                                            <i class="ph ph-hard-drive"></i> (<span x-text="d"></span>:)
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- App Name Input & Trigger -->
+                            <div>
+                                <label class="block text-xs font-mono font-bold uppercase text-gray-400 mb-3">3. Nama Aplikasi <span class="text-red-400">*</span></label>
+                                <div class="flex items-center gap-2">
+                                    <div class="relative flex-1">
+                                        <input type="text" x-model="appName" @input="sanitizeAppName()" required placeholder="e.g. my_app" pattern="^[a-zA-Z0-9][a-zA-Z0-9_-]*$" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-xs text-gray-200 focus:outline-none focus:border-[var(--brand-primary)] transition-colors font-mono" :class="{ 'border-red-500': appNameError }">
                                         <template x-if="appNameError">
-                                        <div class="absolute bottom-full left-0 mb-1 px-2 py-1 bg-red-500/90 text-white text-[10px] rounded whitespace-nowrap">Gunakan _ atau - sebagai pemisah, tanpa spasi/simbol</div>
-                                    </template>
+                                            <div class="absolute bottom-full left-0 mb-1 px-2 py-1 bg-red-500/90 text-white text-[10px] font-sans rounded whitespace-nowrap">Format: huruf, angka, _, - (tanpa spasi)</div>
+                                        </template>
+                                    </div>
+                                    <button type="submit" :disabled="!appName.trim() || isSettingUp || appNameError" class="px-5 py-3 bg-gradient-brand text-white text-xs font-mono font-bold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 shrink-0 whitespace-nowrap shadow-lg glow-orange-sm">
+                                        <template x-if="!isSettingUp">
+                                            <span class="flex items-center gap-1.5"><i class="ph ph-rocket-launch text-base"></i> EXECUTE SETUP</span>
+                                        </template>
+                                        <template x-if="isSettingUp">
+                                            <span class="flex items-center gap-1.5"><i class="ph ph-circle-notch animate-spin text-base"></i> RUNNING...</span>
+                                        </template>
+                                    </button>
                                 </div>
-                                <button type="submit" :disabled="!appName.trim() || isSettingUp || appNameError" class="px-4 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity shadow-md disabled:opacity-50 flex items-center gap-1.5 shrink-0 whitespace-nowrap glow-orange-sm">
-                                    <template x-if="!isSettingUp">
-                                        <span class="flex items-center gap-1.5"><i class="ph ph-rocket-launch"></i> Setup Otomatis</span>
-                                    </template>
-                                    <template x-if="isSettingUp">
-                                        <span class="flex items-center gap-1.5"><i class="ph ph-circle-notch animate-spin"></i> Menyiapkan...</span>
-                                    </template>
-                                </button>
                             </div>
-                        </div>
-                    </form>
+                        </form>
 
-                    <!-- Terminal Overlay Dialog -->
-                    <div id="setupTerminal" x-show="showTerminal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" x-cloak>
-                        <div class="bg-gray-900 rounded-2xl w-full max-w-2xl border border-gray-700 shadow-2xl overflow-hidden">
-                            <div class="flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700">
-                                <span class="text-sm font-bold text-white flex items-center gap-2">
-                                    <i class="ph ph-terminal text-[var(--brand-primary)]"></i> Setup Otomatis
-                                </span>
-                                <button type="button" @click="cancelSetup()" :disabled="!isSettingUp" class="text-gray-400 hover:text-red-400 transition-colors disabled:opacity-30">
-                                    <i class="ph ph-x text-sm"></i>
-                                </button>
-                            </div>
-                            <div class="p-6 font-mono text-sm text-green-400 h-80 overflow-y-auto space-y-1 bg-gray-950">
-                                <template x-for="line in terminalLines">
-                                    <div x-text="line" class="leading-relaxed"></div>
-                                </template>
-                                <div x-show="isSettingUp" class="flex items-center gap-2 text-gray-500 pt-1">
-                                    <i class="ph ph-circle-notch animate-spin text-xs"></i>
-                                    <span class="text-xs">Menjalankan proses instalasi otomatis...</span>
+                        <!-- Terminal Overlay Dialog -->
+                        <div id="setupTerminal" x-show="showTerminal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md" x-cloak>
+                            <div class="bg-gray-950 rounded-2xl w-full max-w-2xl border border-gray-800 shadow-2xl overflow-hidden">
+                                <div class="flex items-center justify-between px-5 py-3.5 bg-gray-900 border-b border-gray-800">
+                                    <span class="text-xs font-mono font-bold text-white flex items-center gap-2">
+                                        <i class="ph ph-terminal-window text-[var(--brand-primary)] text-lg"></i> Vibeforge Automated Installer
+                                    </span>
+                                    <button type="button" @click="cancelSetup()" :disabled="!isSettingUp" class="text-gray-400 hover:text-red-400 transition-colors disabled:opacity-30">
+                                        <i class="ph ph-x text-lg"></i>
+                                    </button>
+                                </div>
+                                <div class="p-6 font-mono text-xs text-emerald-400 h-96 overflow-y-auto space-y-1.5 bg-black">
+                                    <template x-for="line in terminalLines">
+                                        <div x-text="line" class="leading-relaxed"></div>
+                                    </template>
+                                    <div x-show="isSettingUp" class="flex items-center gap-2 text-gray-500 pt-2">
+                                        <i class="ph ph-circle-notch animate-spin text-sm"></i>
+                                        <span>Menjalankan skrip Powershell & Virtual Host auto-config...</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tab Menu for Workflows -->
-                <div id="alur-aplikasi" class="flex justify-center mb-8 border-b border-[var(--border-default)] max-w-md mx-auto" x-data="{ tab: 'new' }">
-                    <button @click="tab = 'new'; $dispatch('tab-change', 'new')" :class="tab === 'new' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-sm font-semibold transition-colors focus:outline-none">Alur Aplikasi Baru (New)</button>
-                    <button @click="tab = 'redesign'; $dispatch('tab-change', 'redesign')" :class="tab === 'redesign' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-sm font-semibold transition-colors focus:outline-none">Alur Redesain Aplikasi (Redesign)</button>
-                </div>
+                <!-- Workflow Step Tabs -->
+                <div id="alur-aplikasi" class="space-y-8">
 
-                <div x-data="{ mode: 'new' }" @tab-change.window="mode = $event.detail">
-                    <!-- NEW MODE TUTORIAL (12 Langkah) -->
-                    <div x-show="mode === 'new'" class="space-y-6">
-                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 shadow-sm">
-                            <h3 class="font-heading font-semibold text-lg mb-4 text-center">12 Langkah Setup Wizard - Aplikasi Baru</h3>
-                            <div class="space-y-4">
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">1</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Overview</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Halaman sambutan untuk memilih mode instalasi dan memahami alur kerja Vibeforge.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">2</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">PRD (Product Requirements Document)</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Tulis spesifikasi aplikasi: nama, fitur, target pengguna, user flow, dan kebutuhan bisnis di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">docs/prd.md</code>.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">3</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Branding Identity</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Konfigurasi warna, font, logo, dan identitas visual aplikasi di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">docs/branding.md</code>.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">4</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Logo</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Upload logo aplikasi berformat PNG (max 2MB) yang disimpan ke <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">docs/logo.png</code>.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">5</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Landing Page</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Kustomisasi struktur & styling halaman landing di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/landingpage.html</code>.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">6</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Login Page</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Atur tampilan halaman login di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/login.html</code>.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">7</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Register Page</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Kustomisasi halaman registrasi di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/register.html</code>.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">8</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Modul Manajemen</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Dashboard Super Admin di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/modul_manajemen.html</code>.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">9</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Modul Admin/Creator</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Studio creator di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/modul_admin.html</code>.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">10</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Modul Client</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Dashboard pendengar di <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">references/modul_client.html</code>.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">11</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Server Configuration</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Pilih server lokal (Laragon/XAMPP) dan disk tujuan instalasi.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-heading font-bold text-base shrink-0">12</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Install Path & Execute</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Konfirmasi lokasi project dan buka terminal untuk menjalankan <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-xs">baca dan jalankan @docs/install.md</code>.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-center mt-6">
-                                <a href="/install/" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-brand text-white font-bold rounded-xl hover:opacity-90 transition-opacity glow-orange shadow-lg">
-                                    <i class="ph ph-magic-wand"></i> Mulai Wizard Baru (12 Langkah)
-                                </a>
-                            </div>
-                        </div>
+                    <div class="flex justify-center border-b border-[var(--border-default)] max-w-md mx-auto" x-data="{ tab: 'new' }">
+                        <button @click="tab = 'new'; $dispatch('tab-change', 'new')" :class="tab === 'new' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-xs font-mono uppercase tracking-wider transition-colors focus:outline-none">Alur Aplikasi Baru (12 Steps)</button>
+                        <button @click="tab = 'redesign'; $dispatch('tab-change', 'redesign')" :class="tab === 'redesign' ? 'border-purple-500 text-purple-400 border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-xs font-mono uppercase tracking-wider transition-colors focus:outline-none">Alur Redesain (5 Steps)</button>
                     </div>
 
-                    <!-- REDESIGN MODE TUTORIAL (5 Langkah) -->
-                    <div x-show="mode === 'redesign'" class="space-y-6">
-                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 shadow-sm">
-                            <h3 class="font-heading font-semibold text-lg mb-4 text-center">5 Langkah Setup Wizard - Redesain Aplikasi</h3>
-                            <div class="space-y-4">
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-heading font-bold text-base shrink-0">1</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Overview</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Halaman sambutan untuk memilih mode Redesain dan memahami alur cepat.</p>
-                                    </div>
+                    <div x-data="{ mode: 'new' }" @tab-change.window="mode = $event.detail">
+
+                        <!-- NEW MODE TUTORIAL (12 Steps) -->
+                        <div x-show="mode === 'new'" class="space-y-6">
+                            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6">
+                                <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
+                                    <h3 class="font-heading font-extrabold text-xl">12 Langkah Setup Wizard — Aplikasi Baru</h3>
+                                    <span class="px-3 py-1 bg-orange-500/10 border border-orange-500/30 text-[var(--brand-primary)] font-mono text-xs rounded-full">MODE: GREENFIELD</span>
                                 </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-heading font-bold text-base shrink-0">2</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Kelola Folder References</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Upload file/folder codebase lama aplikasi Anda ke folder <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-purple-400 font-mono text-xs">references/</code> via Web UI atau buka File Explorer langsung.</p>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_01</span>
+                                            <i class="ph ph-compass text-lg text-[var(--text-muted)]"></i>
+                                        </div>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Overview Mode</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Pemilihan mode instalasi & penjelasan arsitektur Vibeforge.</p>
                                     </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-heading font-bold text-base shrink-0">3</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Logo</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Upload logo aplikasi PNG (max 2MB) ke <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-purple-400 font-mono text-xs">docs/logo.png</code>.</p>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_02</span>
+                                            <i class="ph ph-file-text text-lg text-[var(--text-muted)]"></i>
+                                        </div>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Definisi PRD</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Spesifikasi aplikasi & alur fitur di <code class="px-1 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">docs/prd.md</code>.</p>
                                     </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-heading font-bold text-base shrink-0">4</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Server Configuration</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Pilih server lokal (Laragon/XAMPP) dan disk tujuan instalasi.</p>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_03</span>
+                                            <i class="ph ph-palette text-lg text-[var(--text-muted)]"></i>
+                                        </div>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Branding Tokens</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Konfigurasi token warna & font di <code class="px-1 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">docs/branding.md</code>.</p>
                                     </div>
-                                </div>
-                                <div class="flex gap-4 p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)]">
-                                    <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-heading font-bold text-base shrink-0">5</div>
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-[var(--text-primary)] mb-1">Install Path & Execute</h4>
-                                        <p class="text-xs text-[var(--text-secondary)]">Konfirmasi lokasi project dan buka terminal. PRD & Branding akan otomatis dibuat oleh AI saat menjalankan <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-purple-400 font-mono text-xs">baca dan jalankan @docs/install.md</code>.</p>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_04</span>
+                                            <i class="ph ph-image text-lg text-[var(--text-muted)]"></i>
+                                        </div>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Logo Assets</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Upload asset gambar logo ke <code class="px-1 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">docs/logo.png</code>.</p>
                                     </div>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_05</span>
+                                            <i class="ph ph-browsers text-lg text-[var(--text-muted)]"></i>
+                                        </div>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Template Landing</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Kustomisasi halaman depan di <code class="px-1 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">references/landingpage.html</code>.</p>
+                                    </div>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_06-07</span>
+                                            <i class="ph ph-lock-key text-lg text-[var(--text-muted)]"></i>
+                                        </div>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Auth Forms</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Desain form Login & Register di folder <code class="px-1 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">references/</code>.</p>
+                                    </div>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_08-10</span>
+                                            <i class="ph ph-squares-four text-lg text-[var(--text-muted)]"></i>
+                                        </div>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Role Modules</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Dashboard Manajemen, Admin/Creator Studio, & Client Player.</p>
+                                    </div>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_11</span>
+                                            <i class="ph ph-gear text-lg text-[var(--text-muted)]"></i>
+                                        </div>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Config & Environment</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Penyesuaian variabel <code class="px-1 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">.env</code> & database settings.</p>
+                                    </div>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_12</span>
+                                            <i class="ph ph-terminal text-lg text-[var(--text-muted)]"></i>
+                                        </div>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">AI Execution</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Buka CLI dan eksekusi <code class="px-1 bg-[var(--bg-surface)] text-[var(--brand-primary)] font-mono rounded">baca @docs/install.md</code>.</p>
+                                    </div>
+
                                 </div>
-                            </div>
-                            <div class="text-center mt-6">
-                                <a href="/install/?mode=redesign" class="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors shadow-lg">
-                                    <i class="ph ph-folder-open"></i> Mulai Wizard Redesain (5 Langkah)
-                                </a>
+
+                                <div class="text-center pt-4">
+                                    <a href="/install/" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-brand text-white font-mono font-bold text-xs rounded-xl hover:opacity-90 transition-opacity glow-orange-sm shadow-lg">
+                                        <i class="ph ph-magic-wand text-base"></i> LAUNCH 12-STEP WIZARD
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
-        <!-- Demo / Try It -->
-        <section id="demo" class="py-16 sm:py-24">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-3xl sm:text-4xl font-heading font-bold mb-4">Coba Sekarang</h2>
-                <p class="text-[var(--text-secondary)] mb-10">Klik tombol di bawah ini untuk langsung masuk ke dashboard masing-masing role tanpa perlu mengetik credential.</p>
+                        <!-- REDESIGN MODE TUTORIAL (5 Steps) -->
+                        <div x-show="mode === 'redesign'" class="space-y-6">
+                            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6">
+                                <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
+                                    <h3 class="font-heading font-extrabold text-xl">5 Langkah Setup Wizard — Redesain Aplikasi</h3>
+                                    <span class="px-3 py-1 bg-purple-500/10 border border-purple-500/30 text-purple-400 font-mono text-xs rounded-full">MODE: REFIT</span>
+                                </div>
 
-                <div class="grid sm:grid-cols-3 gap-6 mb-8 max-w-4xl mx-auto">
-                    <!-- Demo Card 1: Manajemen -->
-                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 text-left flex flex-col justify-between">
-                        <div>
-                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4">
-                                <i class="ph ph-users text-2xl text-purple-400"></i>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <span class="font-mono text-xs text-purple-400 font-bold">STEP_01</span>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Overview</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Pilih Mode Redesain pada Wizard UI.</p>
+                                    </div>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <span class="font-mono text-xs text-purple-400 font-bold">STEP_02</span>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Upload References</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Letakkan codebase lama ke folder <code class="px-1 bg-[var(--bg-surface)] text-purple-400 font-mono rounded">references/</code>.</p>
+                                    </div>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <span class="font-mono text-xs text-purple-400 font-bold">STEP_03</span>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Logo Assets</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Upload asset logo baru ke <code class="px-1 bg-[var(--bg-surface)] text-purple-400 font-mono rounded">docs/logo.png</code>.</p>
+                                    </div>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <span class="font-mono text-xs text-purple-400 font-bold">STEP_04</span>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">Target Host</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Tentukan jenis web server lokal (Laragon/XAMPP).</p>
+                                    </div>
+
+                                    <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                        <span class="font-mono text-xs text-purple-400 font-bold">STEP_05</span>
+                                        <h4 class="font-bold text-sm text-[var(--text-primary)]">AI Re-architecting</h4>
+                                        <p class="text-xs text-[var(--text-secondary)]">Jalankan AI CLI untuk auto-generate PRD & menyerap struktur lama.</p>
+                                    </div>
+
+                                </div>
+
+                                <div class="text-center pt-4">
+                                    <a href="/install/?mode=redesign" class="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold text-xs rounded-xl transition-colors shadow-lg">
+                                        <i class="ph ph-folder-open text-base"></i> LAUNCH 5-STEP REDESIGN WIZARD
+                                    </a>
+                                </div>
                             </div>
-                            <h3 class="font-heading font-semibold mb-1">Manajemen</h3>
-                            <p class="text-sm text-[var(--text-muted)] mb-4">Super Admin dashboard penuh</p>
                         </div>
-                        <form action="/core/router.php" method="POST" class="w-full">
-                            <input type="hidden" name="module" value="auth">
-                            <input type="hidden" name="action" value="login">
-                            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
-                            <input type="hidden" name="email" value="manajemen@example.com">
-                            <input type="hidden" name="password" value="password123">
-                            <button type="submit" onclick="directLogin(event, this.form, '/manajemen/')" class="w-full py-2.5 bg-purple-500 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 shadow-md">
-                                <i class="ph ph-sign-in text-base"></i> Masuk Manajemen
-                            </button>
-                        </form>
-                    </div>
 
-                    <!-- Demo Card 2: Admin/Creator -->
-                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--brand-primary)] p-6 text-left relative overflow-hidden flex flex-col justify-between">
-                        <div class="absolute top-3 right-3 px-2 py-1 bg-[var(--brand-primary)] text-white text-xs font-bold rounded">Creator</div>
-                        <div>
-                            <div class="w-12 h-12 rounded-xl bg-[var(--brand-primary-light)] flex items-center justify-center mb-4">
-                                <i class="ph ph-rocket-launch text-2xl text-[var(--brand-primary)]"></i>
-                            </div>
-                            <h3 class="font-heading font-semibold mb-1">Admin / Creator</h3>
-                            <p class="text-sm text-[var(--text-muted)] mb-4">Studio upload & analitik</p>
-                        </div>
-                        <form action="/core/router.php" method="POST" class="w-full">
-                            <input type="hidden" name="module" value="auth">
-                            <input type="hidden" name="action" value="login">
-                            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
-                            <input type="hidden" name="email" value="admin@example.com">
-                            <input type="hidden" name="password" value="password123">
-                            <button type="submit" onclick="directLogin(event, this.form, '/admin/')" class="w-full py-2.5 bg-gradient-brand text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 shadow-md glow-orange-sm">
-                                <i class="ph ph-sign-in text-base"></i> Masuk Creator
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Demo Card 3: Client -->
-                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 text-left flex flex-col justify-between">
-                        <div>
-                            <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center mb-4">
-                                <i class="ph ph-user text-2xl text-green-400"></i>
-                            </div>
-                            <h3 class="font-heading font-semibold mb-1">Client / Pengguna</h3>
-                            <p class="text-sm text-[var(--text-muted)] mb-4">Dashboard eksplorasi konten</p>
-                        </div>
-                        <form action="/core/router.php" method="POST" class="w-full">
-                            <input type="hidden" name="module" value="auth">
-                            <input type="hidden" name="action" value="login">
-                            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
-                            <input type="hidden" name="email" value="client@example.com">
-                            <input type="hidden" name="password" value="password123">
-                            <button type="submit" onclick="directLogin(event, this.form, '/client/')" class="w-full py-2.5 bg-[var(--brand-primary)] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 shadow-md">
-                                <i class="ph ph-sign-in text-base"></i> Masuk Client
-                            </button>
-                        </form>
                     </div>
                 </div>
 
             </div>
         </section>
 
-        <!-- GitHub CTA -->
-        <section class="py-12 bg-gradient-brand">
-            <div class="max-w-4xl mx-auto px-4 text-center">
-                <h2 class="text-2xl font-heading font-bold text-white mb-4">Source Code Terbuka</h2>
-                <p class="text-white/80 mb-6">Lihat, fork, dan kontribusi di GitHub</p>
-                <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-[var(--brand-primary)] font-bold rounded-xl hover:opacity-90 transition-opacity shadow-lg">
-                    <i class="ph ph-github-logo text-xl"></i> github.com/iqbalmurtadho24/vibeforge
-                </a>
+        <!-- Role Access Matrix / Demo Portals Section -->
+        <section id="demo" class="py-20 sm:py-28">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                    <span class="font-mono text-xs text-[var(--brand-primary)] tracking-widest uppercase font-bold">// ACCESS CONTROL MATRIX //</span>
+                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">Coba Demo Instant Roles</h2>
+                    <p class="text-[var(--text-secondary)] text-base">Satu klik untuk menguji autentikasi & otorisasi role-based access control (RBAC) tanpa perlu mengetik kredensial.</p>
+                </div>
+
+                <div class="grid sm:grid-cols-3 gap-8 max-w-5xl mx-auto">
+
+                    <!-- Role Card 1: Manajemen -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between space-y-6 glow-box-cyber">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                                    <i class="ph ph-crown text-2xl"></i>
+                                </div>
+                                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">ROLE: MANAJEMEN</span>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-bold text-xl text-[var(--text-primary)]">Super Admin Portal</h3>
+                                <p class="text-xs text-[var(--text-secondary)] mt-1">Akses penuh ke overview sistem, audit trail, keuangan & persetujuan kreator.</p>
+                            </div>
+                        </div>
+                        <form action="/core/router.php" method="POST" class="w-full">
+                            <input type="hidden" name="module" value="auth">
+                            <input type="hidden" name="action" value="login">
+                            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+                            <input type="hidden" name="email" value="admin@app.com">
+                            <input type="hidden" name="password" value="password123">
+                            <button type="submit" onclick="directLogin(event, this.form, '/manajemen/')" class="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                                <i class="ph ph-sign-in text-base"></i> LOGIN SUPER ADMIN
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Role Card 2: Creator -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--brand-primary)]/50 p-6 transition-all duration-300 flex flex-col justify-between space-y-6 relative overflow-hidden glow-box-cyber">
+                        <div class="absolute -top-12 -right-12 w-28 h-28 bg-orange-500/10 rounded-full blur-xl pointer-events-none"></div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)]">
+                                    <i class="ph ph-rocket-launch text-2xl"></i>
+                                </div>
+                                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">ROLE: ADMIN (CREATOR)</span>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-bold text-xl text-[var(--text-primary)]">Creator Studio</h3>
+                                <p class="text-xs text-[var(--text-secondary)] mt-1">Dashboard upload konten, statistik performa karya, & manajemen royalti.</p>
+                            </div>
+                        </div>
+                        <form action="/core/router.php" method="POST" class="w-full">
+                            <input type="hidden" name="module" value="auth">
+                            <input type="hidden" name="action" value="login">
+                            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+                            <input type="hidden" name="email" value="admin@app.id">
+                            <input type="hidden" name="password" value="password123">
+                            <button type="submit" onclick="directLogin(event, this.form, '/admin/')" class="w-full py-3 bg-gradient-brand text-white font-mono font-bold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-2 glow-orange-sm">
+                                <i class="ph ph-sign-in text-base"></i> LOGIN CREATOR
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Role Card 3: Client -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between space-y-6 glow-box-cyber">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                                    <i class="ph ph-headphones text-2xl"></i>
+                                </div>
+                                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ROLE: CLIENT</span>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-bold text-xl text-[var(--text-primary)]">Client Application</h3>
+                                <p class="text-xs text-[var(--text-secondary)] mt-1">Interface pengguna/pendengar untuk eksplorasi, playlist, & player audio.</p>
+                            </div>
+                        </div>
+                        <form action="/core/router.php" method="POST" class="w-full">
+                            <input type="hidden" name="module" value="auth">
+                            <input type="hidden" name="action" value="login">
+                            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+                            <input type="hidden" name="email" value="client@app.com">
+                            <input type="hidden" name="password" value="password123">
+                            <button type="submit" onclick="directLogin(event, this.form, '/client/')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                                <i class="ph ph-sign-in text-base"></i> LOGIN CLIENT
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Open Source CTA Banner -->
+        <section class="py-16 bg-gradient-brand border-t border-orange-500/30 text-white">
+            <div class="max-w-4xl mx-auto px-4 text-center space-y-4">
+                <span class="font-mono text-xs uppercase tracking-widest text-orange-200 font-bold">// OPEN SOURCE REPOSITORY //</span>
+                <h2 class="text-3xl sm:text-4xl font-heading font-extrabold">Siap Mengembangkan Vibeforge?</h2>
+                <p class="text-white/80 max-w-xl mx-auto text-sm">Proyek ini 100% open-source di bawah lisensi Apache 2.0. Bebas digunakan untuk aplikasi komersial maupun pribadi.</p>
+                <div class="pt-2">
+                    <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="inline-flex items-center gap-2 px-8 py-3.5 bg-gray-950 text-white font-mono font-bold text-xs rounded-xl hover:bg-gray-900 transition-colors shadow-2xl">
+                        <i class="ph ph-github-logo text-lg text-orange-400"></i> github.com/iqbalmurtadho24/vibeforge
+                    </a>
+                </div>
             </div>
         </section>
     </main>
 
     <!-- Mobile Bottom Navigation -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-card)]/95 backdrop-blur-md border-t border-[var(--border-default)] z-50 shadow-lg">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-card)]/95 backdrop-blur-md border-t border-[var(--border-default)] z-50 shadow-lg font-mono">
         <div class="flex justify-around items-center h-16 px-2">
             <a href="#fitur" class="flex flex-col items-center gap-1 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
-                <i class="ph ph-lightning text-xl"></i>
-                <span class="text-[10px] font-medium">Fitur</span>
+                <i class="ph ph-cpu text-xl"></i>
+                <span class="text-[9px] font-semibold">Fitur</span>
             </a>
             <a href="#cara-pasang" class="flex flex-col items-center gap-1 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
-                <i class="ph ph-wrench text-xl"></i>
-                <span class="text-[10px] font-medium">Pasang</span>
+                <i class="ph ph-terminal-window text-xl"></i>
+                <span class="text-[9px] font-semibold">Pasang</span>
             </a>
             <a href="#demo" class="flex flex-col items-center gap-1 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
-                <i class="ph ph-play-circle text-xl"></i>
-                <span class="text-[10px] font-medium">Demo</span>
+                <i class="ph ph-shield-check text-xl"></i>
+                <span class="text-[9px] font-semibold">Demo</span>
             </a>
             <a href="/install/" class="flex flex-col items-center gap-1 text-[var(--brand-primary)]">
                 <i class="ph ph-magic-wand text-xl"></i>
-                <span class="text-[10px] font-semibold">Wizard</span>
+                <span class="text-[9px] font-bold">Wizard</span>
             </a>
         </div>
     </nav>
 
-    <footer class="bg-[var(--bg-secondary)] border-t border-[var(--border-default)] py-8 pb-24 md:pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[var(--text-muted)]">
-            <p>&copy; 2026 <?= APP_DISPLAY_NAME ?>. All rights reserved.</p>
+    <!-- Footer -->
+    <footer class="bg-[var(--bg-secondary)] border-t border-[var(--border-default)] py-8 pb-24 md:pb-8 font-mono text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[var(--text-muted)]">
+            <p>&copy; 2026 <?= APP_DISPLAY_NAME ?>. Developer-Grade Vibe Coding Architecture.</p>
             <div class="flex gap-6">
                 <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="hover:text-[var(--brand-primary)] transition-colors">GitHub</a>
-                <a href="#" class="hover:text-[var(--brand-primary)] transition-colors">Dokumentasi</a>
-                <a href="#" class="hover:text-[var(--brand-primary)] transition-colors">Lisensi Apache 2.0</a>
+                <a href="#" class="hover:text-[var(--brand-primary)] transition-colors">Docs</a>
+                <a href="#" class="hover:text-[var(--brand-primary)] transition-colors">Apache-2.0 License</a>
             </div>
         </div>
     </footer>
@@ -677,23 +834,17 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                     return this.drive + ':\\' + this.subPath() + '\\' + (this.appName.trim() || 'myapp');
                 },
                 fullCommand() {
-                    const targetDir = this.drive + ':\\' + this.subPath();
-                    const appName = this.appName.trim() || 'myapp';
-                    return `Set-Location -Path '${targetDir}'; npx -y degit iqbalmurtadho24/vibeforge ${appName}; if ($?) { Set-Location -Path '.\\${appName}'; Copy-Item -Path '.env.example' -Destination '.env'; Exit }`;
+                    return `irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex`;
                 },
                 wizardUrl() {
                     const name = this.appName.trim() || 'myapp';
                     return 'http://localhost/' + name + '/public/install/';
                 },
                 sanitizeAppName() {
-                    // Hanya izinkan huruf, angka, underscore, hyphen
-                    // Hapus karakter yang tidak diizinkan
                     this.appName = this.appName.replace(/[^a-zA-Z0-9_-]/g, '');
-                    // Cek apakah ada karakter yang dihapus (misal spasi, titik, koma)
                     this.appNameError = /[^a-zA-Z0-9_-]/.test(this.appName);
                 },
                 init() {
-                    // Auto-refresh status folder setiap 4 detik jika belum ada
                     setInterval(() => {
                         if (this.isSubmitted && !this.folderExists && !this.isChecking && this.appName.trim()) {
                             this.checkFolder();
@@ -739,7 +890,7 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
         });
         initTheme();
 
-        // Copy Snippet Helper with fallback for non-secure contexts
+        // Copy Snippet Helper
         async function copySnippet(btn, codeText) {
             const originalHtml = btn.innerHTML;
             try {
@@ -755,16 +906,15 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                     document.execCommand('copy');
                     document.body.removeChild(textarea);
                 }
-                btn.innerHTML = '<i class="ph ph-check text-green-400"></i> Tersalin!';
+                btn.innerHTML = '<i class="ph ph-check text-emerald-400"></i> Copied!';
             } catch(e) {
-                btn.innerHTML = '<i class="ph ph-warning text-red-400"></i> Gagal!';
-            } finally {
+                btn.innerHTML = '<i class="ph ph-warning text-red-400"></i> Failed!';
+            } fontFinally: {
                 setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
             }
         }
 
-        // Start Full Setup: Download + Virtual Host + Redirect ke halaman install
-        // Gabungan dari executeInteractiveTerminal + startSetupWizard dalam satu alur
+        // Start Full Setup Workflow
         async function startFullSetup() {
             const dataEl = document.getElementById('appDownloaderComponent');
             if (!dataEl) return;
@@ -777,13 +927,13 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
             state.isSettingUp = true;
             state.setupCancelled = false;
             state.terminalLines = [
-                '═══════════════════════════════════════',
-                '  Vibeforge Setup Otomatis',
-                '  Aplikasi: ' + appName,
-                '  Server:   ' + state.server.toUpperCase(),
-                '  Disk:     ' + state.drive + ':',
-                '  Target:   http://' + appName + '.test/install/',
-                '═══════════════════════════════════════',
+                '═══════════════════════════════════════════════════════',
+                '  Vibeforge Automated CLI Deployment Engine',
+                '  Target App:  ' + appName,
+                '  Server:      ' + state.server.toUpperCase(),
+                '  Target Disk: ' + state.drive + ':',
+                '  VHost URL:   http://' + appName + '.test/install/',
+                '═══════════════════════════════════════════════════════',
                 ''
             ];
 
@@ -797,7 +947,6 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                 });
             };
 
-            // --- Step 1: Download template via degit ---
             await addLog('[1/3] Mengunduh template Vibeforge via degit...', 300);
             await addLog('[CMD] ' + state.fullCommand(), 200);
 
@@ -818,11 +967,8 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                 const data1 = await res1.json();
 
                 if (data1.success) {
-                    await addLog('[OK] Terminal PowerShell berhasil dibuka — proses download dimulai...', 600);
-                    await addLog('[INFO] Tunggu sementara terminal menyelesaikan download...', 800);
-                    // Beri waktu untuk degit selesai; file env.example -> .env dikopi oleh fullCommand()
-                    await addLog('[WAIT] Menunggu 8 detik agar npx degit selesai...', 1000);
-                    // Polling folder existence
+                    await addLog('[OK] Terminal PowerShell berhasil dibuka — proses download berjalan...', 600);
+                    await addLog('[INFO] Menunggu pengerjaan degit...', 800);
                     let found = false;
                     for (let i = 0; i < 10; i++) {
                         await new Promise(r => setTimeout(r, 1000));
@@ -846,12 +992,12 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                                 state.folderExists = true;
                                 break;
                             }
-                        } catch(e) { /* ignore poll errors */ }
+                        } catch(e) {}
                     }
                     if (found) {
                         await addLog('[OK] Folder target terdeteksi — download template selesai.', 200);
                     } else {
-                        await addLog('[WARN] Folder belum terdeteksi, lanjutkan setup...', 200);
+                        await addLog('[WARN] Folder belum terdeteksi, melanjutkan proses setup...', 200);
                     }
                 } else {
                     await addLog('[WARN] ' + (data1.error || 'Gagal membuka terminal download.'), 0);
@@ -859,16 +1005,13 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                 }
             } catch(e) {
                 await addLog('[WARN] Error: ' + e.message, 0);
-                await addLog('[INFO] Mencoba lanjut ke Virtual Host setup...', 600);
             }
 
             if (state.setupCancelled) { state.isSettingUp = false; return; }
 
-            // --- Step 2: Virtual Host + Hosts file + Apache restart ---
             await addLog('', 300);
-            await addLog('[2/3] Membuat Virtual Host & update file hosts...', 600);
+            await addLog('[2/3] Konfigurasi Virtual Host & file hosts Windows...', 600);
             await addLog('[INFO] Domain: http://' + appName + '.test/', 300);
-            await addLog('[INFO] Men-trigger PowerShell (administrator) untuk VirtualHost & hosts...', 600);
 
             try {
                 const res2 = await fetch('/core/router.php', {
@@ -887,38 +1030,33 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
 
                 if (data2.success) {
                     await addLog('[OK] Virtual Host berhasil dibuat!', 300);
-                    await addLog('[OK] File hosts diperbarui (127.0.0.1 ' + appName + '.test).', 300);
-                    await addLog('[OK] DNS cache di-flush.', 300);
-                    await addLog('[OK] Apache berhasil di-restart!', 300);
+                    await addLog('[OK] Host local DNS (127.0.0.1 ' + appName + '.test) ditambahkan.', 300);
+                    await addLog('[OK] Web Server Apache di-restart.', 300);
                 } else {
                     await addLog('[WARN] ' + (data2.error || 'VirtualHost setup gagal.'), 0);
                 }
             } catch(e) {
-                await addLog('[WARN] Koneksi error saat setup VirtualHost.', 0);
+                await addLog('[WARN] Error koneksi saat setup VirtualHost.', 0);
             }
 
             if (state.setupCancelled) { state.isSettingUp = false; return; }
 
-            // --- Step 3: Redirect ke halaman install ---
             await addLog('', 300);
-            await addLog('═══════════════════════════════════════', 200);
-            await addLog('[3/3] Setup selesai! Membuka halaman install...', 400);
+            await addLog('═══════════════════════════════════════════════════════', 200);
+            await addLog('[3/3] Deployment selesai! Membuka Setup Wizard...', 400);
             await addLog('[→] ' + targetUrl, 200);
-            await addLog('═══════════════════════════════════════', 400);
+            await addLog('═══════════════════════════════════════════════════════', 400);
 
             setTimeout(() => {
                 state.isSettingUp = false;
-                // Coba domain .test dulu, fallback ke localhost
                 window.location.href = targetUrl;
-                // Fallback: jika domain tidak terselesaikan, browser akan timeout dan navigasi ke fallback
                 setTimeout(() => {
-                    if (window.location.href !== targetUrl) return; // already navigated away
+                    if (window.location.href !== targetUrl) return;
                     window.location.href = fallbackUrl;
                 }, 4000);
             }, 1500);
         }
 
-        // Cancel setup jika user tekan X di terminal overlay
         function cancelSetup() {
             const dataEl = document.getElementById('appDownloaderComponent');
             if (!dataEl) return;
@@ -929,36 +1067,14 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
             setTimeout(() => { state.setupCancelled = false; }, 300);
         }
 
-        // Open Folder Helper via AJAX
-        async function openFolderExplorer(btn) {
-            try {
-                const res = await fetch('/core/router.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        module: 'install',
-                        action: 'open_folder',
-                        folder: 'references',
-                        csrf_token: '<?= $csrfToken ?>'
-                    })
-                });
-                const data = await res.json();
-                if (!data.success) alert(data.error || 'Gagal membuka folder');
-            } catch(e) {
-                alert('Gagal membuka folder.');
-            }
-        }
-
-        // Direct Login without redirection manually typing credentials
         async function directLogin(event, form, targetUrl) {
             event.preventDefault();
             const btn = event.currentTarget;
             const originalHtml = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<i class="ph ph-circle-notch animate-spin text-base"></i> Memproses...';
+            btn.innerHTML = '<i class="ph ph-circle-notch animate-spin text-base"></i> MEMPROSES...';
 
             try {
-                // Post request to router proxy /core/router.php
                 const response = await fetch('/core/router.php', {
                     method: 'POST',
                     headers: {

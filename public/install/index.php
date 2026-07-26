@@ -1,6 +1,7 @@
 <?php
 /**
  * Vibeforge - Installation Wizard Shell
+ * IT Professional Edition
  *
  * Flow: Welcome Overview (1) -> PRD (2) -> Branding (3) -> Logo (4) ->
  *        HTML Templates (5-10) -> Server Config (11) -> Install Path (12)
@@ -49,11 +50,11 @@ if (file_exists($configPath)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setup Wizard - <?= APP_DISPLAY_NAME ?></title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF6B35'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
+    <title>Setup Wizard - <?= APP_DISPLAY_NAME ?> Engine</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F97316'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../assets/css/branding.css">
@@ -89,119 +90,160 @@ if (file_exists($configPath)) {
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { brand: { primary: '#F97316', dark: '#0D1117', card: '#161B22' } },
-                    fontFamily: { sans: ['Inter', 'sans-serif'], heading: ['Poppins', 'sans-serif'] }
+                    colors: {
+                        brand: {
+                            primary: '#F97316',
+                            hover: '#EA580C',
+                            dark: '#0B0F17',
+                            card: '#111726',
+                            border: '#1E293B'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        heading: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary); }
-        h1, h2, h3 { font-family: 'Poppins', sans-serif; }
-        .text-gradient { background: linear-gradient(135deg, #F97316 0%, #F59E0B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #F59E0B 100%); }
-        .glow-orange { box-shadow: 0 0 40px rgba(255, 107, 53, 0.3); }
-        .glow-orange-sm { box-shadow: 0 0 20px rgba(255, 107, 53, 0.2); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-primary); color: var(--text-primary); }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .tech-grid {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        .glow-mesh {
+            background: radial-gradient(circle at 50% 10%, rgba(249, 115, 22, 0.12) 0%, rgba(11, 15, 23, 0) 70%);
+        }
+        .text-gradient { background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #F59E0B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); }
+        .glow-orange { box-shadow: 0 0 35px rgba(249, 115, 22, 0.25); }
+        .glow-orange-sm { box-shadow: 0 0 20px rgba(249, 115, 22, 0.15); }
+        .glow-box-cyber { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
         .step-dot { transition: all 0.3s ease; }
-        .step-dot.active { background: var(--brand-primary); transform: scale(1.2); color: #fff; }
-        .step-dot.completed { background: #22C55E; color: #fff; }
-        .step-dot.inactive { background: var(--bg-surface); color: var(--text-muted); }
-        .step-connector { width: 12px; height: 2px; background: var(--border-default); transition: background 0.3s ease; }
-        .step-connector.completed { background: #22C55E; }
+        .step-dot.active { background: var(--brand-primary); border-color: var(--brand-primary); transform: scale(1.15); color: #fff; box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
+        .step-dot.completed { background: #10B981; border-color: #10B981; color: #fff; }
+        .step-dot.inactive { background: var(--bg-card); border-color: var(--border-default); color: var(--text-muted); }
+        .step-connector { width: 14px; height: 2px; background: var(--border-default); transition: background 0.3s ease; }
+        .step-connector.completed { background: #10B981; }
         .form-input { width: 100%; padding: 0.75rem 1rem; background: var(--bg-card); border: 1px solid var(--border-default); border-radius: 0.75rem; color: var(--text-primary); font-size: 0.875rem; transition: all 0.2s; }
-        .form-input:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1); }
-        .form-label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-secondary); }
+        .form-input:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15); }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary); }
         .upload-zone { border: 2px dashed var(--border-default); border-radius: 1rem; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; }
-        .upload-zone:hover, .upload-zone.dragover { border-color: var(--brand-primary); background: rgba(255, 107, 53, 0.05); }
-        .editor-container { height: 400px; border: 1px solid var(--border-default); border-radius: 0.75rem; overflow: hidden; background: #161B22; }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--brand-primary); background: rgba(249, 115, 22, 0.05); }
+        .editor-container { height: 420px; border: 1px solid var(--border-default); border-radius: 0.75rem; overflow: hidden; background: #0B0F17; }
         .step-content { animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes checkmark { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         .success-check { animation: checkmark 0.4s ease-out; }
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .fallback-notice { background: var(--status-warning); color: #000; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
-        #successModal { cursor: pointer; }
-        #successModal > div { cursor: default; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .fallback-notice { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #FBBF24; padding: 0.6rem 1rem; border-radius: 0.75rem; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 0.5rem; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="antialiased min-h-screen pt-16">
-    <div class="min-h-screen flex flex-col">
+<body class="antialiased min-h-screen pt-24 tech-grid bg-[var(--bg-primary)] text-[var(--text-primary)]">
+    <div class="min-h-screen flex flex-col glow-mesh">
+
+        <!-- Top Status Bar -->
+        <div class="fixed top-0 w-full bg-[var(--bg-secondary)] border-b border-[var(--border-default)] py-1 px-4 text-[11px] font-mono text-[var(--text-secondary)] hidden sm:flex items-center justify-between z-50">
+            <div class="flex items-center gap-4">
+                <span class="flex items-center gap-1.5 text-emerald-400 font-bold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    INSTALLER: ACTIVE
+                </span>
+                <span class="text-[var(--border-default)]">|</span>
+                <span>PHP 8.3+ Runtime</span>
+                <span class="text-[var(--border-default)]">|</span>
+                <span>Config Engine: Dual-Mode</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span>Wizard Version: 3.2.0</span>
+                <span class="text-[var(--border-default)]">|</span>
+                <span class="text-[var(--brand-primary)]">VIBEFORGE_ENGINE</span>
+            </div>
+        </div>
 
         <!-- Navbar -->
-        <nav class="fixed top-0 w-full z-50 bg-[var(--bg-secondary)]/90 backdrop-blur-md border-b border-[var(--border-default)]">
+        <nav class="fixed top-7 w-full z-40 bg-[var(--bg-primary)]/85 backdrop-blur-xl border-b border-[var(--border-default)]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
-                    <a href="/" class="flex items-center gap-2">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="#F97316"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
-                        <span class="font-heading font-bold text-xl"><span class="text-[var(--text-primary)]">Vibe</span><span class="text-gradient">forge</span></span>
+                    <a href="/" class="flex items-center gap-3 group">
+                        <div class="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center group-hover:border-orange-500 transition-colors shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="#F97316"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-heading font-extrabold text-lg tracking-tight leading-none"><span class="text-[var(--text-primary)]">Vibe</span><span class="text-gradient">forge</span></span>
+                            <span class="font-mono text-[9px] text-[var(--text-muted)] tracking-wider">SETUP_WIZARD</span>
+                        </div>
                     </a>
-                    <div class="hidden md:flex items-center gap-8">
-                        <a href="/#fitur" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">Fitur</a>
-                        <a href="/#cara-pasang" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">Cara Pasang</a>
-                        <a href="/#demo" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors">Demo</a>
-                        <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1"><i class="ph ph-github-logo"></i> GitHub</a>
+
+                    <div class="hidden md:flex items-center gap-8 font-medium text-sm">
+                        <a href="/#fitur" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5"><i class="ph ph-cpu text-base text-[var(--brand-primary)]"></i> Arsitektur</a>
+                        <a href="/#cara-pasang" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5"><i class="ph ph-terminal-window text-base text-[var(--brand-primary)]"></i> Installer</a>
+                        <a href="/#demo" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5"><i class="ph ph-shield-check text-base text-[var(--brand-primary)]"></i> Demo Roles</a>
                     </div>
+
                     <div class="flex items-center gap-3">
-                        <a href="/" class="px-3 py-1.5 text-[var(--text-secondary)] text-sm font-medium rounded-lg hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5"><i class="ph ph-arrow-left"></i> Kembali</a>
-                        <button id="themeToggle" class="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[var(--bg-hover)] transition-colors" aria-label="Toggle theme"><i class="ph ph-moon text-lg text-[var(--text-muted)]"></i></button>
-<?php if ($isLoggedIn): ?>
-                        <a href="<?= $dashboardUrl ?>" class="px-4 py-2 bg-[var(--brand-primary)] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">Dashboard</a>
-<?php else: ?>
-                        <a href="/login/" class="px-4 py-2 text-[var(--text-secondary)] text-sm font-medium rounded-lg hover:bg-[var(--bg-hover)] transition-colors">Masuk</a>
-                        <a href="/register/" class="px-4 py-2 bg-gradient-brand text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity shadow-lg glow-orange-sm">Daftar</a>
-<?php endif; ?>
+                        <a href="/" class="px-3 py-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-mono font-semibold rounded-lg hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5"><i class="ph ph-arrow-left"></i> BERANDA</a>
+                        <button id="themeToggle" class="w-9 h-9 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] flex items-center justify-center transition-colors text-[var(--text-muted)] hover:text-amber-400" aria-label="Toggle theme"><i class="ph ph-moon text-lg dark:text-amber-400"></i></button>
                     </div>
                 </div>
             </div>
         </nav>
 
-        <!-- Progress Bar -->
-        <div class="bg-[var(--bg-secondary)] border-b border-[var(--border-default)] px-4 py-4">
-            <div class="max-w-7xl mx-auto">
-                <div class="flex items-center justify-between mb-3 text-xs text-[var(--text-muted)]" id="phaseLabels">
-                    <span>Overview</span><span>PRD</span><span>Branding</span><span>Logo</span>
-                    <span>Landing</span><span>Login</span><span>Register</span><span>Manajemen</span>
-                    <span>Admin</span><span>Client</span><span>Server</span><span>Path</span>
-                </div>
-                <div class="flex flex-col items-center mb-3 gap-1">
-                    <span class="text-sm font-medium" id="stepLabel">Langkah 1 dari 12</span>
+        <!-- Progress Stepper Header -->
+        <div class="bg-[var(--bg-card)]/90 backdrop-blur-md border-b border-[var(--border-default)] px-4 py-4 mt-2">
+            <div class="max-w-7xl mx-auto space-y-3">
+                <div class="flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider" id="phaseLabels"></div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-2 bg-[var(--bg-primary)] px-4 py-2.5 rounded-xl border border-[var(--border-default)]">
                     <div class="flex items-center gap-3">
-                        <span id="saveStatus" class="text-xs text-green-400 hidden flex items-center gap-1">
-                            <i class="ph-bold ph-check-circle"></i> <span id="saveStatusText">Tersimpan otomatis</span>
+                        <span class="px-2.5 py-0.5 rounded bg-orange-500/10 border border-orange-500/30 text-[var(--brand-primary)] font-mono text-xs font-bold" id="stepLabel">STEP 01/12</span>
+                        <span class="text-xs font-heading font-bold text-[var(--text-primary)] flex items-center gap-2" id="stepName"><i class="ph ph-map-trifold text-[var(--brand-primary)]"></i> Overview</span>
+                    </div>
+                    <div class="flex items-center gap-2 font-mono text-xs">
+                        <span id="saveStatus" class="text-emerald-400 hidden flex items-center gap-1.5 font-bold">
+                            <i class="ph-bold ph-check-circle text-sm"></i> <span id="saveStatusText">Auto-Saved</span>
                         </span>
-                        <span class="text-sm text-[var(--text-muted)]" id="stepName"><i class="ph ph-map-trifold"></i> Overview</span>
                     </div>
                 </div>
-                <div class="flex items-center justify-center pb-1" id="stepsDots"></div>
+
+                <div class="flex items-center justify-center pt-1 overflow-x-auto hide-scrollbar pb-1" id="stepsDots"></div>
             </div>
         </div>
 
         <!-- Main Content -->
         <main class="flex-1 px-4 py-8">
             <div class="max-w-4xl mx-auto">
-                <div id="eduBanner" class="mb-6 p-4 bg-gradient-to-r from-[var(--brand-primary-light)] to-[var(--bg-card)] border border-[var(--brand-primary)]/20 rounded-2xl flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-lg bg-[var(--brand-primary)]/10 flex items-center justify-center text-[var(--brand-primary)] shrink-0"><i class="ph ph-info text-2xl"></i></div>
+                <div id="eduBanner" class="mb-6 p-4 bg-gray-950 border border-[var(--border-default)] rounded-2xl flex items-start gap-4 shadow-xl glow-box-cyber">
+                    <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)] shrink-0"><i class="ph ph-cpu text-2xl"></i></div>
                     <div>
-                        <h4 class="font-bold text-sm text-[var(--text-primary)] mb-1" id="eduTitle">Gunakan Konsep ini Sebagai Referensi AI</h4>
+                        <h4 class="font-heading font-bold text-sm text-[var(--text-primary)] mb-1" id="eduTitle">Developer Reference Context</h4>
                         <p class="text-xs text-[var(--text-secondary)] leading-relaxed" id="eduDesc">File yang Anda edit di sini akan langsung disimpan ke project lokal.</p>
                     </div>
                 </div>
+
                 <div id="wizardContent" class="step-content"></div>
 
-                <div class="mt-8 flex items-center justify-between gap-3">
-                    <button id="prevBtn" onclick="prevStep()" class="hidden px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl font-medium hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-2">
-                        <i class="ph ph-arrow-left"></i> Kembali
+                <div class="mt-8 flex items-center justify-between gap-3 pt-4 border-t border-[var(--border-default)] font-mono">
+                    <button id="prevBtn" onclick="prevStep()" class="hidden px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl text-xs font-bold hover:border-[var(--brand-primary)] transition-all flex items-center gap-2">
+                        <i class="ph ph-arrow-left text-sm"></i> PREV STEP
                     </button>
                     <div class="flex-1"></div>
-                    <div class="flex items-center gap-2">
-                        <button id="nextBtn" onclick="nextStep()" class="hidden px-6 py-3 bg-[var(--brand-primary)] text-white font-medium rounded-xl hover:opacity-90 transition-colors flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
-                            Lanjut <i class="ph ph-arrow-right"></i>
+                    <div class="flex items-center gap-3">
+                        <button id="nextBtn" onclick="nextStep()" class="hidden px-6 py-3 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-md glow-orange-sm flex items-center gap-2">
+                            NEXT STEP <i class="ph ph-arrow-right text-sm"></i>
                         </button>
-                        <button id="finishBtn" onclick="finishWizard()" class="hidden px-6 py-3 bg-green-500 text-white font-medium rounded-xl hover:opacity-90 transition-colors flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
-                            <i class="ph ph-check"></i> Konfirmasi & Lanjut
+                        <button id="finishBtn" onclick="finishWizard()" class="hidden px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2">
+                            <i class="ph ph-check text-base"></i> CONFIRM & GENERATE
                         </button>
-                        <button id="executeBtn" onclick="executeTerminal()" class="hidden px-6 py-3 bg-green-500 text-white font-medium rounded-xl hover:opacity-90 transition-colors flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
-                            <i class="ph ph-terminal"></i> Buka Terminal
+                        <button id="executeBtn" onclick="executeTerminal()" class="hidden px-6 py-3 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-xl glow-orange flex items-center gap-2">
+                            <i class="ph ph-terminal-window text-base"></i> LAUNCH TERMINAL
                         </button>
                     </div>
                 </div>
@@ -210,38 +252,39 @@ if (file_exists($configPath)) {
     </div>
 
     <!-- Success Modal -->
-    <div id="successModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onclick="closeSuccessModal()" role="dialog" aria-modal="true">
-        <div class="bg-[var(--bg-card)] rounded-2xl p-8 max-w-md mx-4 text-center border border-[var(--border-default)] relative" onclick="event.stopPropagation()">
-            <button onclick="closeSuccessModal()" class="absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--bg-hover)] transition-colors" aria-label="Close"><i class="ph ph-x text-lg"></i></button>
-            <div class="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6 success-check"><i class="ph ph-check-circle text-5xl text-green-500"></i></div>
-            <h2 class="text-2xl font-bold mb-4">Semua File Sudah Disimpan!</h2>
-            <div class="bg-[var(--bg-primary)] rounded-xl p-4 text-left mb-6">
-                <p class="text-sm text-[var(--text-secondary)] mb-3">File yang sudah diedit:</p>
-                <ul id="savedFilesList" class="text-xs text-[var(--text-secondary)] space-y-1.5"></ul>
-                <p class="text-sm text-[var(--text-secondary)] mt-4 mb-2">Jalankan AI coding assistant:</p>
-                <div class="flex items-center gap-2 bg-[var(--bg-card)] p-2 rounded border border-[var(--border-default)] mb-2">
-                    <code class="text-[var(--brand-primary)] font-mono text-sm flex-1">baca dan jalankan @docs/install.md </code>
-                    <button onclick="copyModalInstallCommand()" class="px-2.5 py-1 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg text-xs font-medium hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1 shrink-0" title="Salin command"><i class="ph ph-copy"></i> Salin</button>
+    <div id="successModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4" onclick="closeSuccessModal()" role="dialog" aria-modal="true">
+        <div class="bg-gray-950 rounded-2xl p-8 max-w-md w-full border border-gray-800 shadow-2xl relative glow-box-cyber text-center" onclick="event.stopPropagation()">
+            <button onclick="closeSuccessModal()" class="absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-colors" aria-label="Close"><i class="ph ph-x text-lg"></i></button>
+            <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-5 success-check"><i class="ph ph-check-circle text-4xl text-emerald-400"></i></div>
+            <h2 class="text-2xl font-heading font-extrabold mb-2">Konfigurasi Disimpan!</h2>
+            <p class="text-xs text-[var(--text-secondary)] mb-6">Seluruh file spesifikasi aplikasi Anda telah diperbarui.</p>
+
+            <div class="bg-black/60 rounded-xl p-4 text-left mb-6 border border-gray-800 font-mono text-xs">
+                <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-wider">// Saved Specifications:</p>
+                <ul id="savedFilesList" class="space-y-1.5 mb-4 max-h-32 overflow-y-auto hide-scrollbar"></ul>
+                <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-wider">// AI Prompt Command:</p>
+                <div class="flex items-center gap-2 bg-gray-900 p-2.5 rounded-lg border border-gray-800">
+                    <code class="text-orange-400 font-mono text-xs flex-1 truncate">baca dan jalankan @docs/install.md</code>
+                    <button onclick="copyModalInstallCommand()" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-[11px] transition-colors shrink-0 flex items-center gap-1"><i class="ph ph-copy"></i> Copy</button>
                 </div>
-                <p class="text-xs text-[var(--text-muted)] mt-2">AI akan menempa kode fungsional dari konsep Anda.</p>
             </div>
-            <a href="/" class="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl font-medium hover:bg-[var(--bg-hover)] transition-colors">
-                <i class="ph ph-house"></i> Kembali ke Beranda
+            <a href="/" class="w-full py-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl font-mono text-xs font-bold text-[var(--text-primary)] hover:border-[var(--brand-primary)] transition-all inline-flex items-center justify-center gap-2">
+                <i class="ph ph-house text-base"></i> KEMBALI KE BERANDA
             </a>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl px-6 py-4 shadow-2xl flex items-center gap-3 z-50 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
-        <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center"><i class="ph ph-check-circle text-xl text-green-500" id="toastIcon"></i></div>
-        <div><p class="font-medium text-sm" id="toastTitle">Berhasil!</p><p class="text-xs text-[var(--text-muted)]" id="toastMessage"></p></div>
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-950 border border-gray-800 rounded-xl px-5 py-3.5 shadow-2xl flex items-center gap-3 z-50 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none font-mono">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0"><i class="ph ph-check-circle text-lg text-emerald-400" id="toastIcon"></i></div>
+        <div><p class="font-bold text-xs text-white" id="toastTitle">Success!</p><p class="text-[11px] text-gray-400" id="toastMessage"></p></div>
     </div>
 
     <!-- Saving Overlay -->
-    <div id="savingOverlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50">
-        <div class="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl px-6 py-4 flex items-center gap-3 shadow-2xl">
+    <div id="savingOverlay" class="hidden fixed inset-0 bg-black/65 backdrop-blur-xs flex items-center justify-center z-50 font-mono">
+        <div class="bg-gray-950 border border-gray-800 rounded-2xl px-6 py-4 flex items-center gap-3 shadow-2xl glow-box-cyber">
             <i class="ph ph-circle-notch text-2xl text-[var(--brand-primary)] animate-spin"></i>
-            <span class="text-sm font-medium text-[var(--text-primary)]">Menyimpan perubahan file...</span>
+            <span class="text-xs font-bold text-gray-200">Writing file specifications...</span>
         </div>
     </div>
 
@@ -264,7 +307,6 @@ if (file_exists($configPath)) {
 
     var formData = <?= json_encode($filesData) ?>;
     formData.logo = null;
-    // Use variables from header.php or URL params for auto-detected server/drive
     formData.serverType = paramServer || <?= $jsServer ?>;
     formData.drive = paramDrive || <?= $jsDrive ?>;
     formData.installPath = <?= $jsInstallPath ?>;
@@ -286,7 +328,6 @@ if (file_exists($configPath)) {
         { id: 12, name: 'Path',        icon: 'ph-folder',         file: null,           type: 'config' }
     ];
 
-    // Redesign mode: Overview (1) -> References (2) -> Logo (3) -> Server (4) -> Path (5)
     var stepsRedesign = [
         { id: 1,  name: 'Overview',    icon: 'ph-map-trifold',   file: null,           type: 'welcome' },
         { id: 2,  name: 'References',  icon: 'ph-folder-simple', file: null,           type: 'ref_manager' },
@@ -309,11 +350,11 @@ if (file_exists($configPath)) {
         dotsContainer.innerHTML = '';
         steps.forEach(function(s, i) {
             var dot = document.createElement('div');
-            dot.className = 'step-dot shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs cursor-pointer';
+            dot.className = 'step-dot border shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-xs cursor-pointer';
             dot.setAttribute('data-step', s.id);
             dot.setAttribute('onclick', 'jumpToStep(' + s.id + ')');
             dot.setAttribute('title', s.name);
-            dot.innerHTML = s.type === 'welcome' ? '<i class="ph ph-map-trifold"></i>' : s.id;
+            dot.innerHTML = s.type === 'welcome' ? '<i class="ph ph-map-trifold text-sm"></i>' : (s.id < 10 ? '0' + s.id : s.id);
             dotsContainer.appendChild(dot);
             if (i < steps.length - 1) {
                 var connector = document.createElement('div');
@@ -337,14 +378,14 @@ if (file_exists($configPath)) {
     }
 
     function updateStepUI() {
-        document.getElementById('stepLabel').textContent = 'Langkah ' + currentStep + ' dari ' + totalSteps;
+        document.getElementById('stepLabel').textContent = 'STEP ' + (currentStep < 10 ? '0' + currentStep : currentStep) + '/' + (totalSteps < 10 ? '0' + totalSteps : totalSteps);
         var step = steps[currentStep - 1];
-        document.getElementById('stepName').innerHTML = '<i class="ph ' + step.icon + '"></i> ' + step.name;
+        document.getElementById('stepName').innerHTML = '<i class="ph ' + step.icon + ' text-[var(--brand-primary)]"></i> ' + step.name;
 
         var dots = document.querySelectorAll('.step-dot');
         var connectors = document.querySelectorAll('.step-connector');
         dots.forEach(function(dot, i) {
-            dot.className = 'step-dot shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs cursor-pointer';
+            dot.className = 'step-dot border shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-xs cursor-pointer';
             if (i + 1 < currentStep) dot.classList.add('completed');
             else if (i + 1 === currentStep) dot.classList.add('active');
             else dot.classList.add('inactive');
@@ -443,129 +484,128 @@ if (file_exists($configPath)) {
 
     function renderWelcomeStep() {
         return '<div class="space-y-8">' +
-            '<div class="text-center">' +
-                '<div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-brand mb-6 glow-orange">' +
-                    '<i class="ph ph-magic-wand text-4xl text-white"></i>' +
+            '<div class="text-center max-w-xl mx-auto space-y-3">' +
+                '<div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-orange-500/10 border border-orange-500/30 mb-2 glow-orange">' +
+                    '<i class="ph ph-magic-wand text-4xl text-[var(--brand-primary)]"></i>' +
                 '</div>' +
-                '<h2 class="text-3xl sm:text-4xl font-heading font-bold mb-3">Setup Wizard</h2>' +
-                '<p class="text-[var(--text-secondary)] max-w-xl mx-auto">Pilih jenis alur persiapan proyek aplikasi Anda di bawah ini:</p>' +
+                '<h2 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight">Vibeforge Setup Wizard</h2>' +
+                '<p class="text-[var(--text-secondary)] text-sm leading-relaxed">Pilih alur persiapan proyek aplikasi Anda untuk memandu AI assistant:</p>' +
             '</div>' +
 
             '<!-- Mode Selection Cards -->' +
             '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">' +
-                '<div onclick="setAppMode(\'new\')" class="cursor-pointer p-6 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-[var(--brand-primary)] ' + (appMode === 'new' ? 'border-[var(--brand-primary)] bg-[var(--brand-primary-light)]/10 shadow-lg glow-orange-sm' : 'border-[var(--border-default)]') + '">' +
+                '<div onclick="setAppMode(\'new\')" class="cursor-pointer p-6 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-[var(--brand-primary)] glow-box-cyber ' + (appMode === 'new' ? 'border-[var(--brand-primary)] bg-orange-500/5 shadow-lg' : 'border-[var(--border-default)]') + '">' +
                     '<div class="flex items-center justify-between mb-4">' +
-                        '<div class="w-12 h-12 rounded-xl bg-[var(--brand-primary)]/10 flex items-center justify-center text-[var(--brand-primary)]"><i class="ph ph-sparkle text-2xl"></i></div>' +
-                        '<span class="text-xs font-bold px-2.5 py-1 rounded-full ' + (appMode === 'new' ? 'bg-[var(--brand-primary)] text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">Default Flow</span>' +
+                        '<div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)]"><i class="ph ph-sparkle text-2xl"></i></div>' +
+                        '<span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-full ' + (appMode === 'new' ? 'bg-[var(--brand-primary)] text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">GREENFIELD FLOW</span>' +
                     '</div>' +
-                    '<h3 class="font-heading font-bold text-lg mb-2">Membuat Aplikasi Baru</h3>' +
-                    '<p class="text-xs text-[var(--text-secondary)] leading-relaxed mb-4">Alur lengkap 12 langkah: Susun PRD, Branding, Logo, hingga kustomisasi 6 template HTML referensi.</p>' +
-                    '<ul class="text-xs text-[var(--text-muted)] space-y-1.5 border-t border-[var(--border-default)] pt-3">' +
-                        '<li class="flex items-center gap-1.5"><i class="ph ph-check text-green-400"></i> Editor dokumen PRD & Branding</li>' +
-                        '<li class="flex items-center gap-1.5"><i class="ph ph-check text-green-400"></i> Editor 6 template HTML visual</li>' +
+                    '<h3 class="font-heading font-bold text-lg mb-2">Aplikasi Baru (12 Steps)</h3>' +
+                    '<p class="text-xs text-[var(--text-secondary)] leading-relaxed mb-4">Alur lengkap: Susun PRD, Branding, Logo, hingga kustomisasi 6 template HTML referensi.</p>' +
+                    '<ul class="text-xs font-mono text-[var(--text-muted)] space-y-2 border-t border-[var(--border-default)] pt-4">' +
+                        '<li class="flex items-center gap-2"><i class="ph ph-check-circle text-emerald-400 text-base"></i> Editor dokumen PRD & Branding</li>' +
+                        '<li class="flex items-center gap-2"><i class="ph ph-check-circle text-emerald-400 text-base"></i> Editor 6 template HTML visual</li>' +
                     '</ul>' +
                 '</div>' +
 
-                '<div onclick="setAppMode(\'redesign\')" class="cursor-pointer p-6 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-[var(--brand-primary)] ' + (appMode === 'redesign' ? 'border-[var(--brand-primary)] bg-[var(--brand-primary-light)]/10 shadow-lg glow-orange-sm' : 'border-[var(--border-default)]') + '">' +
+                '<div onclick="setAppMode(\'redesign\')" class="cursor-pointer p-6 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-purple-500 glow-box-cyber ' + (appMode === 'redesign' ? 'border-purple-500 bg-purple-500/5 shadow-lg' : 'border-[var(--border-default)]') + '">' +
                     '<div class="flex items-center justify-between mb-4">' +
-                        '<div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400"><i class="ph ph-paint-brush text-2xl"></i></div>' +
-                        '<span class="text-xs font-bold px-2.5 py-1 rounded-full ' + (appMode === 'redesign' ? 'bg-purple-500 text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">Quick Flow</span>' +
+                        '<div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400"><i class="ph ph-paint-brush text-2xl"></i></div>' +
+                        '<span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-full ' + (appMode === 'redesign' ? 'bg-purple-600 text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">REFIT FLOW</span>' +
                     '</div>' +
-                    '<h3 class="font-heading font-bold text-lg mb-2">Redesain Aplikasi</h3>' +
-                    '<p class="text-xs text-[var(--text-secondary)] leading-relaxed mb-4">Langkah praktis 5 langkah: Upload Logo, kelola folder References, konfigurasi Server & Path. PRD & Branding dibuat saat menjalankan @docs/install.md</p>' +
-                    '<ul class="text-xs text-[var(--text-muted)] space-y-1.5 border-t border-[var(--border-default)] pt-3">' +
-                        '<li class="flex items-center gap-1.5"><i class="ph ph-check text-purple-400"></i> Upload Logo + Kelola References</li>' +
-                        '<li class="flex items-center gap-1.5"><i class="ph ph-check text-purple-400"></i> PRD & Branding otomatis dari References</li>' +
+                    '<h3 class="font-heading font-bold text-lg mb-2">Redesain Aplikasi (5 Steps)</h3>' +
+                    '<p class="text-xs text-[var(--text-secondary)] leading-relaxed mb-4">Alur cepat: Upload Logo, kelola folder References, konfigurasi Server & Path.</p>' +
+                    '<ul class="text-xs font-mono text-[var(--text-muted)] space-y-2 border-t border-[var(--border-default)] pt-4">' +
+                        '<li class="flex items-center gap-2"><i class="ph ph-check-circle text-purple-400 text-base"></i> Upload Logo + Kelola References</li>' +
+                        '<li class="flex items-center gap-2"><i class="ph ph-check-circle text-purple-400 text-base"></i> Auto PRD/Branding dari References</li>' +
                     '</ul>' +
                 '</div>' +
             '</div>' +
 
             '<div class="text-center pt-2" id="welcomeCTA">' +
-                '<button onclick="startEditor()" class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-brand text-white font-bold rounded-xl hover:opacity-90 transition-opacity glow-orange text-lg shadow-lg cursor-pointer">' +
-                    '<i class="ph ph-rocket-launch"></i> Mulai Persiapan <i class="ph ph-arrow-right"></i>' +
+                '<button onclick="startEditor()" class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-brand text-white font-mono font-bold text-xs rounded-xl hover:opacity-90 transition-opacity glow-orange shadow-lg cursor-pointer">' +
+                    '<i class="ph ph-rocket-launch text-base"></i> START CONFIGURATION <i class="ph ph-arrow-right text-base"></i>' +
                 '</button>' +
             '</div>' +
         '</div>';
     }
 
     function renderCodeEditorStep(title, targetFile, dataKey, lang) {
-        var fallbackNotice = window.monacoLoadFailed ? '<div class="fallback-notice mb-3"><i class="ph ph-warning"></i> Monaco Editor tidak tersedia. Menggunakan text editor dasar.</div>' : '';
+        var fallbackNotice = window.monacoLoadFailed ? '<div class="fallback-notice mb-3"><i class="ph ph-warning"></i> Monaco Editor tidak tersedia. Menggunakan editor textarea standar.</div>' : '';
         return '<div class="space-y-4">' +
             '<div class="flex items-center justify-between flex-wrap gap-2">' +
-                '<div><h2 class="text-2xl font-bold mb-1">' + title + '</h2><p class="text-xs text-[var(--text-secondary)]">Mengedit: <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono">' + targetFile + '</code></p></div>' +
-                '<button id="copyBtn" class="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl text-xs font-semibold hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph ph-copy"></i> Salin Referensi</button>' +
+                '<div><h2 class="text-2xl font-heading font-bold mb-1">' + title + '</h2><p class="text-xs font-mono text-[var(--text-secondary)]">Target File: <code class="px-2 py-0.5 bg-[var(--bg-card)] rounded text-[var(--brand-primary)] border border-[var(--border-default)]">' + targetFile + '</code></p></div>' +
+                '<button id="copyBtn" class="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl text-xs font-mono font-bold hover:border-[var(--brand-primary)] transition-all flex items-center gap-2 shadow-sm"><i class="ph ph-copy"></i> SALIN REFERENSI</button>' +
             '</div>' +
             fallbackNotice +
-            '<div id="monaco-editor-container" class="editor-container shadow-inner"></div>' +
-            '<div class="flex items-center gap-4 text-xs text-[var(--text-muted)] border-t border-[var(--border-default)] pt-4">' +
-                '<span>Atau timpa dengan upload file:</span>' +
+            '<div id="monaco-editor-container" class="editor-container shadow-2xl border border-[var(--border-default)]"></div>' +
+            '<div class="flex items-center gap-4 text-xs font-mono text-[var(--text-muted)] border-t border-[var(--border-default)] pt-4">' +
+                '<span>Timpa dengan file lokal:</span>' +
                 '<input type="file" id="fileInput" class="hidden" accept=".html,.md,.txt" onchange="handleFileUpload(this, \'' + dataKey + '\')">' +
-                '<button onclick="document.getElementById(\'fileInput\').click()" class="px-3 py-1.5 bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] rounded-lg flex items-center gap-1.5 transition-colors"><i class="ph ph-upload-simple"></i> Upload File</button>' +
+                '<button onclick="document.getElementById(\'fileInput\').click()" class="px-3.5 py-1.5 bg-[var(--bg-card)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] rounded-lg flex items-center gap-1.5 transition-colors text-xs font-bold text-gray-300"><i class="ph ph-upload-simple"></i> Upload File</button>' +
             '</div>' +
         '</div>';
     }
 
     function renderLogoUploadStep() {
-        var existingLogo = formData.logoBase64 ? '<img src="data:image/png;base64,' + formData.logoBase64 + '" class="max-h-32 mx-auto mb-3 rounded-lg">' : '';
+        var existingLogo = formData.logoBase64 ? '<img src="data:image/png;base64,' + formData.logoBase64 + '" class="max-h-32 mx-auto mb-3 rounded-lg shadow-md border border-[var(--border-default)]">' : '';
         var hasExisting = formData.logoBase64 || formData.logo;
 
         return '<div class="space-y-6">' +
-            '<div><h2 class="text-2xl font-bold mb-2">Upload Logo</h2><p class="text-[var(--text-secondary)]">Upload file gambar PNG untuk logo aplikasi. Disimpan ke <code class="px-2 py-1 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono text-sm">docs/logo.png</code></p></div>' +
-            '<div class="upload-zone" id="uploadZone" onclick="document.getElementById(\'logoInput\').click()">' +
+            '<div><h2 class="text-2xl font-heading font-bold mb-2">Upload Logo Aplikasi</h2><p class="text-xs font-mono text-[var(--text-secondary)]">Disimpan otomatis ke <code class="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-default)] rounded text-[var(--brand-primary)]">docs/logo.png</code></p></div>' +
+            '<div class="upload-zone bg-[var(--bg-card)] border-2 border-dashed border-[var(--border-default)] rounded-2xl p-8 hover:border-[var(--brand-primary)] transition-all glow-box-cyber" id="uploadZone" onclick="document.getElementById(\'logoInput\').click()">' +
                 '<input type="file" id="logoInput" class="hidden" accept=".png,image/png" onchange="handleLogoUpload(this)">' +
-                '<div id="logoPreviewContainer" class="' + (hasExisting ? '' : 'hidden') + '"><img id="logoPreview" class="max-h-32 mx-auto mb-3 rounded-lg"></div>' +
-                '<div id="logoPlaceholder" class="' + (hasExisting ? 'hidden' : '') + '"><i class="ph ph-image text-4xl text-[var(--brand-primary)] mb-3"></i><p class="text-[var(--text-secondary)]">Klik untuk upload logo PNG</p><p class="text-xs text-[var(--text-muted)] mt-1">Format: PNG, maks 2MB</p></div>' +
+                '<div id="logoPreviewContainer" class="' + (hasExisting ? '' : 'hidden') + '"><img id="logoPreview" class="max-h-32 mx-auto mb-3 rounded-lg shadow-md border border-[var(--border-default)]"></div>' +
+                '<div id="logoPlaceholder" class="' + (hasExisting ? 'hidden' : '') + '"><i class="ph ph-image text-4xl text-[var(--brand-primary)] mb-3"></i><p class="text-sm font-semibold text-[var(--text-primary)]">Klik / Drag & Drop logo PNG</p><p class="text-xs font-mono text-[var(--text-muted)] mt-1">Format: PNG (Max 2MB)</p></div>' +
             '</div>' +
-            (hasExisting ? '<div class="flex items-center gap-2 text-green-400 text-sm"><i class="ph ph-check-circle"></i><span>' + (formData.logo ? 'Logo baru dipilih' : 'Logo sudah ada') + ': docs/logo.png</span></div>' : '') +
+            (hasExisting ? '<div class="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold"><i class="ph ph-check-circle text-sm"></i><span>Logo file ready: docs/logo.png</span></div>' : '') +
         '</div>';
     }
 
     function renderReferencesManagerStep() {
         return '<div class="space-y-6">' +
-            '<div><h2 class="text-2xl font-bold mb-2">Manajemen Folder References</h2><p class="text-[var(--text-secondary)]">Kelola file referensi aplikasi Anda di folder <code class="px-2 py-1 bg-[var(--bg-surface)] rounded text-purple-400 font-mono text-sm">references/</code></p></div>' +
+            '<div><h2 class="text-2xl font-heading font-bold mb-2">Folder References Manager</h2><p class="text-xs font-mono text-[var(--text-secondary)]">Kelola file referensi aplikasi lama di <code class="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-default)] rounded text-purple-400">references/</code></p></div>' +
 
-            '<div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-2xl flex items-start gap-3">' +
+            '<div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-2xl flex items-start gap-3.5 font-mono text-xs">' +
                 '<i class="ph ph-info text-xl text-purple-400 shrink-0 mt-0.5"></i>' +
-                '<div class="text-xs text-[var(--text-secondary)] space-y-1 leading-relaxed">' +
-                    '<p class="font-semibold text-purple-300">Panduan Mode Redesain:</p>' +
-                    '<p>1. Folder <code class="px-1 bg-[var(--bg-surface)] text-purple-300 font-mono">references/</code> telah otomatis dikosongkan untuk menampung referensi baru.</p>' +
-                    '<p>2. Unggah file/folder referensi aplikasi lama, atau buka folder langsung di File Explorer.</p>' +
-                    '<p>3. Dokumen <code class="px-1 bg-[var(--bg-surface)] text-purple-300 font-mono">docs/prd.md</code> dan <code class="px-1 bg-[var(--bg-surface)] text-purple-300 font-mono">docs/branding.md</code> akan otomatis disusun oleh AI saat menjalankan <code class="px-1 bg-[var(--bg-surface)] text-purple-300 font-mono">@docs/install.md</code>.</p>' +
+                '<div class="text-[11px] text-[var(--text-secondary)] space-y-1.5 leading-relaxed">' +
+                    '<p class="font-bold text-purple-300">// Refit Mode Protocol:</p>' +
+                    '<p>1. Folder <code class="px-1 bg-black/50 text-purple-300 rounded">references/</code> telah siap untuk menampung referensi codebase lama.</p>' +
+                    '<p>2. Unggah file / folder codebase lama via tombol di bawah atau buka folder File Explorer.</p>' +
+                    '<p>3. PRD & Branding akan otomatis dirangkum oleh AI CLI saat menjalankan <code class="px-1 bg-black/50 text-purple-300 rounded">@docs/install.md</code>.</p>' +
                 '</div>' +
             '</div>' +
 
-            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-4">' +
+            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-4 glow-box-cyber">' +
                 '<div class="flex items-center justify-between flex-wrap gap-3">' +
-                    '<h3 class="font-heading font-semibold text-lg flex items-center gap-2"><i class="ph ph-folder-open text-purple-400"></i> Isi Folder references/</h3>' +
-                    '<div class="flex items-center gap-2">' +
-                        '<button onclick="openReferencesFolder()" class="px-3.5 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-xl text-xs font-semibold hover:bg-blue-500/20 transition-colors flex items-center gap-1.5" title="Buka folder di File Explorer"><i class="ph ph-folder-simple-open"></i> Buka Folder</button>' +
-                        '<button onclick="clearReferencesFolder()" class="px-3.5 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs font-semibold hover:bg-red-500/20 transition-colors flex items-center gap-1.5"><i class="ph ph-trash"></i> Bersihkan</button>' +
-                        '<button onclick="loadReferencesList()" class="px-3.5 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl text-xs font-semibold hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5"><i class="ph ph-arrows-clockwise"></i> Refresh</button>' +
+                    '<h3 class="font-heading font-bold text-lg flex items-center gap-2"><i class="ph ph-folder-open text-purple-400"></i> Contents: references/</h3>' +
+                    '<div class="flex items-center gap-2 font-mono text-xs">' +
+                        '<button onclick="openReferencesFolder()" class="px-3.5 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-xl font-bold hover:bg-blue-500/20 transition-colors flex items-center gap-1.5"><i class="ph ph-folder-simple-open"></i> File Explorer</button>' +
+                        '<button onclick="clearReferencesFolder()" class="px-3.5 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-bold hover:bg-red-500/20 transition-colors flex items-center gap-1.5"><i class="ph ph-trash"></i> Clear</button>' +
+                        '<button onclick="loadReferencesList()" class="px-3.5 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl font-bold hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5"><i class="ph ph-arrows-clockwise"></i> Refresh</button>' +
                     '</div>' +
                 '</div>' +
 
-                '<div id="refFilesContainer" class="min-h-[120px] bg-[var(--bg-primary)] rounded-xl p-4 border border-[var(--border-default)] flex flex-col justify-center items-center text-center">' +
+                '<div id="refFilesContainer" class="min-h-[140px] bg-black/60 rounded-xl p-4 border border-[var(--border-default)] flex flex-col justify-center items-center text-center font-mono">' +
                     '<i class="ph ph-circle-notch text-2xl text-[var(--brand-primary)] animate-spin"></i>' +
-                    '<p class="text-xs text-[var(--text-muted)] mt-2">Mendeteksi isi folder...</p>' +
+                    '<p class="text-xs text-[var(--text-muted)] mt-2">Reading directory...</p>' +
                 '</div>' +
 
-                '<div class="pt-2 border-t border-[var(--border-default)]">' +
-                    '<p class="text-xs text-[var(--text-muted)] mb-3">Kelola atau unggah file/folder referensi baru:</p>' +
+                '<div class="pt-2 border-t border-[var(--border-default)] font-mono text-xs">' +
+                    '<p class="text-[11px] text-[var(--text-muted)] mb-3">// Upload files or folder:</p>' +
                     '<input type="file" id="refFileInput" class="hidden" multiple onchange="handleRefUpload(this)">' +
                     '<input type="file" id="refFolderInput" class="hidden" webkitdirectory directory multiple onchange="handleRefUpload(this)">' +
-                    '<div class="flex items-center gap-2 flex-wrap">' +
-                        '<button onclick="openReferencesFolder()" class="px-3.5 py-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-xl font-medium hover:bg-blue-500/20 transition-colors flex items-center gap-1.5 shadow-sm" title="Buka folder di File Explorer"><i class="ph ph-folder-simple-open"></i> Buka Folder</button>' +
-                        '<button onclick="document.getElementById(\'refFileInput\').click()" class="px-3.5 py-2 bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] rounded-xl font-medium hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph ph-file-plus"></i> Upload File</button>' +
-                        '<button onclick="document.getElementById(\'refFolderInput\').click()" class="px-3.5 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-500 transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph ph-folder-plus"></i> Upload Folder</button>' +
+                    '<div class="flex items-center gap-2.5 flex-wrap">' +
+                        '<button onclick="openReferencesFolder()" class="px-4 py-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-xl font-bold hover:bg-blue-500/20 transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph ph-folder-simple-open"></i> Open Folder</button>' +
+                        '<button onclick="document.getElementById(\'refFileInput\').click()" class="px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] rounded-xl font-bold hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph ph-file-plus"></i> Upload Files</button>' +
+                        '<button onclick="document.getElementById(\'refFolderInput\').click()" class="px-4 py-2 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-500 transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph ph-folder-plus"></i> Upload Folder</button>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
         '</div>';
     }
 
-    // Buka folder references/ di File Explorer via AJAX call to backend
     async function openReferencesFolder() {
-        showToast('Membuka Folder', 'Membuka folder references/ di File Explorer...');
+        showToast('System Action', 'Membuka folder references/ di File Explorer...');
         try {
             var res = await fetch('/core/router.php', {
                 method: 'POST',
@@ -579,12 +619,12 @@ if (file_exists($configPath)) {
             });
             var data = await res.json();
             if (data.success) {
-                showToast('Folder Terbuka', 'File Explorer telah dibuka di folder references/');
+                showToast('Terbuka', 'Folder references/ dibuka di File Explorer');
             } else {
-                showToast('Gagal', data.error || 'Gagal membuka folder', true);
+                showToast('Error', data.error || 'Gagal membuka folder', true);
             }
         } catch(e) {
-            showToast('Gagal', 'Gagal menghubungi server', true);
+            showToast('Error', 'Gagal koneksi ke server', true);
         }
     }
 
@@ -602,14 +642,14 @@ if (file_exists($configPath)) {
             refFiles = data.files || [];
 
             if (refFiles.length === 0) {
-                container.innerHTML = '<div class="py-6"><i class="ph ph-folder-open text-4xl text-[var(--text-muted)] mb-2 block"></i><p class="text-sm text-[var(--text-secondary)] font-medium">Folder references/ Kosong</p><p class="text-xs text-[var(--text-muted)] mt-1">Silakan upload file/folder referensi Anda atau masukkan file ke folder tersebut.</p></div>';
+                container.innerHTML = '<div class="py-6"><i class="ph ph-folder-open text-4xl text-[var(--text-muted)] mb-2 block"></i><p class="text-xs font-bold text-[var(--text-secondary)] font-mono">Folder references/ Kosong</p><p class="text-[11px] text-[var(--text-muted)] mt-1 font-mono">Silakan upload file/folder referensi aplikasi lama.</p></div>';
             } else {
-                var html = '<div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">';
+                var html = '<div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 text-left font-mono text-xs">';
                 refFiles.forEach(function(file) {
                     var isDir = file.is_dir;
                     var icon = isDir ? 'ph-folder-simple text-amber-400' : 'ph-file-code text-purple-400';
                     var bg = isDir ? 'bg-amber-500/10' : 'bg-purple-500/10';
-                    var kb = isDir ? 'Folder' : (file.size / 1024).toFixed(1) + ' KB';
+                    var kb = isDir ? 'DIR' : (file.size / 1024).toFixed(1) + ' KB';
 
                     html += '<div class="p-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl flex items-center gap-3">' +
                         '<div class="w-9 h-9 rounded-lg ' + bg + ' flex items-center justify-center shrink-0"><i class="ph ' + icon + ' text-lg"></i></div>' +
@@ -620,12 +660,12 @@ if (file_exists($configPath)) {
                 container.innerHTML = html;
             }
         } catch(e) {
-            container.innerHTML = '<p class="text-xs text-red-400">Gagal mendeteksi isi folder references</p>';
+            container.innerHTML = '<p class="text-xs font-mono text-red-400">Gagal mendeteksi isi folder references</p>';
         }
     }
 
     async function clearReferencesFolder() {
-        if (!confirm('Apakah Anda yakin ingin menghapus seluruh file HTML bawaan di folder references/?')) return;
+        if (!confirm('Apakah Anda yakin ingin menghapus seluruh file di folder references/?')) return;
         showSavingOverlay();
         try {
             var res = await fetch('/core/router.php', {
@@ -687,37 +727,37 @@ if (file_exists($configPath)) {
         var driveButtons = drives.map(function(d) {
             var activeClass = d === currentDrive
                 ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)] shadow-md'
-                : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]';
+                : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]';
 
-            return '<button type="button" onclick="updateDrive(\'' + d + '\')" class="shrink-0 px-4 py-2.5 rounded-xl border text-sm transition-all flex items-center gap-1.5 ' + activeClass + '">' +
-                '<i class="ph ph-hard-drive text-base"></i> Disk (' + d + ':)' +
+            return '<button type="button" onclick="updateDrive(\'' + d + '\')" class="shrink-0 px-4 py-2.5 rounded-xl border text-xs font-mono font-bold transition-all flex items-center gap-1.5 ' + activeClass + '">' +
+                '<i class="ph ph-hard-drive text-base"></i> (' + d + ':)' +
             '</button>';
         }).join('');
 
         return '<div class="space-y-6">' +
-            '<div><h2 class="text-2xl font-bold mb-2">Pilih Local Server</h2><p class="text-[var(--text-secondary)]">Aplikasi web server mana yang Anda gunakan?</p></div>' +
+            '<div><h2 class="text-2xl font-heading font-bold mb-2">Web Server Runtime</h2><p class="text-xs font-mono text-[var(--text-secondary)]">Pilih lingkungan web server lokal target:</p></div>' +
             '<div class="grid grid-cols-2 gap-4">' +
                 '<label class="cursor-pointer">' +
                     '<input type="radio" name="serverType" value="laragon" class="hidden peer" ' + (server === 'laragon' ? 'checked' : '') + ' onchange="updateServerType(\'laragon\')">' +
-                    '<div class="p-6 bg-[var(--bg-card)] border-2 rounded-xl transition-all peer-checked:border-[var(--brand-primary)] peer-checked:bg-[var(--brand-primary-light)]/10">' +
-                        '<div class="w-14 h-14 rounded-xl bg-green-500/10 flex items-center justify-center mb-4"><i class="ph ph-bug text-3xl text-green-500"></i></div>' +
-                        '<h3 class="font-semibold text-lg mb-1">Laragon</h3><p class="text-sm text-[var(--text-muted)]">Full stack dev environment</p><p class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="laragonPathPreview">' + currentDrive + ':\\laragon\\www</p>' +
+                    '<div class="p-6 bg-[var(--bg-card)] border-2 border-[var(--border-default)] rounded-2xl transition-all peer-checked:border-[var(--brand-primary)] peer-checked:bg-orange-500/5 glow-box-cyber">' +
+                        '<div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-4"><i class="ph ph-bug text-2xl text-emerald-400"></i></div>' +
+                        '<h3 class="font-heading font-bold text-lg mb-1">Laragon Engine</h3><p class="text-xs text-[var(--text-muted)]">Apache/Nginx isolated environment</p><p class="text-xs text-[var(--brand-primary)] mt-3 font-mono" id="laragonPathPreview">' + currentDrive + ':\\laragon\\www</p>' +
                     '</div>' +
                 '</label>' +
                 '<label class="cursor-pointer">' +
                     '<input type="radio" name="serverType" value="xampp" class="hidden peer" ' + (server === 'xampp' ? 'checked' : '') + ' onchange="updateServerType(\'xampp\')">' +
-                    '<div class="p-6 bg-[var(--bg-card)] border-2 rounded-xl transition-all peer-checked:border-[var(--brand-primary)] peer-checked:bg-[var(--brand-primary-light)]/10">' +
-                        '<div class="w-14 h-14 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4"><i class="ph ph-file-css text-3xl text-blue-500"></i></div>' +
-                        '<h3 class="font-semibold text-lg mb-1">XAMPP</h3><p class="text-sm text-[var(--text-muted)]">Apache + PHP + MySQL</p><p class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="xamppPathPreview">' + currentDrive + ':\\xampp\\htdocs</p>' +
+                    '<div class="p-6 bg-[var(--bg-card)] border-2 border-[var(--border-default)] rounded-2xl transition-all peer-checked:border-[var(--brand-primary)] peer-checked:bg-orange-500/5 glow-box-cyber">' +
+                        '<div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mb-4"><i class="ph ph-file-css text-2xl text-blue-400"></i></div>' +
+                        '<h3 class="font-heading font-bold text-lg mb-1">XAMPP Engine</h3><p class="text-xs text-[var(--text-muted)]">Apache + PHP + MySQL stack</p><p class="text-xs text-[var(--brand-primary)] mt-3 font-mono" id="xamppPathPreview">' + currentDrive + ':\\xampp\\htdocs</p>' +
                     '</div>' +
                 '</label>' +
             '</div>' +
-            '<div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-6">' +
-                '<label class="form-label font-semibold mb-3 block">Pilih Local Disk Lokasi Server</label>' +
+            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 glow-box-cyber">' +
+                '<label class="form-label font-mono font-bold text-xs uppercase text-[var(--text-secondary)] block">// Select Target Local Disk Drive:</label>' +
                 '<div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin hide-scrollbar" id="driveContainer">' +
                     driveButtons +
                 '</div>' +
-                '<p class="text-xs text-[var(--text-muted)] mt-3">Server path yang dikonfigurasi: <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono" id="serverFullPathPreview">' + fullPathPreview + '</code></p>' +
+                '<p class="text-xs font-mono text-[var(--text-muted)] pt-2 border-t border-[var(--border-default)]">Target Server Path: <code class="px-2 py-0.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded text-[var(--brand-primary)] font-mono font-bold" id="serverFullPathPreview">' + fullPathPreview + '</code></p>' +
             '</div>' +
         '</div>';
     }
@@ -749,29 +789,31 @@ if (file_exists($configPath)) {
         var projectPath = basePath + '\\' + folderName;
 
         return '<div class="space-y-6">' +
-            '<div><h2 class="text-2xl font-bold mb-2">Lokasi Instalasi</h2><p class="text-[var(--text-secondary)]">Di mana Anda ingin menyimpan project ini?</p></div>' +
+            '<div><h2 class="text-2xl font-heading font-bold mb-2">Lokasi Project & Execution</h2><p class="text-xs font-mono text-[var(--text-secondary)]">Selesai! Konfirmasi lokasi workspace sebelum membuka CLI.</p></div>' +
 
-            '<div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-6">' +
-                '<div class="flex items-center justify-between mb-3">' +
-                    '<h3 class="font-medium flex items-center gap-2"><i class="ph ph-folder-simple text-[var(--brand-primary)]"></i> Project Path</h3>' +
-                    '<button onclick="copyProjectPath()" class="px-3 py-1 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg text-xs font-medium hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5"><i class="ph ph-copy"></i> Salin Path</button>' +
+            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 glow-box-cyber">' +
+                '<div class="flex items-center justify-between mb-1">' +
+                    '<h3 class="font-mono text-xs font-bold uppercase text-gray-300 flex items-center gap-2"><i class="ph ph-folder-simple text-[var(--brand-primary)] text-base"></i> Target Directory Path</h3>' +
+                    '<button onclick="copyProjectPath()" class="px-3 py-1 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg text-xs font-mono font-bold hover:border-[var(--brand-primary)] transition-colors flex items-center gap-1.5"><i class="ph ph-copy"></i> Salin Path</button>' +
                 '</div>' +
-                '<div class="bg-[var(--bg-primary)] rounded-lg p-4 font-mono text-sm mb-3"><span class="text-[var(--text-muted)]">$ cd </span><span class="text-[var(--brand-primary)]" id="pathPreview">' + projectPath + '</span></div>' +
-                '<p class="text-xs text-[var(--text-muted)]">Nama folder project default: <code class="px-1.5 py-0.5 bg-[var(--bg-surface)] rounded text-[var(--brand-primary)] font-mono font-semibold">' + folderName + '</code> (Dapat diubah nama foldernya setelah instalasi selesai).</p>' +
+                '<div class="bg-black/80 rounded-xl p-4 font-mono text-xs border border-gray-800 text-emerald-400 select-all"><span class="text-gray-500 select-none">PS&gt; cd </span><span id="pathPreview">' + projectPath + '</span></div>' +
+                '<p class="text-[11px] font-mono text-[var(--text-muted)]">Default directory name: <code class="px-1.5 py-0.5 bg-[var(--bg-primary)] rounded text-[var(--brand-primary)] font-bold">vibeforge</code></p>' +
             '</div>' +
 
-            '<div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-6">' +
-                '<h3 class="font-medium mb-2 flex items-center gap-2"><i class="ph ph-terminal text-[var(--brand-primary)]"></i> Jalankan Terminal</h3>' +
-                '<p class="text-xs text-[var(--text-muted)] mb-4">Semua file konsep sudah siap! Klik tombol di bawah untuk langsung membuka PowerShell & menjalankan Claude Code di folder project ini.</p>' +
-                '<button onclick="executeTerminal()" class="w-full py-3 bg-gradient-brand text-white font-bold rounded-xl hover:opacity-90 transition-opacity glow-orange flex items-center justify-center gap-2 shadow-lg cursor-pointer">' +
-                    '<i class="ph ph-play text-xl"></i> Buka Terminal & Jalankan Claude Code' +
+            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-4 glow-box-cyber">' +
+                '<div>' +
+                    '<h3 class="font-heading font-bold text-lg mb-1 flex items-center gap-2"><i class="ph ph-terminal-window text-[var(--brand-primary)] text-xl"></i> Eksekusi AI Assistant Terminal</h3>' +
+                    '<p class="text-xs text-[var(--text-muted)]">Seluruh file spesifikasi aplikasi Anda sudah disimpan. Klik tombol di bawah untuk membuka PowerShell secara otomatis.</p>' +
+                '</div>' +
+                '<button onclick="executeTerminal()" class="w-full py-4 bg-gradient-brand text-white font-mono font-bold text-xs rounded-xl hover:opacity-95 transition-all glow-orange flex items-center justify-center gap-2 shadow-2xl cursor-pointer">' +
+                    '<i class="ph ph-play-circle text-xl"></i> OPEN POWERSHELL & RUN CLAUDE CODE' +
                 '</button>' +
             '</div>' +
 
-            '<div class="bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] p-6">' +
-                '<h3 class="font-medium mb-3 flex items-center gap-2"><i class="ph ph-clipboard text-[var(--brand-primary)]"></i> Copy Command</h3>' +
-                '<div class="relative"><code class="block bg-[var(--bg-primary)] rounded-lg p-4 font-mono text-sm text-[var(--brand-primary)] select-all">baca dan jalankan @docs/install.md </code>' +
-                '<button onclick="copyInstallCommand()" class="mt-3 w-full py-3 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl font-medium hover:bg-[var(--bg-hover)] transition-colors flex items-center justify-center gap-2"><i class="ph ph-copy"></i> Copy Command</button></div>' +
+            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 font-mono text-xs glow-box-cyber">' +
+                '<h3 class="font-bold text-gray-300 flex items-center gap-2"><i class="ph ph-clipboard text-[var(--brand-primary)] text-base"></i> Manual Prompt Command</h3>' +
+                '<div class="relative"><code class="block bg-black/80 border border-gray-800 rounded-xl p-4 font-mono text-xs text-orange-400 select-all">baca dan jalankan @docs/install.md</code>' +
+                '<button onclick="copyInstallCommand()" class="mt-3 w-full py-2.5 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl font-bold hover:border-[var(--brand-primary)] transition-colors flex items-center justify-center gap-2 text-xs"><i class="ph ph-copy"></i> Copy Prompt Command</button></div>' +
             '</div>' +
         '</div>';
     }
@@ -783,7 +825,7 @@ if (file_exists($configPath)) {
         var projectPath = basePath + '\\vibeforge';
 
         var successCallback = function() {
-            showToast('Tersalin!', 'Project Path berhasil disalin ke clipboard');
+            showToast('Tersalin!', 'Project Path disalin ke clipboard');
         };
         var fallbackCopy = function() {
             var textarea = document.createElement('textarea');
@@ -813,7 +855,6 @@ if (file_exists($configPath)) {
     }
 
     var monacoThemesDefined = false;
-    var _pendingMonacoInit = null;
 
     function initMonacoEditor(language, dataKey) {
         var container = document.getElementById('monaco-editor-container');
@@ -832,7 +873,7 @@ if (file_exists($configPath)) {
             if (!monacoThemesDefined) {
                 monaco.editor.defineTheme('vibeforgeDark', {
                     base: 'vs-dark', inherit: true, rules: [],
-                    colors: { 'editor.background': '#161B22', 'editor.lineHighlightBackground': '#1f242c' }
+                    colors: { 'editor.background': '#0B0F17', 'editor.lineHighlightBackground': '#111726' }
                 });
                 monacoThemesDefined = true;
             }
@@ -841,8 +882,8 @@ if (file_exists($configPath)) {
                 value: formData[dataKey] || '',
                 language: language === 'markdown' ? 'markdown' : 'html',
                 theme: 'vibeforgeDark',
-                fontSize: 14,
-                fontFamily: 'Consolas, Monaco, monospace',
+                fontSize: 13,
+                fontFamily: 'JetBrains Mono, Fira Code, Consolas, monospace',
                 minimap: { enabled: false },
                 lineNumbers: 'on',
                 automaticLayout: true,
@@ -861,7 +902,7 @@ if (file_exists($configPath)) {
     }
 
     function initTextareaFallback(container, dataKey, language) {
-        container.innerHTML = '<textarea id="fallbackEditor" class="w-full h-full p-4 font-mono text-sm resize-none border-0 focus:outline-none" style="min-height: 400px; background-color: #161B22; color: #E6EDF3; line-height: 1.6;" oninput="handleTextareaInput(\'' + dataKey + '\', this.value)">' + (formData[dataKey] || '') + '</textarea>';
+        container.innerHTML = '<textarea id="fallbackEditor" class="w-full h-full p-4 font-mono text-xs resize-none border-0 focus:outline-none" style="min-height: 400px; background-color: #0B0F17; color: #F0F6FC; line-height: 1.6;" oninput="handleTextareaInput(\'' + dataKey + '\', this.value)">' + (formData[dataKey] || '') + '</textarea>';
         var copyBtn = document.getElementById('copyBtn');
         if (copyBtn) copyBtn.onclick = function() { copyToClipboard(dataKey); };
     }
@@ -882,8 +923,8 @@ if (file_exists($configPath)) {
         }
 
         if (status) {
-            statusText.textContent = 'Menyimpan otomatis...';
-            status.className = 'text-xs text-yellow-400 flex items-center gap-1';
+            statusText.textContent = 'Saving...';
+            status.className = 'text-xs font-mono text-amber-400 flex items-center gap-1.5';
         }
 
         clearTimeout(autoSaveTimeout);
@@ -911,20 +952,20 @@ if (file_exists($configPath)) {
 
                 if (response.ok) {
                     if (status) {
-                        statusText.textContent = 'Tersimpan otomatis';
-                        status.className = 'text-xs text-green-400 flex items-center gap-1';
+                        statusText.textContent = 'Auto-Saved';
+                        status.className = 'text-xs font-mono text-emerald-400 flex items-center gap-1.5';
                     }
                     if (step.file) triggerGraphifyUpdate(step.file);
                 } else {
                     if (status) {
-                        statusText.textContent = 'Gagal menyimpan';
-                        status.className = 'text-xs text-red-400 flex items-center gap-1';
+                        statusText.textContent = 'Save Failed';
+                        status.className = 'text-xs font-mono text-rose-400 flex items-center gap-1.5';
                     }
                 }
             } catch(e) {
                 if (status) {
-                    statusText.textContent = 'Gagal koneksi';
-                    status.className = 'text-xs text-red-400 flex items-center gap-1';
+                    statusText.textContent = 'Network Error';
+                    status.className = 'text-xs font-mono text-rose-400 flex items-center gap-1.5';
                 }
             }
         }, 800);
@@ -954,7 +995,7 @@ if (file_exists($configPath)) {
         var fileName = steps[currentStep - 1].file;
 
         var successCallback = function() {
-            showToast('Tersalin!', 'Isi ' + fileName + ' berhasil disalin ke clipboard');
+            showToast('Tersalin!', 'Isi ' + fileName + ' disalin ke clipboard');
         };
         var fallbackCopy = function() {
             var textarea = document.createElement('textarea');
@@ -1087,7 +1128,6 @@ if (file_exists($configPath)) {
         return res.ok;
     }
 
-    // startEditor - jump to step 2 (References or PRD depending on mode)
     function startEditor() { currentStep = 2; renderStep(); }
 
     function showSavingOverlay() {
@@ -1136,7 +1176,7 @@ if (file_exists($configPath)) {
     function jumpToStep(stepId) {
         if (isNavigating) return;
         if (stepId < 1 || stepId > totalSteps) {
-            showToast('Peringatan', 'Langkah tidak valid', true);
+            showToast('Warning', 'Langkah tidak valid', true);
             return;
         }
         isNavigating = true;
@@ -1160,7 +1200,6 @@ if (file_exists($configPath)) {
         showSavingOverlay();
 
         saveCurrentStep().then(async function() {
-            // Generate install.md based on current config
             try {
                 var res = await fetch('/core/router.php', {
                     method: 'POST',
@@ -1211,7 +1250,6 @@ if (file_exists($configPath)) {
         var projectPath = basePath + '\\vibeforge';
 
         try {
-            // 1. Save config first
             await fetch('/core/router.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1226,7 +1264,6 @@ if (file_exists($configPath)) {
                 })
             });
 
-            // 2. Generate install.md with current config
             await fetch('/core/router.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1243,10 +1280,8 @@ if (file_exists($configPath)) {
             });
             savedFiles.add('docs/install.md');
 
-            // 3. Show success modal immediately so user can copy prompt
             showSuccessModal();
 
-            // 4. Open terminal ONCE after 3 seconds delay
             setTimeout(function() {
                 fetch('/core/router.php', {
                     method: 'POST',
@@ -1275,12 +1310,12 @@ if (file_exists($configPath)) {
         if (list) {
             list.innerHTML = '';
             if (savedFiles.size === 0) {
-                list.innerHTML = '<li class="flex items-center gap-2 text-gray-400"><i class="ph ph-info"></i> Belum ada file yang diubah</li>';
+                list.innerHTML = '<li class="flex items-center gap-2 text-gray-400 font-mono"><i class="ph ph-info"></i> Belum ada file yang diubah</li>';
             } else {
                 savedFiles.forEach(function(f) {
                     var li = document.createElement('li');
-                    li.className = 'flex items-center gap-2 text-green-400';
-                    li.innerHTML = '<i class="ph ph-check"></i> ' + f;
+                    li.className = 'flex items-center gap-2 text-emerald-400 font-mono';
+                    li.innerHTML = '<i class="ph ph-check-circle"></i> ' + f;
                     list.appendChild(li);
                 });
             }
@@ -1306,7 +1341,7 @@ if (file_exists($configPath)) {
         if (toastMessage) toastMessage.textContent = message;
 
         if (toastIcon) {
-            toastIcon.className = isError ? 'ph ph-warning-circle text-xl text-red-500' : 'ph ph-check-circle text-xl text-green-500';
+            toastIcon.className = isError ? 'ph ph-warning-circle text-lg text-rose-400' : 'ph ph-check-circle text-lg text-emerald-400';
         }
 
         toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
@@ -1319,9 +1354,9 @@ if (file_exists($configPath)) {
     }
 
     function copyInstallCommand() {
-        var commandText = 'baca dan jalankan @docs/install.md ';
+        var commandText = 'baca dan jalankan @docs/install.md';
         var successCallback = function() {
-            showToast('Tersalin!', 'Command berhasil disalin ke clipboard');
+            showToast('Tersalin!', 'Command disalin ke clipboard');
         };
         var fallbackCopy = function() {
             var textarea = document.createElement('textarea');
