@@ -101,8 +101,8 @@ Repo::table('users')->delete($id);
 
 ### 1. Download Template & Setup Virtual Host (Interaktif)
 
+> Windows PowerShell (jalankan di Terminal Admin)
 ```bash
-# Windows PowerShell (jalankan di Terminal Admin)
 irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex
 ```
 
