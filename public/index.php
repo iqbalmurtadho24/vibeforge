@@ -872,6 +872,8 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                         module: 'install',
                         action: 'setup_vhost',
                         projectName: appName,
+                        drive: state.drive,
+                        serverType: state.server,
                         csrf_token: '<?= $csrfToken ?>'
                     })
                 });

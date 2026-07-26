@@ -16,12 +16,26 @@ function Test-IsAdmin {
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-# Auto-elevate jika belum admin (diperlukan untuk hosts file)
-if (-not (Test-IsAdmin) -and -not $Elevated) {
-    Write-Host "Membuka jendela baru dengan hak Administrator untuk update file 'hosts'..." -ForegroundColor Yellow
-    # Jalankan script yang sama di jendela baru dengan flag -Elevated
-    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" -Elevated" -Verb RunAs
-    exit
+# Cek Administrator — WAJIB, jika tidak admin hentikan script
+if (-not (Test-IsAdmin)) {
+    Write-Host "==========================================" -ForegroundColor Red
+    Write-Host "  HAK AKSES TIDAK MENCUKUPI" -ForegroundColor Red
+    Write-Host "==========================================" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Script ini memerlukan hak Administrator untuk:" -ForegroundColor Yellow
+    Write-Host "  - Update file Windows hosts (C:\Windows\System32\drivers\etc\hosts)" -ForegroundColor White
+    Write-Host "  - Restart service Apache" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Silakan jalankan ulang PowerShell sebagai Administrator:" -ForegroundColor Cyan
+    Write-Host "  1. Tutup jendela ini" -ForegroundColor White
+    Write-Host "  2. Klik kanan pada PowerShell / Terminal -> Run as Administrator" -ForegroundColor White
+    Write-Host "  3. Jalankan ulang script ini" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Atau dari terminal yang sudah ada:" -ForegroundColor Cyan
+    Write-Host "  Start-Process powershell -Verb RunAs" -ForegroundColor Gray
+    Write-Host ""
+    Read-Host "Tekan Enter untuk keluar"
+    exit 1
 }
 
 Write-Header "=========================================="
@@ -32,13 +46,6 @@ Write-Header "=========================================="
 $disk = Read-Host "Masukkan Local Disk (contoh: C, D, E)"
 $disk = $disk.Trim().ToUpper()
 if (-not $disk) { $disk = "C" }
-
-# Cek apakah sudah running sebagai Administrator (diperlukan untuk hosts file)
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-
-if (-not $isAdmin) {
-    Write-Host "`n! Berjalan TANPA hak Administrator. Update file 'hosts' akan dilewati." -ForegroundColor Yellow
-}
 
 # 2. Pilih Web Server
 $serverChoice = Read-Host "Pilih Web Server: [l] Laragon (default) | [x] XAMPP"
@@ -73,7 +80,12 @@ if (-not (Test-Path $baseDir)) {
 }
 
 Write-Host "`n[1/5] Mengunduh template Vibeforge..." -ForegroundColor Green
-npx -y degit iqbalmurtadho24/vibeforge $targetDir
+if (-not (Test-Path $baseDir)) {
+    New-Item -ItemType Directory -Path $baseDir -Force | Out-Null
+}
+
+Set-Location -Path $baseDir
+npx -y degit iqbalmurtadho24/vibeforge $appName
 
 if (-not (Test-Path $targetDir)) {
     Write-Error "Gagal mendownload template."
@@ -84,20 +96,20 @@ Set-Location $targetDir
 $publicDir = (Join-Path $targetDir "public").Replace('\', '/')
 
 Write-Host "`n[2/5] Membuat Virtual Host file..." -ForegroundColor Green
+$domain = "$appName.test"
 
 if ($serverType -eq "Laragon") {
     $laragonVhostDir = "$($disk):\laragon\etc\apache2\sites-enabled"
     if (-not (Test-Path $laragonVhostDir)) {
-        # fallback: cari dari parent baseDir
-        $laragonVhostDir = Join-Path (Split-Path $baseDir -Parent) "etc\apache2\sites-enabled"
+        New-Item -ItemType Directory -Path $laragonVhostDir -Force | Out-Null
     }
 
-    $vhostFile = Join-Path $laragonVhostDir "auto.$appName.test.conf"
+    $vhostFile = Join-Path $laragonVhostDir "auto.$domain.conf"
     $vhostContent = @"
 <VirtualHost *:80>
     DocumentRoot "$publicDir"
-    ServerName $appName.test
-    ServerAlias *.$appName.test
+    ServerName $domain
+    ServerAlias *.$domain
     <Directory "$publicDir">
         AllowOverride All
         Require all granted
@@ -105,14 +117,8 @@ if ($serverType -eq "Laragon") {
 </VirtualHost>
 "@
 
-    if (Test-Path (Split-Path $vhostFile)) {
-        Set-Content -Path $vhostFile -Value $vhostContent -Encoding UTF8
-        Write-Host "Virtual Host dibuat di: $vhostFile" -ForegroundColor Cyan
-    } else {
-        Write-Warning "Folder sites-enabled Laragon tidak ditemukan di $laragonVhostDir"
-    }
-
-    $domain = "$appName.test"
+    Set-Content -Path $vhostFile -Value $vhostContent -Encoding UTF8
+    Write-Host "Virtual Host dibuat di: $vhostFile" -ForegroundColor Cyan
 } else {
     $xamppVhostFile = "$($disk):\xampp\apache\conf\extra\httpd-vhosts.conf"
     $vhostContent = @"
@@ -120,7 +126,7 @@ if ($serverType -eq "Laragon") {
 # Virtual Host untuk $appName
 <VirtualHost *:80>
     DocumentRoot "$publicDir"
-    ServerName $appName.test
+    ServerName $domain
     <Directory "$publicDir">
         AllowOverride All
         Require all granted
@@ -129,37 +135,38 @@ if ($serverType -eq "Laragon") {
 "@
 
     if (Test-Path $xamppVhostFile) {
-        Add-Content -Path $xamppVhostFile -Value $vhostContent -Encoding UTF8
-        Write-Host "Virtual Host ditambahkan ke: $xamppVhostFile" -ForegroundColor Cyan
+        $existingContent = Get-Content $xamppVhostFile -Raw -ErrorAction SilentlyContinue
+        if ($existingContent -notlike "*$domain*") {
+            Add-Content -Path $xamppVhostFile -Value $vhostContent -Encoding UTF8
+            Write-Host "Virtual Host ditambahkan ke: $xamppVhostFile" -ForegroundColor Cyan
+        } else {
+            Write-Host "Virtual Host untuk $domain sudah ada di file $xamppVhostFile." -ForegroundColor Yellow
+        }
     } else {
         Write-Warning "File httpd-vhosts.conf tidak ditemukan di $xamppVhostFile"
     }
-
-    $domain = "$appName.test"
 }
 
-# HANYA update hosts file jika berjalan sebagai Admin
-if (Test-IsAdmin) {
-    Write-Host "`n[3/5] Mengupdate file Windows hosts (127.0.0.1 $domain)..." -ForegroundColor Green
-    $hostsPath = "C:\Windows\System32\drivers\etc\hosts"
-    $hostsEntry = "127.0.0.1 $domain"
+# Update hosts file (sudah dipastikan admin dari awal script)
+Write-Host "`n[3/5] Mengupdate file Windows hosts (127.0.0.1 $domain)..." -ForegroundColor Green
+$hostsPath = "C:\Windows\System32\drivers\etc\hosts"
+$hostsEntry = "127.0.0.1 $domain"
 
-    try {
-        $hostsContent = Get-Content $hostsPath -ErrorAction Stop
-        if ($hostsContent -notcontains $hostsEntry -and ($hostsContent -match [regex]::Escape($domain)).Length -eq 0) {
-            Add-Content -Path $hostsPath -Value "`n$hostsEntry" -ErrorAction Stop
-            Write-Host "Domain $domain berhasil ditambahkan ke C:\Windows\System32\drivers\etc\hosts" -ForegroundColor Cyan
-        } else {
-            Write-Host "Domain $domain sudah ada di file hosts." -ForegroundColor Yellow
-        }
-    } catch {
-        Write-Warning "Gagal menulis ke file hosts."
-        Write-Host "Silakan tambahkan secara manual baris berikut ke file hosts Anda:" -ForegroundColor Yellow
-        Write-Host "127.0.0.1 $domain" -ForegroundColor White
+try {
+    $hostsContent = Get-Content $hostsPath -ErrorAction Stop
+    if ($hostsContent -notcontains $hostsEntry -and ($hostsContent -match [regex]::Escape($domain)).Length -eq 0) {
+        Add-Content -Path $hostsPath -Value "`n$hostsEntry" -ErrorAction Stop
+        Write-Host "Domain $domain berhasil ditambahkan ke C:\Windows\System32\drivers\etc\hosts" -ForegroundColor Cyan
+    } else {
+        Write-Host "Domain $domain sudah ada di file hosts." -ForegroundColor Yellow
     }
-} else {
-    Write-Host "`n[3/5] MELEWATI update file hosts (memerlukan hak Administrator)..." -ForegroundColor Yellow
+} catch {
+    Write-Warning "Gagal menulis ke file hosts: $_"
 }
+
+# Flush DNS cache agar domain baru langsung dapat dikenali oleh Windows
+Write-Host "Flushing DNS cache..." -ForegroundColor Gray
+ipconfig /flushdns | Out-Null
 
 Write-Host "`n[4/5] Membuat file .env..." -ForegroundColor Green
 $envExamplePath = Join-Path $targetDir ".env.example"
@@ -203,45 +210,67 @@ Write-Host "Lokasi  : $targetDir" -ForegroundColor White
 Write-Host "URL App : http://$domain" -ForegroundColor Cyan
 Write-Header "=========================================="
 
-# 5. Restart Apache & Buka Browser
-Write-Host "`n[5/5] Reload Apache service..." -ForegroundColor Green
+# 5. Reload/Restart Apache & Buka Browser
+Write-Host "`n[5/5] Reload & Restart Apache service/process..." -ForegroundColor Green
 
 $apacheReloaded = $false
 
 if ($serverType -eq "Laragon") {
-    # Cek service httpd / httpd24.exe dari Laragon
-    $apacheProc = Get-Process -Name "httpd" -ErrorAction SilentlyContinue
-    if ($apacheProc) {
+    # 1. Cek Service Windows lebih dulu
+    $service = Get-Service -Name "*apache*" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($service -and $service.Status -eq 'Running') {
         try {
-            # Restart service httpd jika berjalan sebagai service Windows
-            $service = Get-Service -Name "*apache*" -ErrorAction SilentlyContinue | Select-Object -First 1
-            if ($service) {
-                Restart-Service -Name $service.Name -ErrorAction Stop
-                $apacheReloaded = $true
-                Write-Host "Service Apache ($($service.Name)) berhasil di-restart!" -ForegroundColor Cyan
-            } else {
-                # Alternatif: panggil httpd -k restart via executable
-                $httpdExe = Get-Command "httpd.exe" -ErrorAction SilentlyContinue
-                if ($httpdExe) {
-                    & $httpdExe.Source -k restart 2>$null
-                    $apacheReloaded = $true
-                    Write-Host "Apache berhasil di-reload via httpd.exe" -ForegroundColor Cyan
-                }
-            }
+            Restart-Service -Name $service.Name -Force -ErrorAction Stop
+            $apacheReloaded = $true
+            Write-Host "Service Apache ($($service.Name)) berhasil di-restart!" -ForegroundColor Cyan
         } catch {
-            Write-Warning "Gagal reload Apache secara otomatis: $_"
+            Write-Warning "Gagal restart service Apache: $_"
+        }
+    }
+
+    # 2. Jika bukan service atau restart service gagal, cari httpd.exe di folder Laragon secara otomatis
+    if (-not $apacheReloaded) {
+        $laragonApacheDir = "$($disk):\laragon\bin\apache"
+        $httpdExe = Get-ChildItem -Path $laragonApacheDir -Filter "httpd.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($httpdExe) {
+            $apacheRootDir = $httpdExe.Directory.Parent.FullName
+            try {
+                Get-Process -Name "httpd" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+                Start-Sleep -Seconds 1
+                Start-Process -FilePath $httpdExe.FullName -ArgumentList "-d", "`"$apacheRootDir`"" -WorkingDirectory $apacheRootDir -WindowStyle Hidden
+                $apacheReloaded = $true
+                Write-Host "Proses Apache Laragon ($($httpdExe.FullName)) berhasil di-restart secara langsung!" -ForegroundColor Cyan
+            } catch {
+                Write-Warning "Gagal me-restart proses httpd.exe: $_"
+            }
         }
     }
 } else {
-    # XAMPP Apache Service
+    # XAMPP Apache
     $service = Get-Service -Name "Apache2.4" -ErrorAction SilentlyContinue
     if ($service -and $service.Status -eq 'Running') {
         try {
-            Restart-Service -Name "Apache2.4" -ErrorAction Stop
+            Restart-Service -Name "Apache2.4" -Force -ErrorAction Stop
             $apacheReloaded = $true
             Write-Host "Service Apache XAMPP berhasil di-restart!" -ForegroundColor Cyan
         } catch {
-            Write-Warning "Gagal restart service XAMPP Apache."
+            Write-Warning "Gagal restart service XAMPP Apache: $_"
+        }
+    }
+
+    if (-not $apacheReloaded) {
+        $xamppHttpdPath = "$($disk):\xampp\apache\bin\httpd.exe"
+        $xamppApacheDir = "$($disk):\xampp\apache"
+        if (Test-Path $xamppHttpdPath) {
+            try {
+                Get-Process -Name "httpd" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+                Start-Sleep -Seconds 1
+                Start-Process -FilePath $xamppHttpdPath -ArgumentList "-d", "`"$xamppApacheDir`"" -WorkingDirectory $xamppApacheDir -WindowStyle Hidden
+                $apacheReloaded = $true
+                Write-Host "Proses Apache XAMPP berhasil di-restart secara langsung!" -ForegroundColor Cyan
+            } catch {
+                Write-Warning "Gagal me-restart proses Apache XAMPP: $_"
+            }
         }
     }
 }
@@ -258,3 +287,9 @@ if (-not $apacheReloaded) {
 Write-Host "`nMembuka browser..." -ForegroundColor Cyan
 Start-Sleep -Seconds 3
 Start-Process "http://$domain"
+
+Write-Host ""
+Write-Host "Setup selesai! Tab browser telah dibuka." -ForegroundColor Green
+Write-Host "Terminal ini akan tertutup otomatis dalam 3 detik..." -ForegroundColor Gray
+Start-Sleep -Seconds 3
+Stop-Process -Id $PID -Force
