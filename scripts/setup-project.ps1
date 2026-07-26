@@ -152,8 +152,33 @@ $envExamplePath = Join-Path $targetDir ".env.example"
 $envPath = Join-Path $targetDir ".env"
 
 if (Test-Path $envExamplePath) {
-    Copy-Item -Path $envExamplePath -Destination $envPath -Force
-    Write-Host "File .env berhasil dibuat!" -ForegroundColor Cyan
+    $envContent = Get-Content -Path $envExamplePath -Raw
+
+    # Generate random cryptographic keys
+    $appKeyBytes = New-Object byte[] 32
+    (New-Object Security.Cryptography.RNGCryptoServiceProvider).GetBytes($appKeyBytes)
+    $appKey = [System.BitConverter]::ToString($appKeyBytes).Replace("-", "").ToLower()
+
+    $csrfKeyBytes = New-Object byte[] 32
+    (New-Object Security.Cryptography.RNGCryptoServiceProvider).GetBytes($csrfKeyBytes)
+    $csrfKey = [System.BitConverter]::ToString($csrfKeyBytes).Replace("-", "").ToLower()
+
+    $rememberBytes = New-Object byte[] 64
+    (New-Object Security.Cryptography.RNGCryptoServiceProvider).GetBytes($rememberBytes)
+    $rememberSecret = [System.BitConverter]::ToString($rememberBytes).Replace("-", "").ToLower()
+
+    # Formatted display name (e.g. abdulqodir -> Abdulqodir)
+    $formattedAppName = (Get-Culture).TextInfo.ToTitleCase($appName.Replace("_", " ").Replace("-", " "))
+
+    # Update placeholders
+    $envContent = $envContent -replace 'APP_DISPLAY_NAME=".*?"', "APP_DISPLAY_NAME=`"$formattedAppName`""
+    $envContent = $envContent -replace 'DB_MODE=".*?"', 'DB_MODE="json"'
+    $envContent = $envContent -replace 'APP_KEY=".*?"', "APP_KEY=`"$appKey`""
+    $envContent = $envContent -replace 'CSRF_KEY=".*?"', "CSRF_KEY=`"$csrfKey`""
+    $envContent = $envContent -replace 'REMEMBER_ME_SECRET=".*?"', "REMEMBER_ME_SECRET=`"$rememberSecret`""
+
+    Set-Content -Path $envPath -Value $envContent -Encoding UTF8
+    Write-Host "File .env berhasil dibuat dan dikonfigurasi!" -ForegroundColor Cyan
 } else {
     Write-Warning "File .env.example tidak ditemukan di $targetDir."
 }
