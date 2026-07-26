@@ -391,10 +391,23 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                                     </button>
                                 </template>
                                 <template x-if="folderExists">
-                                    <button type="button" @click="setupVirtualHost($el)" class="px-5 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1.5 whitespace-nowrap shadow-md glow-orange-sm">
+                                    <button type="button" @click="startSetupWizard($el)" class="px-5 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1.5 whitespace-nowrap shadow-md glow-orange-sm">
                                         <i class="ph ph-magic-wand"></i> Masuk Setup Wizard <i class="ph ph-arrow-right"></i>
                                     </button>
                                 </template>
+
+<div id="setupTerminal" x-show="showTerminal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" x-cloak>
+    <div class="bg-gray-900 rounded-2xl w-full max-w-2xl border border-gray-700 shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700">
+            <span class="text-xs font-mono text-gray-400">Setup Terminal</span>
+        </div>
+        <div class="p-6 font-mono text-sm text-green-400 h-64 overflow-y-auto space-y-1">
+            <template x-for="line in terminalLines">
+                <div x-text="line"></div>
+            </template>
+        </div>
+    </div>
+</div>
                             </div>
                         </div>
                     </div>
@@ -688,6 +701,9 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                 isSubmitted: false,
                 isChecking: false,
                 folderExists: false,
+                showTerminal: false,
+                terminalLines: [],
+                isSettingUp: false,
                 subPath() {
                     return this.server === 'laragon' ? 'laragon\\www' : 'xampp\\htdocs';
                 },
@@ -822,22 +838,33 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
         }
 
         // Setup Virtual Host Helper via AJAX
-        async function setupVirtualHost(btn) {
+        async function startSetupWizard(btn) {
             const dataEl = document.getElementById('appDownloaderComponent');
             if (!dataEl) return;
             const state = Alpine.$data(dataEl);
             const appName = state.appName.trim() || 'myapp';
             const targetUrl = 'http://' + appName + '.test/install/';
 
-            const originalHtml = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i> Membuka terminal & tab baru...';
+            state.showTerminal = true;
+            state.isSettingUp = true;
+            state.terminalLines = [
+                '[INFO] Initializing setup process for ' + appName + '...',
+                '[INFO] Target Domain: http://' + appName + '.test/install/'
+            ];
+
+            const addLog = (msg, delay = 600) => {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        state.terminalLines.push(msg);
+                        resolve();
+                    }, delay);
+                });
+            };
+
+            await addLog('[INFO] Checking virtual host configuration...');
+            await addLog('[INFO] Triggering PowerShell elevation for Apache VHost & Hosts setup...');
 
             try {
-                // 1. Open new tab immediately
-                const newTab = window.open(targetUrl, '_blank');
-
-                // 2. Trigger PowerShell to setup vhost + hosts
                 const res = await fetch('/core/router.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -851,18 +878,35 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                 const data = await res.json();
 
                 if (data.success) {
-                    btn.innerHTML = '<i class="ph ph-check-circle text-green-400"></i> Terminal dibuka, tab baru siap...';
+                    await addLog('[SUCCESS] Virtual host setup command executed successfully!');
+                    await addLog('[INFO] Reloading Apache Web Server configuration...');
+                    await addLog('[SUCCESS] Setup Complete!');
+                    await addLog('[INFO] Redirecting to installation wizard in 2 seconds...', 1000);
+
+                    setTimeout(() => {
+                        state.isSettingUp = false;
+                        window.location.href = targetUrl;
+                    }, 2000);
                 } else {
-                    alert(data.error || 'Gagal mengaktifkan virtual host. Coba jalankan Laragon sebagai Administrator.');
-                    if (newTab) newTab.close();
-                    btn.innerHTML = originalHtml;
+                    await addLog('[ERROR] ' + (data.error || 'Failed to setup Virtual Host.'), 0);
+                    await addLog('[WARNING] Falling back to direct URL: ' + state.wizardUrl(), 1000);
+                    setTimeout(() => {
+                        state.isSettingUp = false;
+                        window.location.href = state.wizardUrl();
+                    }, 3000);
                 }
             } catch(e) {
-                alert('Gagal mengaktifkan virtual host.');
-                btn.innerHTML = originalHtml;
-            } finally {
-                setTimeout(() => { btn.disabled = false; btn.innerHTML = originalHtml; }, 3000);
+                await addLog('[ERROR] Connection error during setup.', 0);
+                await addLog('[WARNING] Falling back to direct URL...', 1000);
+                setTimeout(() => {
+                    state.isSettingUp = false;
+                    window.location.href = state.wizardUrl();
+                }, 3000);
             }
+        }
+
+        async function setupVirtualHost(btn) {
+            startSetupWizard(btn);
         }
 
         // Open Folder Helper via AJAX
