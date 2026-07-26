@@ -1,0 +1,58 @@
+# Apache Configuration - Vibeforge Public Directory
+# ================================================
+# Document Root = public/
+# This file handles URL rewriting, security headers, and CSP
+
+# Disable directory listing
+Options -Indexes
+
+# Block access to sensitive files
+<FilesMatch "\.(env|log|sql|md|json|key|pem)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Block access to backup files
+<FilesMatch "\.(bak|backup|old|orig|original|swp|swo)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Enable mod_rewrite for clean URLs (if needed for future SPA routes)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Allow direct access to existing files
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # For SPA routing, fallback to index.php (optional, for future use)
+    # RewriteRule ^ index.php [L]
+</IfModule>
+
+# Content Security Policy (CSP) - Development Mode
+# Allows: Phosphor Icons (unpkg.com), Tailwind CDN, Google Fonts
+<IfModule mod_headers.c>
+    Header always set Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob: data:; font-src 'self' https: data: blob: https://unpkg.com https://fonts.gstatic.com https://fonts.googleapis.com; img-src 'self' data: https: blob:; connect-src 'self' https:; frame-ancestors 'self';"
+
+    # Security headers
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json
+</IfModule>

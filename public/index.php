@@ -697,13 +697,10 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                 fullCommand() {
                     const targetDir = this.drive + ':\\' + this.subPath();
                     const appName = this.appName.trim() || 'myapp';
-                    return `Set-Location -Path '${targetDir}'; npx -y degit iqbalmurtadho24/vibeforge ${appName}; if ($?) { Set-Location -Path '.\\${appName}' }`;
+                    return `Set-Location -Path '${targetDir}'; npx -y degit iqbalmurtadho24/vibeforge ${appName}; if ($?) { Set-Location -Path '.\\${appName}'; Copy-Item -Path '.env.example' -Destination '.env' }`;
                 },
                 wizardUrl() {
                     const name = this.appName.trim() || 'myapp';
-                    if (this.server === 'laragon') {
-                        return 'http://' + name + '.test/install/';
-                    }
                     return 'http://localhost/' + name + '/public/install/';
                 },
                 sanitizeAppName() {
