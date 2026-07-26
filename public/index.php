@@ -281,10 +281,22 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                     <p class="text-[var(--text-secondary)] max-w-2xl mx-auto">Pilih jenis server, tentukan nama aplikasi Anda, lalu unduh dan jalankan setup wizard otomatis.</p>
                 </div>
 
+                <!-- Notice Banner: Pembuatan Aplikasi Baru -->
+                <div class="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-xs">
+                    <i class="ph ph-warning-circle text-amber-400 text-xl shrink-0 mt-0.5"></i>
+                    <div class="space-y-1">
+                        <p class="font-bold text-amber-300">Penting: Fitur ini Khusus untuk Membuat Aplikasi Baru</p>
+                        <p class="text-[var(--text-secondary)] leading-relaxed">
+                            Form di bawah ini akan mengunduh template Vibeforge dan mengonfigurasi Virtual Host untuk <strong>aplikasi baru yang terpisah</strong> di folder server Anda.<br>
+                            Jika Anda ingin <strong>mengedit aplikasi ini</strong> atau melakukan <strong>redesain proyek</strong>, silakan ikuti panduan dan gunakan tombol pada bagian <a href="#alur-aplikasi" class="text-[var(--brand-primary)] underline font-medium hover:opacity-80">Alur Aplikasi Baru / Redesain di bawah</a>.
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Interactive App Downloader Component -->
                 <div id="appDownloaderComponent" x-data="appDownloader()" class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6 shadow-xl glow-orange-sm mb-12">
 
-                    <form @submit.prevent="checkFolder()" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <form @submit.prevent="startFullSetup()" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- Server Type Selector -->
                         <div>
                             <div class="flex items-center justify-between mb-3">
@@ -294,10 +306,10 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                                 </span>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <button type="button" @click="server = 'laragon'; isSubmitted = false" :class="server === 'laragon' ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="py-2.5 px-3 rounded-xl border text-xs font-medium transition-all flex items-center justify-center gap-1.5">
+                                <button type="button" @click="server = 'laragon'" :class="server === 'laragon' ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="py-2.5 px-3 rounded-xl border text-xs font-medium transition-all flex items-center justify-center gap-1.5">
                                     <i class="ph ph-bug text-base"></i> Laragon
                                 </button>
-                                <button type="button" @click="server = 'xampp'; isSubmitted = false" :class="server === 'xampp' ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="py-2.5 px-3 rounded-xl border text-xs font-medium transition-all flex items-center justify-center gap-1.5">
+                                <button type="button" @click="server = 'xampp'" :class="server === 'xampp' ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="py-2.5 px-3 rounded-xl border text-xs font-medium transition-all flex items-center justify-center gap-1.5">
                                     <i class="ph ph-file-css text-base"></i> XAMPP
                                 </button>
                             </div>
@@ -313,108 +325,61 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                             </div>
                             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
                                 <template x-for="d in drives" :key="d">
-                                    <button type="button" @click="drive = d; isSubmitted = false" :class="drive === d ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="px-3 py-2.5 rounded-xl border text-xs font-medium transition-all flex items-center gap-1 shrink-0">
+                                    <button type="button" @click="drive = d" :class="drive === d ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)]' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]'" class="px-3 py-2.5 rounded-xl border text-xs font-medium transition-all flex items-center gap-1 shrink-0">
                                         <i class="ph ph-hard-drive"></i> (<span x-text="d"></span>:)
                                     </button>
                                 </template>
                             </div>
                         </div>
 
-                        <!-- App Name Input + Submit Button -->
+                        <!-- App Name Input + Tombol Unduh & Setup Otomatis (Langsung di Pojok Kanan) -->
                         <div>
                             <label class="block text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider mb-3">3. Nama Aplikasi <span class="text-red-400">*</span></label>
                             <div class="flex items-center gap-2">
                                 <div class="relative flex-1">
-                                    <input type="text" x-model="appName" @input="sanitizeAppName(); isSubmitted = false" required placeholder="Tulis nama aplikasimu" pattern="^[a-zA-Z0-9][a-zA-Z0-9_-]*$" title="Hanya huruf, angka, underscore (_), dan hyphen (-). Tidak boleh spasi, titik, koma, atau simbol lain." class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors font-mono" :class="{ 'border-red-400': appNameError }">
-                                    <i class="ph ph-folder-simple absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
-                                    <template x-if="appNameError">
+                                    <input type="text" x-model="appName" @input="sanitizeAppName()" required placeholder="Tulis nama aplikasimu" pattern="^[a-zA-Z0-9][a-zA-Z0-9_-]*$" title="Hanya huruf, angka, underscore (_), dan hyphen (-). Tidak boleh spasi, titik, koma, atau simbol lain." class="w-full bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] transition-colors font-mono" :class="{ 'border-red-400': appNameError }">
+                                        <template x-if="appNameError">
                                         <div class="absolute bottom-full left-0 mb-1 px-2 py-1 bg-red-500/90 text-white text-[10px] rounded whitespace-nowrap">Gunakan _ atau - sebagai pemisah, tanpa spasi/simbol</div>
                                     </template>
                                 </div>
-                                <button type="submit" :disabled="!appName.trim() || isChecking || appNameError" class="px-4 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity shadow-md disabled:opacity-50 flex items-center gap-1.5 shrink-0">
-                                    <template x-if="!isChecking">
-                                        <span class="flex items-center gap-1"><i class="ph ph-paper-plane-right"></i> Proses</span>
+                                <button type="submit" :disabled="!appName.trim() || isSettingUp || appNameError" class="px-4 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity shadow-md disabled:opacity-50 flex items-center gap-1.5 shrink-0 whitespace-nowrap glow-orange-sm">
+                                    <template x-if="!isSettingUp">
+                                        <span class="flex items-center gap-1.5"><i class="ph ph-rocket-launch"></i> Setup Otomatis</span>
                                     </template>
-                                    <template x-if="isChecking">
-                                        <span class="flex items-center gap-1"><i class="ph ph-circle-notch animate-spin"></i> Mengecek...</span>
+                                    <template x-if="isSettingUp">
+                                        <span class="flex items-center gap-1.5"><i class="ph ph-circle-notch animate-spin"></i> Menyiapkan...</span>
                                     </template>
                                 </button>
                             </div>
                         </div>
                     </form>
 
-                    <!-- Computed Terminal Box & Next Step CTA (tampil setelah Submit) -->
-                    <div x-show="isSubmitted" x-transition class="space-y-4 pt-2">
-                        <div class="bg-[var(--bg-primary)] rounded-xl p-4 sm:p-5 border border-[var(--border-default)] space-y-3 relative group shadow-inner">
-                            <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-2 text-xs text-[var(--text-muted)] font-mono">
-                                <span class="flex items-center gap-1.5"><i class="ph ph-terminal text-sm text-[var(--brand-primary)]"></i> Perintah PowerShell Download (GitHub)</span>
-                                <span class="text-[10px] text-green-400 font-sans" x-text="'Target Path: ' + fullTargetDir()"></span>
-                            </div>
-                            <div class="font-mono text-xs sm:text-sm text-[var(--text-primary)] space-y-1 select-all break-all" x-text="fullCommand()"></div>
-
-                            <div class="flex items-center gap-2 pt-2 flex-wrap">
-                                <button type="button" @click="copySnippet($el, fullCommand())" class="px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5">
-                                    <i class="ph ph-copy"></i> Salin Perintah
+                    <!-- Terminal Overlay Dialog -->
+                    <div id="setupTerminal" x-show="showTerminal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" x-cloak>
+                        <div class="bg-gray-900 rounded-2xl w-full max-w-2xl border border-gray-700 shadow-2xl overflow-hidden">
+                            <div class="flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700">
+                                <span class="text-sm font-bold text-white flex items-center gap-2">
+                                    <i class="ph ph-terminal text-[var(--brand-primary)]"></i> Setup Otomatis
+                                </span>
+                                <button type="button" @click="cancelSetup()" :disabled="!isSettingUp" class="text-gray-400 hover:text-red-400 transition-colors disabled:opacity-30">
+                                    <i class="ph ph-x text-sm"></i>
                                 </button>
-                                <?php if ($isDev): ?>
-                                <button type="button" @click="executeInteractiveTerminal($el)" class="px-4 py-2 bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5">
-                                    <i class="ph ph-download-simple"></i> Unduh & Buka Terminal Otomatis
-                                </button>
-                                <?php endif; ?>
                             </div>
-                        </div>
-
-                        <!-- Status Folder & Button Setup Wizard -->
-                        <div class="p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-3 transition-all"
-                            :class="folderExists ? 'bg-green-500/10 border-green-500/30' : 'bg-amber-500/10 border-amber-500/30'">
-                            <div class="flex items-center gap-3">
-                                <template x-if="folderExists">
-                                    <i class="ph ph-check-circle text-2xl text-green-400 shrink-0"></i>
+                            <div class="p-6 font-mono text-sm text-green-400 h-80 overflow-y-auto space-y-1 bg-gray-950">
+                                <template x-for="line in terminalLines">
+                                    <div x-text="line" class="leading-relaxed"></div>
                                 </template>
-                                <template x-if="!folderExists">
-                                    <i class="ph ph-info text-2xl text-amber-400 shrink-0"></i>
-                                </template>
-                                <div>
-                                    <p class="text-xs font-bold" x-text="folderExists ? 'Folder Aplikasi Sudah Ada!' : 'Folder Belum Dibuat / Belum Diunduh'"></p>
-                                    <p class="text-[11px] text-[var(--text-muted)]" x-text="folderExists ? 'Folder target sudah siap. Silakan klik Setup Wizard untuk melanjutkan.' : 'Jalankan perintah di atas / klik Unduh Otomatis untuk mengunduh template ke folder target.'"></p>
+                                <div x-show="isSettingUp" class="flex items-center gap-2 text-gray-500 pt-1">
+                                    <i class="ph ph-circle-notch animate-spin text-xs"></i>
+                                    <span class="text-xs">Menjalankan proses instalasi otomatis...</span>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <template x-if="!folderExists">
-                                    <button type="button" @click="checkFolder()" :disabled="isChecking" class="px-3 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-secondary)] rounded-lg text-xs font-medium hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-50 flex items-center gap-1">
-                                        <template x-if="!isChecking">
-                                            <i class="ph ph-arrows-clockwise"></i> Refresh Status
-                                        </template>
-                                        <template x-if="isChecking">
-                                            <i class="ph ph-circle-notch animate-spin"></i> Mengecek...
-                                        </template>
-                                    </button>
-                                </template>
-                                <template x-if="folderExists">
-                                    <button type="button" @click="startSetupWizard($el)" class="px-5 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1.5 whitespace-nowrap shadow-md glow-orange-sm">
-                                        <i class="ph ph-magic-wand"></i> Masuk Setup Wizard <i class="ph ph-arrow-right"></i>
-                                    </button>
-                                </template>
-
-<div id="setupTerminal" x-show="showTerminal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" x-cloak>
-    <div class="bg-gray-900 rounded-2xl w-full max-w-2xl border border-gray-700 shadow-2xl overflow-hidden">
-        <div class="flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700">
-            <span class="text-xs font-mono text-gray-400">Setup Terminal</span>
-        </div>
-        <div class="p-6 font-mono text-sm text-green-400 h-64 overflow-y-auto space-y-1">
-            <template x-for="line in terminalLines">
-                <div x-text="line"></div>
-            </template>
-        </div>
-    </div>
-</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Tab Menu for Workflows -->
-                <div class="flex justify-center mb-8 border-b border-[var(--border-default)] max-w-md mx-auto" x-data="{ tab: 'new' }">
+                <div id="alur-aplikasi" class="flex justify-center mb-8 border-b border-[var(--border-default)] max-w-md mx-auto" x-data="{ tab: 'new' }">
                     <button @click="tab = 'new'; $dispatch('tab-change', 'new')" :class="tab === 'new' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-sm font-semibold transition-colors focus:outline-none">Alur Aplikasi Baru (New)</button>
                     <button @click="tab = 'redesign'; $dispatch('tab-change', 'redesign')" :class="tab === 'redesign' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-sm font-semibold transition-colors focus:outline-none">Alur Redesain Aplikasi (Redesign)</button>
                 </div>
@@ -704,6 +669,7 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                 showTerminal: false,
                 terminalLines: [],
                 isSettingUp: false,
+                setupCancelled: false,
                 subPath() {
                     return this.server === 'laragon' ? 'laragon\\www' : 'xampp\\htdocs';
                 },
@@ -797,19 +763,46 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
             }
         }
 
-        // Execute Terminal Helper via AJAX (downloads via npx degit & opens PowerShell inside project folder)
-        async function executeInteractiveTerminal(btn) {
+        // Start Full Setup: Download + Virtual Host + Redirect ke halaman install
+        // Gabungan dari executeInteractiveTerminal + startSetupWizard dalam satu alur
+        async function startFullSetup() {
             const dataEl = document.getElementById('appDownloaderComponent');
             if (!dataEl) return;
             const state = Alpine.$data(dataEl);
-            const cmdText = state.fullCommand();
+            const appName = state.appName.trim() || 'myapp';
+            const targetUrl = 'http://' + appName + '.test/install/';
+            const fallbackUrl = 'http://localhost/' + appName + '/public/install/';
 
-            const originalHtml = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i> Mengeksekusi...';
+            state.showTerminal = true;
+            state.isSettingUp = true;
+            state.setupCancelled = false;
+            state.terminalLines = [
+                '═══════════════════════════════════════',
+                '  Vibeforge Setup Otomatis',
+                '  Aplikasi: ' + appName,
+                '  Server:   ' + state.server.toUpperCase(),
+                '  Disk:     ' + state.drive + ':',
+                '  Target:   http://' + appName + '.test/install/',
+                '═══════════════════════════════════════',
+                ''
+            ];
+
+            const addLog = (msg, delay = 400) => {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        if (state.setupCancelled) return resolve();
+                        state.terminalLines.push(msg);
+                        resolve();
+                    }, delay);
+                });
+            };
+
+            // --- Step 1: Download template via degit ---
+            await addLog('[1/3] Mengunduh template Vibeforge via degit...', 300);
+            await addLog('[CMD] ' + state.fullCommand(), 200);
 
             try {
-                const res = await fetch('/core/router.php', {
+                const res1 = await fetch('/core/router.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -817,55 +810,68 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                         action: 'execute',
                         drive: state.drive,
                         serverType: state.server,
-                        projectName: state.appName.trim(),
-                        command: cmdText, // Gunakan fullCommand() yang berisi perintah download lengkap
+                        projectName: appName,
+                        command: state.fullCommand(),
                         csrf_token: '<?= $csrfToken ?>'
                     })
                 });
-                const data = await res.json();
-                if (data.success) {
-                    btn.innerHTML = '<i class="ph ph-check-circle text-green-400"></i> Berhasil Dijalankan!';
+                const data1 = await res1.json();
+
+                if (data1.success) {
+                    await addLog('[OK] Terminal PowerShell berhasil dibuka — proses download dimulai...', 600);
+                    await addLog('[INFO] Tunggu sementara terminal menyelesaikan download...', 800);
+                    // Beri waktu untuk degit selesai; file env.example -> .env dikopi oleh fullCommand()
+                    await addLog('[WAIT] Menunggu 8 detik agar npx degit selesai...', 1000);
+                    // Polling folder existence
+                    let found = false;
+                    for (let i = 0; i < 10; i++) {
+                        await new Promise(r => setTimeout(r, 1000));
+                        if (state.setupCancelled) return;
+                        try {
+                            const cr = await fetch('/core/router.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    module: 'install',
+                                    action: 'check_folder',
+                                    drive: state.drive,
+                                    serverType: state.server,
+                                    projectName: appName,
+                                    csrf_token: '<?= $csrfToken ?>'
+                                })
+                            });
+                            const cd = await cr.json();
+                            if (cd.exists) {
+                                found = true;
+                                state.folderExists = true;
+                                break;
+                            }
+                        } catch(e) { /* ignore poll errors */ }
+                    }
+                    if (found) {
+                        await addLog('[OK] Folder target terdeteksi — download template selesai.', 200);
+                    } else {
+                        await addLog('[WARN] Folder belum terdeteksi, lanjutkan setup...', 200);
+                    }
                 } else {
-                    alert(data.error || 'Gagal membuka terminal');
-                    btn.innerHTML = originalHtml;
+                    await addLog('[WARN] ' + (data1.error || 'Gagal membuka terminal download.'), 0);
+                    await addLog('[INFO] Mencoba lanjut ke Virtual Host setup...', 600);
                 }
             } catch(e) {
-                alert('Gagal membuka terminal.');
-                btn.innerHTML = originalHtml;
-            } finally {
-                setTimeout(() => { btn.disabled = false; btn.innerHTML = originalHtml; }, 3000);
+                await addLog('[WARN] Error: ' + e.message, 0);
+                await addLog('[INFO] Mencoba lanjut ke Virtual Host setup...', 600);
             }
-        }
 
-        // Setup Virtual Host Helper via AJAX
-        async function startSetupWizard(btn) {
-            const dataEl = document.getElementById('appDownloaderComponent');
-            if (!dataEl) return;
-            const state = Alpine.$data(dataEl);
-            const appName = state.appName.trim() || 'myapp';
-            const targetUrl = 'http://' + appName + '.test/install/';
+            if (state.setupCancelled) { state.isSettingUp = false; return; }
 
-            state.showTerminal = true;
-            state.isSettingUp = true;
-            state.terminalLines = [
-                '[INFO] Initializing setup process for ' + appName + '...',
-                '[INFO] Target Domain: http://' + appName + '.test/install/'
-            ];
-
-            const addLog = (msg, delay = 600) => {
-                return new Promise(resolve => {
-                    setTimeout(() => {
-                        state.terminalLines.push(msg);
-                        resolve();
-                    }, delay);
-                });
-            };
-
-            await addLog('[INFO] Checking virtual host configuration...');
-            await addLog('[INFO] Triggering PowerShell elevation for Apache VHost & Hosts setup...');
+            // --- Step 2: Virtual Host + Hosts file + Apache restart ---
+            await addLog('', 300);
+            await addLog('[2/3] Membuat Virtual Host & update file hosts...', 600);
+            await addLog('[INFO] Domain: http://' + appName + '.test/', 300);
+            await addLog('[INFO] Men-trigger PowerShell (administrator) untuk VirtualHost & hosts...', 600);
 
             try {
-                const res = await fetch('/core/router.php', {
+                const res2 = await fetch('/core/router.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -877,38 +883,50 @@ if (!in_array($detectedDrive, $availableDrives, true)) {
                         csrf_token: '<?= $csrfToken ?>'
                     })
                 });
-                const data = await res.json();
+                const data2 = await res2.json();
 
-                if (data.success) {
-                    await addLog('[SUCCESS] Virtual host setup command executed successfully!');
-                    await addLog('[INFO] Reloading Apache Web Server configuration...');
-                    await addLog('[SUCCESS] Setup Complete!');
-                    await addLog('[INFO] Redirecting to installation wizard in 2 seconds...', 1000);
-
-                    setTimeout(() => {
-                        state.isSettingUp = false;
-                        window.location.href = targetUrl;
-                    }, 2000);
+                if (data2.success) {
+                    await addLog('[OK] Virtual Host berhasil dibuat!', 300);
+                    await addLog('[OK] File hosts diperbarui (127.0.0.1 ' + appName + '.test).', 300);
+                    await addLog('[OK] DNS cache di-flush.', 300);
+                    await addLog('[OK] Apache berhasil di-restart!', 300);
                 } else {
-                    await addLog('[ERROR] ' + (data.error || 'Failed to setup Virtual Host.'), 0);
-                    await addLog('[WARNING] Falling back to direct URL: ' + state.wizardUrl(), 1000);
-                    setTimeout(() => {
-                        state.isSettingUp = false;
-                        window.location.href = state.wizardUrl();
-                    }, 3000);
+                    await addLog('[WARN] ' + (data2.error || 'VirtualHost setup gagal.'), 0);
                 }
             } catch(e) {
-                await addLog('[ERROR] Connection error during setup.', 0);
-                await addLog('[WARNING] Falling back to direct URL...', 1000);
-                setTimeout(() => {
-                    state.isSettingUp = false;
-                    window.location.href = state.wizardUrl();
-                }, 3000);
+                await addLog('[WARN] Koneksi error saat setup VirtualHost.', 0);
             }
+
+            if (state.setupCancelled) { state.isSettingUp = false; return; }
+
+            // --- Step 3: Redirect ke halaman install ---
+            await addLog('', 300);
+            await addLog('═══════════════════════════════════════', 200);
+            await addLog('[3/3] Setup selesai! Membuka halaman install...', 400);
+            await addLog('[→] ' + targetUrl, 200);
+            await addLog('═══════════════════════════════════════', 400);
+
+            setTimeout(() => {
+                state.isSettingUp = false;
+                // Coba domain .test dulu, fallback ke localhost
+                window.location.href = targetUrl;
+                // Fallback: jika domain tidak terselesaikan, browser akan timeout dan navigasi ke fallback
+                setTimeout(() => {
+                    if (window.location.href !== targetUrl) return; // already navigated away
+                    window.location.href = fallbackUrl;
+                }, 4000);
+            }, 1500);
         }
 
-        async function setupVirtualHost(btn) {
-            startSetupWizard(btn);
+        // Cancel setup jika user tekan X di terminal overlay
+        function cancelSetup() {
+            const dataEl = document.getElementById('appDownloaderComponent');
+            if (!dataEl) return;
+            const state = Alpine.$data(dataEl);
+            state.setupCancelled = true;
+            state.isSettingUp = false;
+            state.showTerminal = false;
+            setTimeout(() => { state.setupCancelled = false; }, 300);
         }
 
         // Open Folder Helper via AJAX
