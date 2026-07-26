@@ -101,23 +101,16 @@ Repo::table('users')->delete($id);
 
 ### 1. Download Template & Setup Virtual Host (Interaktif)
 
-**Opsi A: Script Interaktif (Rekomendasi — otomatis tanya nama app + buat virtual host)**
-
 ```bash
-# Laragon (Windows PowerShell)
-cd C:\laragon\www
-irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex
-
-# XAMPP (Windows PowerShell)
-cd C:\xampp\htdocs
+# Windows PowerShell (jalankan di Terminal Admin)
 irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex
 ```
 
-> Script akan menanyakan **Nama aplikasi** (tanpa spasi, gunakan `_` atau `-`), lalu otomatis:
-> 1. Deteksi server dari direktori kerja (`laragon` atau `xampp`)
-> 2. Download template via `degit`
-> 3. Buat folder project & setup Virtual Host + Windows Hosts (`nama_app.test`)
-> 4. Memberikan petunjuk untuk restart Apache/server
+> Script akan memandu Anda:
+> 1. **Pilih Local Disk** (C: / D: / dst)
+> 2. **Pilih Server** (ketik `l` untuk Laragon atau `x` untuk XAMPP lalu Enter)
+> 3. **Masukkan Nama Aplikasi** (tanpa spasi, gunakan `_` atau `-`)
+> 4. Lalu otomatis: Download template, setup Virtual Host + Windows Hosts (`nama_app.test`), berikan petunjuk restart Apache
 
 ---
 

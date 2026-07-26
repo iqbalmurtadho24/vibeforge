@@ -3,7 +3,31 @@
 [CmdletBinding()]
 param()
 
-$appName = Read-Host "Masukkan nama aplikasi Anda (contoh: toko_online, tanpa spasi)"
+Write-Host "==========================================" -ForegroundColor Header
+Write-Host "  Vibeforge Setup Wizard" -ForegroundColor White
+Write-Host "==========================================" -ForegroundColor Header
+
+# 1. Pilih Local Disk
+$disk = Read-Host "Masukkan Local Disk (contoh: C, D, E)"
+$disk = $disk.Trim().ToUpper()
+if (-not $disk) { $disk = "C" }
+
+# 2. Pilih Web Server
+$serverChoice = Read-Host "Pilih Web Server: [l] Laragon (default) | [x] XAMPP"
+$serverChoice = $serverChoice.Trim().ToLower()
+
+if ($serverChoice -eq "x") {
+    $serverType = "XAMPP"
+    $baseDir = "$($disk):\xampp\htdocs"
+} else {
+    $serverType = "Laragon"
+    $baseDir = "$($disk):\laragon\www"
+}
+
+Write-Host "`nServer terpilih: $serverType ($baseDir)" -ForegroundColor Cyan
+
+# 3. Masukkan Nama Aplikasi
+$appName = Read-Host "Masukkan nama aplikasi (tanpa spasi, gunakan _ atau -)"
 $appName = $appName.Trim().ToLower() -replace '\s+', '_'
 
 if (-not $appName) {
@@ -11,27 +35,16 @@ if (-not $appName) {
     exit 1
 }
 
-$currentDir = (Get-Location).Path
+$targetDir = Join-Path $baseDir $appName
 
-# Otomatis deteksi web server berdasarkan lokasi direktori (CD)
-if ($currentDir -like "*xampp*" -or $currentDir -like "*htdocs*") {
-    $serverType = "XAMPP"
-} elseif ($currentDir -like "*laragon*" -or $currentDir -like "*www*") {
-    $serverType = "Laragon"
-} else {
-    # Fallback jika tidak terdeteksi dari path saat ini
-    if (Test-Path "C:\laragon") {
-        $serverType = "Laragon"
-    } else {
-        $serverType = "XAMPP"
-    }
+# Cek apakah folder base sudah ada
+if (-not (Test-Path $baseDir)) {
+    Write-Warning "Folder $baseDir tidak ditemukan. Pastikan $serverType sudah terinstall."
+    $proceed = Read-Host "Lanjutkan tetap? (y/n)"
+    if ($proceed -ne "y") { exit 1 }
 }
 
-Write-Host "Terdeteksi Web Server: $serverType ($currentDir)" -ForegroundColor Cyan
-
-$targetDir = Join-Path $currentDir $appName
-
-Write-Host "`n[1/4] Mengunduh template Vibeforge..." -ForegroundColor Green
+Write-Host "`n[1/5] Mengunduh template Vibeforge..." -ForegroundColor Green
 npx -y degit iqbalmurtadho24/vibeforge $targetDir
 
 if (-not (Test-Path $targetDir)) {
@@ -42,13 +55,13 @@ if (-not (Test-Path $targetDir)) {
 Set-Location $targetDir
 $publicDir = (Join-Path $targetDir "public").Replace('\', '/')
 
-Write-Host "`n[2/4] Membuat Virtual Host file..." -ForegroundColor Green
+Write-Host "`n[2/5] Membuat Virtual Host file..." -ForegroundColor Green
 
 if ($serverType -eq "Laragon") {
-    $laragonVhostDir = "C:\laragon\etc\apache2\sites-enabled"
+    $laragonVhostDir = "$($disk):\laragon\etc\apache2\sites-enabled"
     if (-not (Test-Path $laragonVhostDir)) {
-        $parentDir = Split-Path $currentDir -Parent
-        $laragonVhostDir = Join-Path $parentDir "etc\apache2\sites-enabled"
+        # fallback: cari dari parent baseDir
+        $laragonVhostDir = Join-Path (Split-Path $baseDir -Parent) "etc\apache2\sites-enabled"
     }
 
     $vhostFile = Join-Path $laragonVhostDir "auto.$appName.test.conf"
@@ -68,12 +81,12 @@ if ($serverType -eq "Laragon") {
         Set-Content -Path $vhostFile -Value $vhostContent -Encoding UTF8
         Write-Host "Virtual Host dibuat di: $vhostFile" -ForegroundColor Cyan
     } else {
-        Write-Warning "Folder sites-enabled Laragon tidak ditemukan."
+        Write-Warning "Folder sites-enabled Laragon tidak ditemukan di $laragonVhostDir"
     }
 
     $domain = "$appName.test"
 } else {
-    $xamppVhostFile = "C:\xampp\apache\conf\extra\httpd-vhosts.conf"
+    $xamppVhostFile = "$($disk):\xampp\apache\conf\extra\httpd-vhosts.conf"
     $vhostContent = @"
 
 # Virtual Host untuk $appName
@@ -91,13 +104,13 @@ if ($serverType -eq "Laragon") {
         Add-Content -Path $xamppVhostFile -Value $vhostContent -Encoding UTF8
         Write-Host "Virtual Host ditambahkan ke: $xamppVhostFile" -ForegroundColor Cyan
     } else {
-        Write-Warning "File httpd-vhosts.conf tidak ditemukan di $xamppVhostFile."
+        Write-Warning "File httpd-vhosts.conf tidak ditemukan di $xamppVhostFile"
     }
 
     $domain = "$appName.test"
 }
 
-Write-Host "`n[3/4] Mengupdate file Windows hosts (127.0.0.1 $domain)..." -ForegroundColor Green
+Write-Host "`n[3/5] Mengupdate file Windows hosts (127.0.0.1 $domain)..." -ForegroundColor Green
 $hostsPath = "C:\Windows\System32\drivers\etc\hosts"
 $hostsEntry = "127.0.0.1 $domain"
 
@@ -115,10 +128,19 @@ try {
     Write-Host "127.0.0.1 $domain" -ForegroundColor White
 }
 
-Write-Host "`n[4/4] Selesai!" -ForegroundColor Green
+Write-Host "`n[4/5] Setup selesai!" -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Header
 Write-Host "Proyek  : $appName" -ForegroundColor White
 Write-Host "Lokasi  : $targetDir" -ForegroundColor White
 Write-Host "URL App : http://$domain" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Header
-Write-Host "Jangan lupa untuk meng-reload/restart Apache di $serverType!" -ForegroundColor Yellow
+
+# 5. Restart Apache
+Write-Host "`n[5/5] RESTART APACHE diperlukan agar perubahan berlaku:" -ForegroundColor Yellow
+if ($serverType -eq "Laragon") {
+    Write-Host "  - Buka Laragon → Menu → Apache → Reload" -ForegroundColor White
+    Write-Host "  - Atau klik kanan tray Laragon → Apache → Reload" -ForegroundColor White
+} else {
+    Write-Host "  - Buka XAMPP Control Panel → Stop Apache → Start Apache" -ForegroundColor White
+}
+Write-Host "`nLalu buka browser: http://$domain" -ForegroundColor Cyan
