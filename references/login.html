@@ -22,7 +22,18 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { primary: '#F97316', dark: '#0B0F17', card: '#111726', border: '#1E293B' }
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            primary: '#F97316',
+                            hover: '#EA580C',
+                            dark: '#0B0F17',
+                            card: '#111726',
+                            border: '#1E293B'
+                        }
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
@@ -35,15 +46,45 @@
     </script>
 
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
+        :root {
+            --bg-primary: #0B0F17;
+            --bg-secondary: #0F172A;
+            --bg-card: #111726;
+            --bg-hover: #1E293B;
+            --border-default: #1E293B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --brand-primary: #F97316;
+            --brand-hover: #EA580C;
+        }
+
+        .light {
+            --bg-primary: #F8FAFC;
+            --bg-secondary: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --bg-hover: #E2E8F0;
+            --border-default: #E2E8F0;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+            --brand-primary: #EA580C;
+            --brand-hover: #C2410C;
+        }
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); transition: background-color 0.3s ease, color 0.3s ease; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .tech-grid {
+            background-image: linear-gradient(to right, rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(249, 115, 22, 0.03) 1px, transparent 1px);
+            background-size: 36px 36px;
+        }
+        .dark .tech-grid {
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                               linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 32px 32px;
         }
         .glow-mesh {
-            background: radial-gradient(circle at 50% 30%, rgba(249, 115, 22, 0.12) 0%, rgba(13, 17, 23, 0) 65%);
+            background: radial-gradient(circle at 50% 30%, rgba(249, 115, 22, 0.12) 0%, rgba(11, 15, 23, 0) 65%);
         }
         .text-gradient {
             background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #F59E0B 100%);
@@ -53,7 +94,9 @@
         }
         .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); }
         .glow-orange { box-shadow: 0 0 35px rgba(249, 115, 22, 0.25); }
-        .glow-box-cyber { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
+        .glow-orange-sm { box-shadow: 0 0 20px rgba(249, 115, 22, 0.15); }
+        .dark .glow-box-cyber { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.15), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
+        .glow-box-cyber { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px var(--border-default); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased tech-grid bg-[var(--bg-primary)]">
@@ -77,7 +120,7 @@
         <div class="flex items-center gap-3">
             <!-- Language Selector -->
             <div class="relative group" x-data="{ open: false }">
-                <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors text-xs font-mono">
+                <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors text-xs font-mono cursor-pointer" aria-label="Change Language">
                     <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="id" class="w-4 h-3 rounded-sm shadow-sm">
                     <span class="uppercase font-bold text-[var(--text-secondary)]">id</span>
                     <i class="ph ph-caret-down text-xs text-[var(--text-muted)]"></i>
@@ -89,9 +132,6 @@
                     <a href="?lang=en" class="flex items-center gap-2.5 px-3 py-2 hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)]">
                         <img src="/assets/flags/en.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> English
                     </a>
-                    <a href="?lang=ja" class="flex items-center gap-2.5 px-3 py-2 hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)]">
-                        <img src="/assets/flags/ja.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> 日本語
-                    </a>
                     <a href="?lang=ar" class="flex items-center gap-2.5 px-3 py-2 hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)]">
                         <img src="/assets/flags/ar.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> العربية
                     </a>
@@ -99,7 +139,7 @@
             </div>
 
             <!-- Theme Toggle -->
-            <button id="themeToggle" class="w-9 h-9 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors flex items-center justify-center text-[var(--text-muted)] hover:text-amber-400" aria-label="Toggle theme">
+            <button id="themeToggle" class="w-9 h-9 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors flex items-center justify-center text-[var(--text-muted)] hover:text-amber-400 cursor-pointer" aria-label="Toggle theme">
                 <i class="ph ph-moon text-lg dark:text-amber-400"></i>
             </button>
         </div>
@@ -118,9 +158,9 @@
             </div>
 
             <!-- Login Cyber Card -->
-            <div class="bg-gray-950/90 backdrop-blur-xl rounded-2xl border border-[var(--border-default)] p-8 glow-box-cyber relative">
+            <div class="bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl border border-[var(--border-default)] p-8 glow-box-cyber relative">
                 <div class="text-center mb-8 space-y-2">
-                    <h1 class="text-2xl font-heading font-extrabold tracking-tight text-white">Selamat Datang Kembali</h1>
+                    <h1 class="text-2xl font-heading font-extrabold tracking-tight text-[var(--text-primary)]">Selamat Datang Kembali</h1>
                     <p class="text-[var(--text-secondary)] text-xs font-mono">Autentikasi akun developer untuk mengakses workspace.</p>
                 </div>
 
@@ -134,17 +174,17 @@
                     <div>
                         <label class="block text-xs font-mono font-bold uppercase text-[var(--text-secondary)] mb-2">Email Address</label>
                         <div class="relative">
-                            <input type="email" id="emailInput" name="email" required class="w-full bg-gray-900 border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] transition-colors font-mono" placeholder="dev@vibeforge.io">
-                            <i class="ph ph-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-base"></i>
+                            <input type="email" id="emailInput" name="email" required class="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] transition-colors font-mono" placeholder="dev@vibeforge.io">
+                            <i class="ph ph-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-base"></i>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-mono font-bold uppercase text-[var(--text-secondary)] mb-2">Password</label>
                         <div class="relative">
-                            <input type="password" id="passwordInput" name="password" required class="w-full bg-gray-900 border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 pr-11 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] transition-colors font-mono" placeholder="••••••••">
-                            <i class="ph ph-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-base"></i>
-                            <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[var(--brand-primary)] transition-colors">
+                            <input type="password" id="passwordInput" name="password" required class="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-xl px-4 py-3 pl-11 pr-11 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)] transition-colors font-mono" placeholder="••••••••">
+                            <i class="ph ph-lock absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-base"></i>
+                            <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors cursor-pointer">
                                 <i class="ph ph-eye text-base"></i>
                             </button>
                         </div>
@@ -152,36 +192,36 @@
 
                     <div class="flex items-center justify-between font-mono text-xs">
                         <label class="flex items-center gap-2 text-[var(--text-secondary)] cursor-pointer">
-                            <input type="checkbox" name="remember" class="w-4 h-4 rounded border-gray-800 bg-gray-900 text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">
+                            <input type="checkbox" name="remember" class="w-4 h-4 rounded border-[var(--border-default)] bg-[var(--bg-primary)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">
                             <span>Remember device</span>
                         </label>
                         <a href="#" class="text-[var(--brand-primary)] hover:underline">Forgot password?</a>
                     </div>
 
-                    <button type="submit" id="submitBtn" class="w-full py-3.5 bg-gradient-brand text-white font-mono font-bold text-xs rounded-xl hover:opacity-90 transition-opacity shadow-lg glow-orange-sm flex items-center justify-center gap-2">
+                    <button type="submit" id="submitBtn" class="w-full py-3.5 bg-gradient-brand text-white font-mono font-bold text-xs rounded-xl hover:opacity-90 transition-opacity shadow-lg glow-orange-sm flex items-center justify-center gap-2 cursor-pointer">
                         <i class="ph ph-sign-in text-base"></i> MASUK WORKSPACE
                     </button>
                 </form>
 
                 <!-- Dev Quick Fill Buttons (Section §6 Requirement) -->
                 <div class="mt-8 pt-6 border-t border-[var(--border-default)] space-y-3 font-mono">
-                    <div class="flex items-center justify-between text-[10px] text-gray-400">
+                    <div class="flex items-center justify-between text-[10px] text-[var(--text-muted)]">
                         <span class="uppercase tracking-wider font-bold text-amber-400 flex items-center gap-1">
                             <i class="ph ph-lightning text-xs"></i> Quick Login Fill (Dev Mode)
                         </span>
-                        <span class="px-1.5 py-0.5 rounded bg-gray-900 border border-gray-800 text-gray-400">password123</span>
+                        <span class="px-1.5 py-0.5 rounded bg-[var(--bg-primary)] border border-[var(--border-default)] text-[var(--text-muted)]">password123</span>
                     </div>
 
                     <div class="grid grid-cols-3 gap-2">
-                        <button type="button" onclick="quickLoginFill('admin@app.com', 'password123')" class="px-2 py-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-lg text-[10px] font-bold transition-all flex flex-col items-center gap-0.5 truncate" title="Super Admin Role">
+                        <button type="button" onclick="quickLoginFill('admin@app.com', 'password123')" class="px-2 py-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-400 rounded-lg text-[10px] font-bold transition-all flex flex-col items-center gap-0.5 truncate cursor-pointer" title="Super Admin Role">
                             <span class="truncate">Super Admin</span>
                             <span class="text-[8px] text-purple-400 font-normal">Manajemen</span>
                         </button>
-                        <button type="button" onclick="quickLoginFill('admin@app.id', 'password123')" class="px-2 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-300 rounded-lg text-[10px] font-bold transition-all flex flex-col items-center gap-0.5 truncate" title="Creator Admin Role">
+                        <button type="button" onclick="quickLoginFill('admin@app.id', 'password123')" class="px-2 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg text-[10px] font-bold transition-all flex flex-col items-center gap-0.5 truncate cursor-pointer" title="Creator Admin Role">
                             <span class="truncate">Creator Admin</span>
                             <span class="text-[8px] text-orange-400 font-normal">Admin</span>
                         </button>
-                        <button type="button" onclick="quickLoginFill('client@app.com', 'password123')" class="px-2 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 rounded-lg text-[10px] font-bold transition-all flex flex-col items-center gap-0.5 truncate" title="Client User Role">
+                        <button type="button" onclick="quickLoginFill('client@app.com', 'password123')" class="px-2 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-lg text-[10px] font-bold transition-all flex flex-col items-center gap-0.5 truncate cursor-pointer" title="Client User Role">
                             <span class="truncate">Client User</span>
                             <span class="text-[8px] text-emerald-400 font-normal">Client</span>
                         </button>
@@ -194,7 +234,7 @@
             </div>
 
             <div class="text-center">
-                <a href="/" class="inline-flex items-center gap-2 font-mono text-xs text-gray-500 hover:text-[var(--brand-primary)] transition-colors">
+                <a href="/" class="inline-flex items-center gap-2 font-mono text-xs text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
                     <i class="ph ph-arrow-left"></i> Kembali ke Beranda
                 </a>
             </div>

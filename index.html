@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibeforge - Developer-Grade Vibe Coding Architecture</title>
+    <meta name="description" content="Template starter profesional untuk membangun aplikasi web dengan metode vibe coding: definisikan kebutuhan di dokumen, biarkan AI coding assistant menempa seluruh struktur kode fungsional.">
+
+    <!-- Open Graph / Meta -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Vibeforge - Developer-Grade Vibe Coding Architecture">
+    <meta property="og:description" content="Wujudkan Aplikasi Anda dari Dokumen ke Kode Jadi. Template starter modern untuk AI-assisted web development.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/docs/logo.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F97316'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icons & Scripts -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            primary: '#F97316',
+                            hover: '#EA580C',
+                            dark: '#0B0F17',
+                            card: '#111726',
+                            border: '#1E293B'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        heading: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg-primary: #0B0F17;
+            --bg-secondary: #0F172A;
+            --bg-card: #111726;
+            --bg-hover: #1E293B;
+            --border-default: #1E293B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --brand-primary: #F97316;
+            --brand-hover: #EA580C;
+        }
+
+        .light {
+            --bg-primary: #F8FAFC;
+            --bg-secondary: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --bg-hover: #E2E8F0;
+            --border-default: #E2E8F0;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+            --brand-primary: #EA580C;
+            --brand-hover: #C2410C;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        .tech-grid {
+            background-image: linear-gradient(to right, rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(249, 115, 22, 0.03) 1px, transparent 1px);
+            background-size: 36px 36px;
+        }
+
+        .dark .tech-grid {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        .glow-mesh {
+            background: radial-gradient(circle at 50% 15%, rgba(249, 115, 22, 0.15) 0%, rgba(11, 15, 23, 0) 70%);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .bg-gradient-brand {
+            background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+        }
+
+        .glow-orange { box-shadow: 0 0 35px rgba(249, 115, 22, 0.25); }
+        .glow-orange-sm { box-shadow: 0 0 20px rgba(249, 115, 22, 0.15); }
+
+        .dark .glow-box-cyber {
+            box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.15), 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+        }
+
+        .glow-box-cyber {
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px var(--border-default);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
+
+        /* RTL Adjustments */
+        [dir="rtl"] {
+            text-align: right;
+        }
+        [dir="rtl"] .font-mono {
+            direction: ltr;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased tech-grid"
+      x-data="appData()"
+      :class="theme">
+
+    <!-- Top Status Bar -->
+    <div class="bg-[var(--bg-secondary)] border-b border-[var(--border-default)] py-1.5 px-4 text-[11px] font-mono text-[var(--text-secondary)] hidden sm:flex items-center justify-between z-50">
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span x-text="t('sys_online')">SYSTEM: ONLINE</span>
+            </span>
+            <span class="text-[var(--border-default)]">|</span>
+            <span>PHP 8.3+ Native</span>
+            <span class="text-[var(--border-default)]">|</span>
+            <span x-text="t('sys_arch')">Architecture: SPA Shell Proxy</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span x-text="t('sys_repo')">Repo Mode: Dual-Engine (Auto SQL/JSON)</span>
+            <span class="text-[var(--border-default)]">|</span>
+            <span class="text-[var(--brand-primary)] font-bold">v3.2.0-STABLE</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 w-full z-50 bg-[var(--bg-primary)]/85 backdrop-blur-xl border-b border-[var(--border-default)] transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+
+                <!-- Logo -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center group-hover:border-orange-500 transition-colors shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="#F97316">
+                            <path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/>
+                        </svg>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-heading font-extrabold text-lg tracking-tight leading-none">
+                            <span class="text-[var(--text-primary)]">Vibe</span><span class="text-gradient">forge</span>
+                        </span>
+                        <span class="font-mono text-[9px] text-[var(--text-muted)] tracking-wider">DEV_ENGINE</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <div class="hidden md:flex items-center gap-8 font-medium text-sm">
+                    <a href="#fitur" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
+                        <i class="ph ph-cpu text-base text-[var(--brand-primary)]"></i> <span x-text="t('nav_arch')">Arsitektur</span>
+                    </a>
+                    <a href="#cara-pasang" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
+                        <i class="ph ph-terminal-window text-base text-[var(--brand-primary)]"></i> <span x-text="t('nav_installer')">Installer</span>
+                    </a>
+                    <a href="#demo" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
+                        <i class="ph ph-shield-check text-base text-[var(--brand-primary)]"></i> <span x-text="t('nav_demo')">Demo Roles</span>
+                    </a>
+                    <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" rel="noopener noreferrer" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
+                        <i class="ph ph-github-logo text-base"></i> <span x-text="t('nav_github')">GitHub</span>
+                    </a>
+                </div>
+
+                <!-- Right Action Bar -->
+                <div class="flex items-center gap-3">
+
+                    <!-- Interactive Language Selector Dropdown -->
+                    <div class="relative" x-data="{ langOpen: false }">
+                        <button @click="langOpen = !langOpen" @click.away="langOpen = false"
+                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors text-xs font-mono cursor-pointer"
+                                aria-label="Select Language">
+                            <img :src="currentFlag" :alt="lang" class="w-4 h-3 rounded-sm shadow-sm object-cover">
+                            <span class="uppercase font-bold text-[var(--text-secondary)]" x-text="lang"></span>
+                            <i class="ph ph-caret-down text-xs text-[var(--text-muted)]"></i>
+                        </button>
+                        <div x-show="langOpen" x-transition
+                             class="absolute right-0 mt-1.5 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[150px] z-50 font-mono text-xs">
+                            <button @click="setLang('id'); langOpen = false"
+                                    class="w-full flex items-center gap-2.5 px-3.5 py-2 hover:bg-[var(--bg-hover)] transition-colors text-left cursor-pointer"
+                                    :class="lang === 'id' ? 'text-[var(--brand-primary)] font-bold bg-orange-500/10' : 'text-[var(--text-secondary)]'">
+                                <img src="https://flagcdn.com/w20/id.png" class="w-4 h-3 rounded-sm object-cover" alt="ID">
+                                <span>Indonesia</span>
+                            </button>
+                            <button @click="setLang('en'); langOpen = false"
+                                    class="w-full flex items-center gap-2.5 px-3.5 py-2 hover:bg-[var(--bg-hover)] transition-colors text-left cursor-pointer"
+                                    :class="lang === 'en' ? 'text-[var(--brand-primary)] font-bold bg-orange-500/10' : 'text-[var(--text-secondary)]'">
+                                <img src="https://flagcdn.com/w20/gb.png" class="w-4 h-3 rounded-sm object-cover" alt="EN">
+                                <span>English</span>
+                            </button>
+                            <button @click="setLang('ar'); langOpen = false"
+                                    class="w-full flex items-center gap-2.5 px-3.5 py-2 hover:bg-[var(--bg-hover)] transition-colors text-left cursor-pointer"
+                                    :class="lang === 'ar' ? 'text-[var(--brand-primary)] font-bold bg-orange-500/10' : 'text-[var(--text-secondary)]'">
+                                <img src="https://flagcdn.com/w20/sa.png" class="w-4 h-3 rounded-sm object-cover" alt="AR">
+                                <span>العربية</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button @click="toggleTheme()"
+                            class="w-9 h-9 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] flex items-center justify-center transition-colors text-[var(--text-muted)] hover:text-amber-400 cursor-pointer"
+                            aria-label="Toggle theme">
+                        <i class="ph text-lg" :class="theme === 'dark' ? 'ph-moon text-amber-400' : 'ph-sun text-amber-500'"></i>
+                    </button>
+
+                    <!-- Mobile Menu Button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden w-9 h-9 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] flex items-center justify-center text-[var(--text-primary)]">
+                        <i class="ph text-xl" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div x-show="mobileMenuOpen" x-transition class="md:hidden border-b border-[var(--border-default)] bg-[var(--bg-secondary)] px-4 pt-2 pb-4 space-y-3 font-mono text-xs">
+            <a href="#fitur" @click="mobileMenuOpen = false" class="block py-2 text-[var(--text-secondary)] hover:text-[var(--brand-primary)]">
+                <i class="ph ph-cpu mr-2 text-[var(--brand-primary)]"></i> <span x-text="t('nav_arch')">Arsitektur</span>
+            </a>
+            <a href="#cara-pasang" @click="mobileMenuOpen = false" class="block py-2 text-[var(--text-secondary)] hover:text-[var(--brand-primary)]">
+                <i class="ph ph-terminal-window mr-2 text-[var(--brand-primary)]"></i> <span x-text="t('nav_installer')">Installer</span>
+            </a>
+            <a href="#demo" @click="mobileMenuOpen = false" class="block py-2 text-[var(--text-secondary)] hover:text-[var(--brand-primary)]">
+                <i class="ph ph-shield-check mr-2 text-[var(--brand-primary)]"></i> <span x-text="t('nav_demo')">Demo Roles</span>
+            </a>
+            <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="block py-2 text-[var(--text-secondary)] hover:text-[var(--brand-primary)]">
+                <i class="ph ph-github-logo mr-2"></i> <span x-text="t('nav_github')">GitHub</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow relative glow-mesh">
+
+        <!-- Hero Section -->
+        <section class="py-16 sm:py-24 relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-4xl mx-auto space-y-6">
+
+                    <!-- Tech Status Badge -->
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 font-mono text-xs shadow-[0_0_20px_rgba(249,115,22,0.15)]">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                        </span>
+                        <span x-text="t('badge_hero')">AI-POWERED VIBE CODING TEMPLATE // ARCHITECTURE READY</span>
+                    </div>
+
+                    <!-- Main Headline -->
+                    <h1 class="text-4xl sm:text-6xl lg:text-7xl font-heading font-extrabold tracking-tight leading-[1.1]" x-html="t('hero_title')">
+                        Wujudkan Aplikasi Anda<br>
+                        <span class="text-gradient">dari Dokumen ke Kode Jadi</span>
+                    </h1>
+
+                    <!-- Description -->
+                    <p class="text-base sm:text-xl text-[var(--text-secondary)] max-w-3xl mx-auto leading-relaxed font-normal" x-html="t('hero_desc')">
+                        <strong class="text-[var(--text-primary)]">Vibeforge</strong> adalah template starter professional untuk membangun aplikasi web dengan metode vibe coding: definisikan kebutuhan di dokumen, biarkan AI coding assistant menempa seluruh struktur kode fungsional.
+                    </p>
+
+                    <!-- Quick Terminal Command Bar in Hero -->
+                    <div class="pt-2 max-w-3xl mx-auto" x-data="{ copied: false }">
+                        <div class="bg-gray-950/90 backdrop-blur-md border border-[var(--border-default)] rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs text-emerald-400 shadow-2xl group hover:border-orange-500/50 transition-all glow-box-cyber">
+                            <div class="flex items-center gap-2.5 overflow-x-auto hide-scrollbar py-0.5 min-w-0">
+                                <span class="text-xs font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded select-none shrink-0">PS</span>
+                                <span class="text-gray-500 select-none font-bold">&gt;</span>
+                                <span class="truncate sm:whitespace-normal font-mono text-emerald-400 font-medium tracking-tight">irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex</span>
+                            </div>
+                            <button @click="navigator.clipboard.writeText('irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex'); copied = true; setTimeout(() => copied = false, 2500)"
+                                    class="self-end sm:self-auto px-4 py-2 bg-gradient-brand hover:opacity-90 text-white rounded-lg text-xs font-sans font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-md glow-orange-sm cursor-pointer">
+                                <i class="ph text-sm" :class="copied ? 'ph-check text-white' : 'ph-copy'"></i>
+                                <span x-text="copied ? t('hero_copied') : t('hero_copy_cmd')">Copy Command</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                        <a href="#cara-pasang" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-brand text-white font-bold rounded-xl hover:opacity-95 transition-all shadow-xl glow-orange text-sm font-mono tracking-wide">
+                            <i class="ph ph-rocket-launch text-xl"></i> <span x-text="t('hero_btn_setup')">SETUP APPLICATION</span>
+                        </a>
+                        <a href="#demo" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[var(--bg-card)] text-[var(--text-primary)] font-bold rounded-xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] hover:bg-orange-500/5 transition-all shadow-lg text-sm font-mono tracking-wide">
+                            <i class="ph ph-shield-check text-xl text-[var(--brand-primary)]"></i> <span x-text="t('hero_btn_demo')">COBA DEMO ROLES</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Specification Bar -->
+        <section class="py-10 bg-[var(--bg-secondary)]/70 border-y border-[var(--border-default)] backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+
+                    <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] flex items-center gap-4 hover:border-orange-500/40 transition-colors">
+                        <div class="w-12 h-12 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[var(--brand-primary)] shrink-0">
+                            <i class="ph ph-code text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-mono text-xs font-bold text-[var(--text-primary)]">Native PHP 8.3+</div>
+                            <div class="text-[11px] text-[var(--text-muted)]" x-text="t('spec_php_sub')">Zero Heavy Framework Overhead</div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] flex items-center gap-4 hover:border-orange-500/40 transition-colors">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                            <i class="ph ph-database text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-mono text-xs font-bold text-[var(--text-primary)]" x-text="t('spec_repo_title')">Dual-Engine Repo</div>
+                            <div class="text-[11px] text-[var(--text-muted)]" x-text="t('spec_repo_sub')">Auto Switch SQL / JSON Storage</div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] flex items-center gap-4 hover:border-orange-500/40 transition-colors">
+                        <div class="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                            <i class="ph ph-shield-check text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-mono text-xs font-bold text-[var(--text-primary)]" x-text="t('spec_owasp_title')">OWASP ASVS Guarded</div>
+                            <div class="text-[11px] text-[var(--text-muted)]" x-text="t('spec_owasp_sub')">Argon2ID + CSRF + Rate Limiter</div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] flex items-center gap-4 hover:border-orange-500/40 transition-colors">
+                        <div class="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
+                            <i class="ph ph-browser text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-mono text-xs font-bold text-[var(--text-primary)]" x-text="t('spec_spa_title')">SPA Shell Architecture</div>
+                            <div class="text-[11px] text-[var(--text-muted)]" x-text="t('spec_spa_sub')">Router Proxy Pattern No-Reload</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Grid Section -->
+        <section id="fitur" class="py-20 sm:py-28">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                    <span class="font-mono text-xs text-[var(--brand-primary)] tracking-widest uppercase font-bold" x-text="t('fitur_tag')">// KEY ARCHITECTURE //</span>
+                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight" x-text="t('fitur_title')">Kenapa Harus Vibeforge?</h2>
+                    <p class="text-[var(--text-secondary)] text-base" x-text="t('fitur_sub')">Arsitektur bersih yang dirancang khusus untuk mempermudah AI CLI (Claude Code, Cursor, Copilot) bekerja tanpa kebingungan.</p>
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                    <!-- Card 1 -->
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
+                        <div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)] group-hover:scale-110 transition-transform">
+                            <i class="ph ph-file-doc text-2xl"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]" x-text="t('feat1_title')">Dokumen ke Kode</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed" x-html="t('feat1_desc')"></p>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-layout text-2xl"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]" x-text="t('feat2_title')">Shell SPA Clean-URL</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed" x-text="t('feat2_desc')"></p>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-shield-check text-2xl"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]" x-text="t('feat3_title')">Enterprise Security</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed" x-text="t('feat3_desc')"></p>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] hover:border-orange-500/50 transition-all duration-300 group space-y-4 glow-box-cyber">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                            <i class="ph ph-translate text-2xl"></i>
+                        </div>
+                        <h3 class="font-heading font-semibold text-lg text-[var(--text-primary)]" x-text="t('feat4_title')">Native i18n & RTL</h3>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed" x-text="t('feat4_desc')"></p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Automated Deployment Guide Section -->
+        <section id="cara-pasang" class="py-20 sm:py-28 bg-[var(--bg-secondary)]/50 border-y border-[var(--border-default)]">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+                    <span class="font-mono text-xs text-[var(--brand-primary)] tracking-widest uppercase font-bold" x-text="t('pasang_tag')">// DEPLOYMENT CONSOLE & WORKFLOW //</span>
+                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight" x-text="t('pasang_title')">Unduh & Konfigurasi Aplikasi</h2>
+                    <p class="text-[var(--text-secondary)] text-sm sm:text-base" x-text="t('pasang_sub')">Eksekusi skrip otomatisasi Vibeforge untuk meng-clone template dan mengonfigurasi workspace di server lokal.</p>
+                </div>
+
+                <!-- IDE Terminal-Style Window Mockup -->
+                <div class="bg-gray-950 rounded-2xl border border-[var(--border-default)] shadow-2xl overflow-hidden mb-16 glow-box-cyber">
+                    <!-- Title Bar -->
+                    <div class="px-5 py-3 bg-gray-900 border-b border-gray-800 flex items-center justify-between font-mono text-xs text-gray-400">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                            <span class="ml-2 font-semibold text-gray-300">vibeforge-cli ~ automated-setup</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-[11px] text-gray-500">
+                            <span>ENV: <strong class="text-orange-400">DEVELOPMENT</strong></span>
+                            <span>PHP: <strong class="text-emerald-400">8.3</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Console Code Body -->
+                    <div class="p-6 sm:p-8 font-mono text-xs space-y-4 bg-gray-950 text-emerald-400">
+                        <div class="text-gray-500" x-text="t('term_comment')"># Jalankan command PowerShell berikut di terminal Windows Anda (Laragon / XAMPP):</div>
+                        <div class="flex items-start gap-2 bg-black/60 p-4 rounded-xl border border-gray-800">
+                            <span class="text-orange-400 select-none font-bold">PS &gt;</span>
+                            <code class="text-emerald-400 leading-relaxed break-all">irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex</code>
+                        </div>
+                        <div class="text-gray-400 pt-2 space-y-1.5 leading-relaxed">
+                            <p class="text-white font-bold" x-text="t('term_bold')">Skrip otomatis ini akan melakukan:</p>
+                            <p x-text="t('term_s1')">✓ Mengunduh versi terbaru template Vibeforge</p>
+                            <p x-text="t('term_s2')">✓ Menyiapkan struktur folder shell SPA (`manajemen/`, `admin/`, `client/`)</p>
+                            <p x-text="t('term_s3')">✓ Mengonfigurasi Virtual Host & Local Host DNS domain (.test)</p>
+                            <p x-text="t('term_s4')">✓ Menginisialisasi `users.json` dengan kredensial demo terenkripsi Argon2ID</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Workflow Step Tabs -->
+                <div id="alur-aplikasi" class="space-y-8" x-data="{ mode: 'new' }">
+
+                    <div class="flex justify-center border-b border-[var(--border-default)] max-w-md mx-auto">
+                        <button @click="mode = 'new'" :class="mode === 'new' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-xs font-mono uppercase tracking-wider transition-colors focus:outline-none cursor-pointer" x-text="t('tab_new')">Alur Aplikasi Baru (12 Steps)</button>
+                        <button @click="mode = 'redesign'" :class="mode === 'redesign' ? 'border-purple-500 text-purple-400 border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-xs font-mono uppercase tracking-wider transition-colors focus:outline-none cursor-pointer" x-text="t('tab_redesign')">Alur Redesain (5 Steps)</button>
+                    </div>
+
+                    <!-- NEW MODE TUTORIAL (12 Steps) -->
+                    <div x-show="mode === 'new'" class="space-y-6" x-transition>
+                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6">
+                            <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
+                                <h3 class="font-heading font-extrabold text-xl" x-text="t('new_title')">12 Langkah Setup Wizard — Greenfield App</h3>
+                                <span class="px-3 py-1 bg-orange-500/10 border border-orange-500/30 text-[var(--brand-primary)] font-mono text-xs rounded-full" x-text="t('mode_greenfield')">MODE: GREENFIELD</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_01</span>
+                                        <i class="ph ph-compass text-lg text-[var(--text-muted)]"></i>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s1_t')">Overview Mode</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-text="t('new_s1_d')">Pemilihan mode instalasi & penjelasan arsitektur Vibeforge.</p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_02</span>
+                                        <i class="ph ph-file-text text-lg text-[var(--text-muted)]"></i>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s2_t')">Definisi PRD</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s2_d')"></p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_03</span>
+                                        <i class="ph ph-palette text-lg text-[var(--text-muted)]"></i>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s3_t')">Branding Tokens</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s3_d')"></p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_04</span>
+                                        <i class="ph ph-image text-lg text-[var(--text-muted)]"></i>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s4_t')">Logo Assets</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s4_d')"></p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_05</span>
+                                        <i class="ph ph-browsers text-lg text-[var(--text-muted)]"></i>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s5_t')">Template Landing</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s5_d')"></p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_06-07</span>
+                                        <i class="ph ph-lock-key text-lg text-[var(--text-muted)]"></i>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s6_t')">Auth Forms</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s6_d')"></p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_08-10</span>
+                                        <i class="ph ph-squares-four text-lg text-[var(--text-muted)]"></i>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s8_t')">Role Modules</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-text="t('new_s8_d')">Dashboard Manajemen, Admin/Creator Studio, & Client Player.</p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_11</span>
+                                        <i class="ph ph-gear text-lg text-[var(--text-muted)]"></i>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s11_t')">Config & Environment</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s11_d')"></p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_12</span>
+                                        <i class="ph ph-terminal text-lg text-[var(--text-muted)]"></i>
+                                    </div>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s12_t')">AI Execution</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s12_d')"></p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- REDESIGN MODE TUTORIAL (5 Steps) -->
+                    <div x-show="mode === 'redesign'" class="space-y-6" x-transition>
+                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6">
+                            <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
+                                <h3 class="font-heading font-extrabold text-xl" x-text="t('redesign_title')">5 Langkah Setup Wizard — Redesain Aplikasi</h3>
+                                <span class="px-3 py-1 bg-purple-500/10 border border-purple-500/30 text-purple-400 font-mono text-xs rounded-full" x-text="t('mode_refit')">MODE: REFIT</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <span class="font-mono text-xs text-purple-400 font-bold">STEP_01</span>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('redesign_s1_t')">Overview</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-text="t('redesign_s1_d')">Pilih Mode Redesain pada Wizard UI.</p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <span class="font-mono text-xs text-purple-400 font-bold">STEP_02</span>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('redesign_s2_t')">Upload References</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('redesign_s2_d')"></p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <span class="font-mono text-xs text-purple-400 font-bold">STEP_03</span>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('redesign_s3_t')">Logo Assets</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('redesign_s3_d')"></p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <span class="font-mono text-xs text-purple-400 font-bold">STEP_04</span>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('redesign_s4_t')">Target Host</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-text="t('redesign_s4_d')">Tentukan jenis web server lokal (Laragon/XAMPP).</p>
+                                </div>
+
+                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                    <span class="font-mono text-xs text-purple-400 font-bold">STEP_05</span>
+                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('redesign_s5_t')">AI Re-architecting</h4>
+                                    <p class="text-xs text-[var(--text-secondary)]" x-text="t('redesign_s5_d')">Jalankan AI CLI untuk auto-generate PRD & menyerap struktur lama.</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Role Access Matrix / Demo Portals Section -->
+        <section id="demo" class="py-20 sm:py-28">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                    <span class="font-mono text-xs text-[var(--brand-primary)] tracking-widest uppercase font-bold" x-text="t('demo_tag')">// ACCESS CONTROL MATRIX //</span>
+                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight" x-text="t('demo_title')">Arsitektur Role-Based (RBAC)</h2>
+                    <p class="text-[var(--text-secondary)] text-base" x-text="t('demo_sub')">Tiga modul terpisah dengan otorisasi ketat server-side session dan UI shell tersendiri.</p>
+                </div>
+
+                <div class="grid sm:grid-cols-3 gap-8 max-w-5xl mx-auto">
+
+                    <!-- Role Card 1: Manajemen -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between space-y-6 glow-box-cyber">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                                    <i class="ph ph-crown text-2xl"></i>
+                                </div>
+                                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">ROLE: MANAJEMEN</span>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-bold text-xl text-[var(--text-primary)]" x-text="t('role1_title')">Super Admin Portal</h3>
+                                <p class="text-xs text-[var(--text-secondary)] mt-1" x-text="t('role1_desc')">Akses penuh ke overview sistem, audit trail, keuangan & persetujuan kreator.</p>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] font-mono text-[11px] text-[var(--text-muted)]">
+                            <div>Shell: <code class="text-purple-400">/manajemen/</code></div>
+                            <div>Default: admin@app.com</div>
+                        </div>
+                    </div>
+
+                    <!-- Role Card 2: Creator -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--brand-primary)]/50 p-6 transition-all duration-300 flex flex-col justify-between space-y-6 relative overflow-hidden glow-box-cyber">
+                        <div class="absolute -top-12 -right-12 w-28 h-28 bg-orange-500/10 rounded-full blur-xl pointer-events-none"></div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)]">
+                                    <i class="ph ph-rocket-launch text-2xl"></i>
+                                </div>
+                                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">ROLE: ADMIN (CREATOR)</span>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-bold text-xl text-[var(--text-primary)]" x-text="t('role2_title')">Creator Studio</h3>
+                                <p class="text-xs text-[var(--text-secondary)] mt-1" x-text="t('role2_desc')">Dashboard upload konten, statistik performa karya, & manajemen royalti.</p>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] font-mono text-[11px] text-[var(--text-muted)]">
+                            <div>Shell: <code class="text-orange-400">/admin/</code></div>
+                            <div>Default: admin@app.id</div>
+                        </div>
+                    </div>
+
+                    <!-- Role Card 3: Client -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between space-y-6 glow-box-cyber">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                                    <i class="ph ph-headphones text-2xl"></i>
+                                </div>
+                                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ROLE: CLIENT</span>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-bold text-xl text-[var(--text-primary)]" x-text="t('role3_title')">Client Application</h3>
+                                <p class="text-xs text-[var(--text-secondary)] mt-1" x-text="t('role3_desc')">Interface pengguna/pendengar untuk eksplorasi, playlist, & player audio.</p>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] font-mono text-[11px] text-[var(--text-muted)]">
+                            <div>Shell: <code class="text-emerald-400">/client/</code></div>
+                            <div>Default: client@app.com</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Open Source CTA Banner -->
+        <section class="py-16 bg-gradient-brand border-t border-orange-500/30 text-white">
+            <div class="max-w-4xl mx-auto px-4 text-center space-y-4">
+                <span class="font-mono text-xs uppercase tracking-widest text-orange-200 font-bold" x-text="t('cta_tag')">// OPEN SOURCE REPOSITORY //</span>
+                <h2 class="text-3xl sm:text-4xl font-heading font-extrabold" x-text="t('cta_title')">Siap Mengembangkan Vibeforge?</h2>
+                <p class="text-white/80 max-w-xl mx-auto text-sm" x-text="t('cta_desc')">Proyek ini 100% open-source di bawah lisensi Apache 2.0. Bebas digunakan untuk aplikasi komersial maupun pribadi.</p>
+                <div class="pt-2">
+                    <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-8 py-3.5 bg-gray-950 text-white font-mono font-bold text-xs rounded-xl hover:bg-gray-900 transition-colors shadow-2xl">
+                        <i class="ph ph-github-logo text-lg text-orange-400"></i> github.com/iqbalmurtadho24/vibeforge
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-card)]/95 backdrop-blur-md border-t border-[var(--border-default)] z-50 shadow-lg font-mono">
+        <div class="flex justify-around items-center h-16 px-2">
+            <a href="#fitur" class="flex flex-col items-center gap-1 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
+                <i class="ph ph-cpu text-xl"></i>
+                <span class="text-[9px] font-semibold" x-text="t('nav_arch')">Fitur</span>
+            </a>
+            <a href="#cara-pasang" class="flex flex-col items-center gap-1 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
+                <i class="ph ph-terminal-window text-xl"></i>
+                <span class="text-[9px] font-semibold" x-text="t('nav_installer')">Pasang</span>
+            </a>
+            <a href="#demo" class="flex flex-col items-center gap-1 text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
+                <i class="ph ph-shield-check text-xl"></i>
+                <span class="text-[9px] font-semibold" x-text="t('nav_demo')">Demo</span>
+            </a>
+            <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" class="flex flex-col items-center gap-1 text-[var(--brand-primary)]">
+                <i class="ph ph-github-logo text-xl"></i>
+                <span class="text-[9px] font-bold">GitHub</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="bg-[var(--bg-secondary)] border-t border-[var(--border-default)] py-8 pb-24 md:pb-8 font-mono text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[var(--text-muted)]">
+            <p x-html="t('footer_copy')">&copy; 2026 Vibeforge. Developer-Grade Vibe Coding Architecture.</p>
+            <div class="flex gap-6">
+                <a href="https://github.com/iqbalmurtadho24/vibeforge" target="_blank" rel="noopener noreferrer" class="hover:text-[var(--brand-primary)] transition-colors">GitHub</a>
+                <a href="#fitur" class="hover:text-[var(--brand-primary)] transition-colors" x-text="t('nav_arch')">Fitur</a>
+                <a href="https://github.com/iqbalmurtadho24/vibeforge/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="hover:text-[var(--brand-primary)] transition-colors">Apache-2.0 License</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Multilingual i18n & Theme Script -->
+    <script>
+        const translations = {
+            id: {
+                sys_online: "SYSTEM: ONLINE",
+                sys_arch: "Arsitektur: SPA Shell Proxy",
+                sys_repo: "Repo Mode: Dual-Engine (Auto SQL/JSON)",
+                nav_arch: "Arsitektur",
+                nav_installer: "Installer",
+                nav_demo: "Demo Roles",
+                nav_github: "GitHub",
+                badge_hero: "AI-POWERED VIBE CODING TEMPLATE // ARCHITECTURE READY",
+                hero_title: "Wujudkan Aplikasi Anda<br><span class=\"text-gradient\">dari Dokumen ke Kode Jadi</span>",
+                hero_desc: "<strong class=\"text-[var(--text-primary)]\">Vibeforge</strong> adalah template starter professional untuk membangun aplikasi web dengan metode vibe coding: definisikan kebutuhan di dokumen, biarkan AI coding assistant menempa seluruh struktur kode fungsional.",
+                hero_copy_cmd: "Copy Command",
+                hero_copied: "Tercopy!",
+                hero_btn_setup: "SETUP APPLICATION",
+                hero_btn_demo: "COBA DEMO ROLES",
+                spec_php_sub: "Zero Heavy Framework Overhead",
+                spec_repo_title: "Dual-Engine Repo",
+                spec_repo_sub: "Auto Switch SQL / JSON Storage",
+                spec_owasp_title: "OWASP ASVS Guarded",
+                spec_owasp_sub: "Argon2ID + CSRF + Rate Limiter",
+                spec_spa_title: "SPA Shell Architecture",
+                spec_spa_sub: "Router Proxy Pattern No-Reload",
+                fitur_tag: "// KEY ARCHITECTURE //",
+                fitur_title: "Kenapa Harus Vibeforge?",
+                fitur_sub: "Arsitektur bersih yang dirancang khusus untuk mempermudah AI CLI (Claude Code, Cursor, Copilot) bekerja tanpa kebingungan.",
+                feat1_title: "Dokumen ke Kode",
+                feat1_desc: "Cukup update <code class=\"px-1.5 py-0.5 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--brand-primary)] font-mono rounded\">docs/prd.md</code> & <code class=\"px-1.5 py-0.5 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--brand-primary)] font-mono rounded\">docs/branding.md</code>. AI akan mengeksekusi fitur secara presisi.",
+                feat2_title: "Shell SPA Clean-URL",
+                feat2_desc: "Landing page, login, register, manajemen, admin, client — terisolasi via Shell tipis dengan router proxy AJAX.",
+                feat3_title: "Enterprise Security",
+                feat3_desc: "Password hashing Argon2ID, proteksi CSRF otomatis, rate-limiting IP/Username, serta RBAC middleware.",
+                feat4_title: "Native i18n & RTL",
+                feat4_desc: "Sistem terjemahan multi-bahasa terpusat dengan deteksi GeoIP dan dukungan penuh layout RTL (Arabic).",
+                pasang_tag: "// DEPLOYMENT CONSOLE & WORKFLOW //",
+                pasang_title: "Unduh & Konfigurasi Aplikasi",
+                pasang_sub: "Eksekusi skrip otomatisasi Vibeforge untuk meng-clone template dan mengonfigurasi workspace di server lokal.",
+                term_comment: "# Jalankan command PowerShell berikut di terminal Windows Anda (Laragon / XAMPP):",
+                term_bold: "Skrip otomatis ini akan melakukan:",
+                term_s1: "✓ Mengunduh versi terbaru template Vibeforge",
+                term_s2: "✓ Menyiapkan struktur folder shell SPA (`manajemen/`, `admin/`, `client/`)",
+                term_s3: "✓ Mengonfigurasi Virtual Host & Local Host DNS domain (.test)",
+                term_s4: "✓ Menginisialisasi `users.json` dengan kredensial demo terenkripsi Argon2ID",
+                tab_new: "Alur Aplikasi Baru (12 Steps)",
+                tab_redesign: "Alur Redesain (5 Steps)",
+                new_title: "12 Langkah Setup Wizard — Greenfield App",
+                mode_greenfield: "MODE: GREENFIELD",
+                new_s1_t: "Overview Mode",
+                new_s1_d: "Pemilihan mode instalasi & penjelasan arsitektur Vibeforge.",
+                new_s2_t: "Definisi PRD",
+                new_s2_d: "Spesifikasi aplikasi & alur fitur di <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/prd.md</code>.",
+                new_s3_t: "Branding Tokens",
+                new_s3_d: "Konfigurasi token warna & font di <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/branding.md</code>.",
+                new_s4_t: "Logo Assets",
+                new_s4_d: "Upload asset gambar logo ke <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/logo.png</code>.",
+                new_s5_t: "Template Landing",
+                new_s5_d: "Kustomisasi halaman depan di <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/landingpage.html</code>.",
+                new_s6_t: "Auth Forms",
+                new_s6_d: "Desain form Login & Register di folder <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/</code>.",
+                new_s8_t: "Role Modules",
+                new_s8_d: "Dashboard Manajemen, Admin/Creator Studio, & Client Player.",
+                new_s11_t: "Config & Environment",
+                new_s11_d: "Penyesuaian variabel <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">.env</code> & database settings.",
+                new_s12_t: "AI Execution",
+                new_s12_d: "Buka CLI dan eksekusi <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">baca @docs/install.md</code>.",
+                redesign_title: "5 Langkah Setup Wizard — Redesain Aplikasi",
+                mode_refit: "MODE: REFIT",
+                redesign_s1_t: "Overview",
+                redesign_s1_d: "Pilih Mode Redesain pada Wizard UI.",
+                redesign_s2_t: "Upload References",
+                redesign_s2_d: "Letakkan codebase lama ke folder <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">references/</code>.",
+                redesign_s3_t: "Logo Assets",
+                redesign_s3_d: "Upload asset logo baru ke <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">docs/logo.png</code>.",
+                redesign_s4_t: "Target Host",
+                redesign_s4_d: "Tentukan jenis web server lokal (Laragon/XAMPP).",
+                redesign_s5_t: "AI Re-architecting",
+                redesign_s5_d: "Jalankan AI CLI untuk auto-generate PRD & menyerap struktur lama.",
+                demo_tag: "// ACCESS CONTROL MATRIX //",
+                demo_title: "Arsitektur Role-Based (RBAC)",
+                demo_sub: "Tiga modul terpisah dengan otorisasi ketat server-side session dan UI shell tersendiri.",
+                role1_title: "Super Admin Portal",
+                role1_desc: "Akses penuh ke overview sistem, audit trail, keuangan & persetujuan kreator.",
+                role2_title: "Creator Studio",
+                role2_desc: "Dashboard upload konten, statistik performa karya, & manajemen royalti.",
+                role3_title: "Client Application",
+                role3_desc: "Interface pengguna/pendengar untuk eksplorasi, playlist, & player audio.",
+                cta_tag: "// OPEN SOURCE REPOSITORY //",
+                cta_title: "Siap Mengembangkan Vibeforge?",
+                cta_desc: "Proyek ini 100% open-source di bawah lisensi Apache 2.0. Bebas digunakan untuk aplikasi komersial maupun pribadi.",
+                footer_copy: "&copy; 2026 Vibeforge. Developer-Grade Vibe Coding Architecture."
+            },
+            en: {
+                sys_online: "SYSTEM: ONLINE",
+                sys_arch: "Architecture: SPA Shell Proxy",
+                sys_repo: "Repo Mode: Dual-Engine (Auto SQL/JSON)",
+                nav_arch: "Architecture",
+                nav_installer: "Installer",
+                nav_demo: "Demo Roles",
+                nav_github: "GitHub",
+                badge_hero: "AI-POWERED VIBE CODING TEMPLATE // ARCHITECTURE READY",
+                hero_title: "Forge Your Application<br><span class=\"text-gradient\">from Document to Code</span>",
+                hero_desc: "<strong class=\"text-[var(--text-primary)]\">Vibeforge</strong> is a professional starter template for building web apps via vibe coding: specify requirements in docs, let AI coding assistant forge the entire functional codebase.",
+                hero_copy_cmd: "Copy Command",
+                hero_copied: "Copied!",
+                hero_btn_setup: "SETUP APPLICATION",
+                hero_btn_demo: "TRY DEMO ROLES",
+                spec_php_sub: "Zero Heavy Framework Overhead",
+                spec_repo_title: "Dual-Engine Repo",
+                spec_repo_sub: "Auto Switch SQL / JSON Storage",
+                spec_owasp_title: "OWASP ASVS Guarded",
+                spec_owasp_sub: "Argon2ID + CSRF + Rate Limiter",
+                spec_spa_title: "SPA Shell Architecture",
+                spec_spa_sub: "Router Proxy Pattern No-Reload",
+                fitur_tag: "// KEY ARCHITECTURE //",
+                fitur_title: "Why Vibeforge?",
+                fitur_sub: "Clean architecture designed specifically for AI CLI tools (Claude Code, Cursor, Copilot) to work seamlessly.",
+                feat1_title: "Doc to Code",
+                feat1_desc: "Simply update <code class=\"px-1.5 py-0.5 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--brand-primary)] font-mono rounded\">docs/prd.md</code> & <code class=\"px-1.5 py-0.5 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--brand-primary)] font-mono rounded\">docs/branding.md</code>. AI executes features precisely.",
+                feat2_title: "Clean-URL SPA Shell",
+                feat2_desc: "Landing page, login, register, management, admin, client — isolated via thin Shells with AJAX router proxy.",
+                feat3_title: "Enterprise Security",
+                feat3_desc: "Argon2ID password hashing, automated CSRF protection, IP/Username rate-limiting, and RBAC middleware.",
+                feat4_title: "Native i18n & RTL",
+                feat4_desc: "Centralized multi-language translation with GeoIP detection and full RTL layout support (Arabic).",
+                pasang_tag: "// DEPLOYMENT CONSOLE & WORKFLOW //",
+                pasang_title: "Download & Configure App",
+                pasang_sub: "Execute Vibeforge automation script to clone template and configure workspace on local server.",
+                term_comment: "# Run the following PowerShell command in your Windows terminal (Laragon / XAMPP):",
+                term_bold: "This automated script will perform:",
+                term_s1: "✓ Download the latest version of Vibeforge template",
+                term_s2: "✓ Prepare SPA shell folder structure (`manajemen/`, `admin/`, `client/`)",
+                term_s3: "✓ Configure Virtual Host & Local Host DNS domain (.test)",
+                term_s4: "✓ Initialize `users.json` with Argon2ID encrypted demo credentials",
+                tab_new: "New App Workflow (12 Steps)",
+                tab_redesign: "Redesign Workflow (5 Steps)",
+                new_title: "12-Step Setup Wizard — Greenfield App",
+                mode_greenfield: "MODE: GREENFIELD",
+                new_s1_t: "Overview Mode",
+                new_s1_d: "Installation mode selection & Vibeforge architecture overview.",
+                new_s2_t: "PRD Definition",
+                new_s2_d: "App spec & feature workflow in <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/prd.md</code>.",
+                new_s3_t: "Branding Tokens",
+                new_s3_d: "Color tokens & font config in <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/branding.md</code>.",
+                new_s4_t: "Logo Assets",
+                new_s4_d: "Upload logo image asset to <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/logo.png</code>.",
+                new_s5_t: "Landing Template",
+                new_s5_d: "Customize front page at <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/landingpage.html</code>.",
+                new_s6_t: "Auth Forms",
+                new_s6_d: "Design Login & Register forms in <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/</code> folder.",
+                new_s8_t: "Role Modules",
+                new_s8_d: "Management Dashboard, Admin/Creator Studio, & Client Player.",
+                new_s11_t: "Config & Environment",
+                new_s11_d: "Environment variables <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">.env</code> & database settings adjustment.",
+                new_s12_t: "AI Execution",
+                new_s12_d: "Open CLI and execute <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">read @docs/install.md</code>.",
+                redesign_title: "5-Step Setup Wizard — App Redesign",
+                mode_refit: "MODE: REFIT",
+                redesign_s1_t: "Overview",
+                redesign_s1_d: "Select Redesign Mode in Wizard UI.",
+                redesign_s2_t: "Upload References",
+                redesign_s2_d: "Place legacy codebase into <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">references/</code> folder.",
+                redesign_s3_t: "Logo Assets",
+                redesign_s3_d: "Upload new logo asset to <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">docs/logo.png</code>.",
+                redesign_s4_t: "Target Host",
+                redesign_s4_d: "Specify local web server (Laragon/XAMPP).",
+                redesign_s5_t: "AI Re-architecting",
+                redesign_s5_d: "Run AI CLI to auto-generate PRD & digest legacy structure.",
+                demo_tag: "// ACCESS CONTROL MATRIX //",
+                demo_title: "Role-Based Architecture (RBAC)",
+                demo_sub: "Three separate modules with strict server-side session authorization and individual UI shells.",
+                role1_title: "Super Admin Portal",
+                role1_desc: "Full access to system overview, audit trail, finances & creator approvals.",
+                role2_title: "Creator Studio",
+                role2_desc: "Content upload dashboard, performance analytics, & royalty management.",
+                role3_title: "Client Application",
+                role3_desc: "User/listener interface for exploration, playlists, & audio player.",
+                cta_tag: "// OPEN SOURCE REPOSITORY //",
+                cta_title: "Ready to Build with Vibeforge?",
+                cta_desc: "This project is 100% open-source under Apache 2.0 license. Free for commercial and personal apps.",
+                footer_copy: "&copy; 2026 Vibeforge. Developer-Grade Vibe Coding Architecture."
+            },
+            ar: {
+                sys_online: "النظام: متصل",
+                sys_arch: "البنية: وكيل SPA Shell",
+                sys_repo: "المستودع: محرك مزدوج (SQL/JSON)",
+                nav_arch: "المعمارية",
+                nav_installer: "برنامج التثبيت",
+                nav_demo: "أدوار العرض",
+                nav_github: "GitHub",
+                badge_hero: "قالب VIBE CODING بالذكاء الاصطناعي // البنية جاهزة",
+                hero_title: "اصنع تطبيقك<br><span class=\"text-gradient\">من المستندات إلى كود جاهز</span>",
+                hero_desc: "<strong class=\"text-[var(--text-primary)]\">Vibeforge</strong> هو قالب بداية احترافي لبناء تطبيقات الويب بطريقة vibe coding: حدد متطلباتك في المستندات، ودع مساعد الذكاء الاصطناعي يبني الكود بالكامل.",
+                hero_copy_cmd: "نسخ الأمر",
+                hero_copied: "تم النسخ!",
+                hero_btn_setup: "تثبيت التطبيق",
+                hero_btn_demo: "تجربة الأدوار",
+                spec_php_sub: "بدون أطر عمل ثقيلة",
+                spec_repo_title: "مستودع محرك مزدوج",
+                spec_repo_sub: "تبديل تلقائي بين SQL و JSON",
+                spec_owasp_title: "محمي بمعايير OWASP ASVS",
+                spec_owasp_sub: "Argon2ID + CSRF + Rate Limiter",
+                spec_spa_title: "بنية غلاف SPA",
+                spec_spa_sub: "نمط وكيل التوجيه بدون إعادة تحميل",
+                fitur_tag: "// المعمارية الأساسية //",
+                fitur_title: "لماذا Vibeforge؟",
+                fitur_sub: "بنية نظيفة مصممة خصيصًا لتسهيل عمل أدوات الذكاء الاصطناعي (Claude Code, Cursor, Copilot) بدون تعقيد.",
+                feat1_title: "من المستندات إلى الكود",
+                feat1_desc: "فقط قم بتحديث <code class=\"px-1.5 py-0.5 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--brand-primary)] font-mono rounded\">docs/prd.md</code> و <code class=\"px-1.5 py-0.5 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--brand-primary)] font-mono rounded\">docs/branding.md</code>. وسيقوم الذكاء الاصطناعي بتنفيذ الميزات بدقة.",
+                feat2_title: "غلاف SPA بعناوين نظيفة",
+                feat2_desc: "صفحة الهبوط، تسجيل الدخول، التسجيل، الإدارة، المشرف، العميل - معزولة عبر أغلفة خفيفة مع وكيل AJAX.",
+                feat3_title: "أمان المؤسسات",
+                feat3_desc: "تشفير كلمة المرور Argon2ID، حماية CSRF تلقائية، تحديد معدل IP/اسم المستخدم، ووسيط RBAC.",
+                feat4_title: "دعم اللغات و RTL الأصلي",
+                feat4_desc: "نظام ترجمة متعدد اللغات مركزي مع كشف GeoIP ودعم كامل لتخطيط RTL (العربية).",
+                pasang_tag: "// وحدة التثبيت ومسار العمل //",
+                pasang_title: "تنزيل وتكوين التطبيق",
+                pasang_sub: "قم بتشغيل نص الأتمتة لـ Vibeforge لاستنساخ القالب وتكوين بيئة العمل على الخادم المحلي.",
+                term_comment: "# قم بتشغيل أمر PowerShell التالي في موجه الأوامر (Laragon / XAMPP):",
+                term_bold: "سيقوم هذا النص البرمجي التلقائي بما يلي:",
+                term_s1: "✓ تنزيل أحدث إصدار من قالب Vibeforge",
+                term_s2: "✓ إعداد هيكل مجلدات غلاف SPA (`manajemen/`, `admin/`, `client/`)",
+                term_s3: "✓ تكوين المضيف الافتراضي و DNS المحلي (.test)",
+                term_s4: "✓ تهيئة `users.json` ببيانات اعتماد تجريبية مشفرة بـ Argon2ID",
+                tab_new: "مسار تطبيق جديد (12 خطوة)",
+                tab_redesign: "مسار إعادة التصميم (5 خطوات)",
+                new_title: "معالج الإعداد بـ 12 خطوة - تطبيق جديد",
+                mode_greenfield: "الوضع: تطبيق جديد",
+                new_s1_t: "وضع نظرة عامة",
+                new_s1_d: "اختيار وضع التثبيت ونظرة عامة على بنية Vibeforge.",
+                new_s2_t: "تعريف PRD",
+                new_s2_d: "مواصفات التطبيق ومسار الميزات في <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/prd.md</code>.",
+                new_s3_t: "رموز الهوية البصرية",
+                new_s3_d: "تكوين الألوان والخطوط في <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/branding.md</code>.",
+                new_s4_t: "أصول الشعار",
+                new_s4_d: "رفع صورة الشعار إلى <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/logo.png</code>.",
+                new_s5_t: "قالب صفحة الهبوط",
+                new_s5_d: "تخصيص الصفحة الرئيسية في <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/landingpage.html</code>.",
+                new_s6_t: "نماذج المصادقة",
+                new_s6_d: "تصميم نماذج الدخول والتسجيل في مجلد <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/</code>.",
+                new_s8_t: "وحدات الأدوار",
+                new_s8_d: "لوحة تحكم الإدارة، استوديو المنشئ، ومشغل العميل.",
+                new_s11_t: "التكوين والبيئة",
+                new_s11_d: "تعديل متغيرات البيئة <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">.env</code> وإعدادات قاعدة البيانات.",
+                new_s12_t: "تنفيذ الذكاء الاصطناعي",
+                new_s12_d: "افتح موجه الأوامر ونفذ <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">قراءة @docs/install.md</code>.",
+                redesign_title: "معالج الإعداد بـ 5 خطوات - إعادة التصميم",
+                mode_refit: "الوضع: إعادة التصميم",
+                redesign_s1_t: "نظرة عامة",
+                redesign_s1_d: "اختر وضع إعادة التصميم في الواجهة.",
+                redesign_s2_t: "رفع المراجع",
+                redesign_s2_d: "ضع الكود القديم في مجلد <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">references/</code>.",
+                redesign_s3_t: "أصول الشعار",
+                redesign_s3_d: "رفع الشعار الجديد إلى <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">docs/logo.png</code>.",
+                redesign_s4_t: "الخادم المستهدف",
+                redesign_s4_d: "حدد نوع الخادم المحلي (Laragon/XAMPP).",
+                redesign_s5_t: "إعادة الهيكلة بالذكاء الاصطناعي",
+                redesign_s5_d: "قم بتشغيل الذكاء الاصطناعي لإنشاء PRD تلقائيًا واستيعاب الهيكل القديم.",
+                demo_tag: "// بنية التحكم بالأدوار //",
+                demo_title: "بنية التحكم بالأدوار (RBAC)",
+                demo_sub: "ثلاث وحدات منفصلة مع تفويض جلسة صارم وأغلفة واجهة مستخدم خاصة.",
+                role1_title: "بوابة المشرف الفائق",
+                role1_desc: "وصول كامل لنظرة عامة على النظام، سجل التدقيق، المالية، وموافقات المنشئين.",
+                role2_title: "استوديو المنشئ",
+                role2_desc: "لوحة رفع المحتوى، إحصائيات الأداء، وإدارة العوائد.",
+                role3_title: "تطبيق العميل",
+                role3_desc: "واجهة المستخدم/المستمع للاستكشاف، قوائم التشغيل، ومشغل الصوت.",
+                cta_tag: "// مستودع مفتوح المصدر //",
+                cta_title: "مستعد للتطوير مع Vibeforge؟",
+                cta_desc: "هذا المشروع مفتوح المصدر بنسبة 100٪ بموجب ترخيص Apache 2.0. مجاني للاستخدام التجاري والشخصي.",
+                footer_copy: "&copy; 2026 Vibeforge. Developer-Grade Vibe Coding Architecture."
+            }
+        };
+
+        function appData() {
+            return {
+                theme: localStorage.getItem('theme') || 'dark',
+                lang: localStorage.getItem('lang') || 'id',
+                mobileMenuOpen: false,
+                init() {
+                    this.applyLangAttributes();
+                },
+                setLang(newLang) {
+                    this.lang = newLang;
+                    localStorage.setItem('lang', newLang);
+                    this.applyLangAttributes();
+                },
+                applyLangAttributes() {
+                    document.documentElement.lang = this.lang;
+                    document.documentElement.dir = this.lang === 'ar' ? 'rtl' : 'ltr';
+                },
+                toggleTheme() {
+                    this.theme = this.theme === 'dark' ? 'light' : 'dark';
+                    localStorage.setItem('theme', this.theme);
+                },
+                get currentFlag() {
+                    const flags = {
+                        id: 'https://flagcdn.com/w20/id.png',
+                        en: 'https://flagcdn.com/w20/gb.png',
+                        ar: 'https://flagcdn.com/w20/sa.png'
+                    };
+                    return flags[this.lang] || flags.id;
+                },
+                t(key) {
+                    return (translations[this.lang] && translations[this.lang][key])
+                        || (translations['id'] && translations['id'][key])
+                        || key;
+                }
+            };
+        }
+    </script>
+</body>
+</html>

@@ -17,7 +17,20 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { brand: { primary: '#F97316', dark: '#0B0F17', card: '#111726', border: '#1E293B' } },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            primary: '#F97316',
+                            hover: '#EA580C',
+                            dark: '#0B0F17',
+                            card: '#111726',
+                            border: '#1E293B'
+                        }
+                    },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
                         heading: ['Plus Jakarta Sans', 'sans-serif'],
@@ -28,12 +41,42 @@
         }
     </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
+        :root {
+            --bg-primary: #0B0F17;
+            --bg-secondary: #0F172A;
+            --bg-card: #111726;
+            --bg-hover: #1E293B;
+            --border-default: #1E293B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --brand-primary: #F97316;
+            --brand-hover: #EA580C;
+        }
+
+        .light {
+            --bg-primary: #F8FAFC;
+            --bg-secondary: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --bg-hover: #E2E8F0;
+            --border-default: #E2E8F0;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+            --brand-primary: #EA580C;
+            --brand-hover: #C2410C;
+        }
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); transition: background-color 0.3s ease, color 0.3s ease; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .tech-grid {
+            background-image: linear-gradient(to right, rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(249, 115, 22, 0.03) 1px, transparent 1px);
+            background-size: 36px 36px;
+        }
+        .dark .tech-grid {
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                               linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 32px 32px;
         }
         .text-gradient {
             background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #F59E0B 100%);
@@ -42,36 +85,37 @@
             background-clip: text;
         }
         .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); }
-        .glow-box-cyber { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
+        .dark .glow-box-cyber { box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.15), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
+        .glow-box-cyber { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px var(--border-default); }
     </style>
 </head>
 <body class="antialiased h-screen flex flex-col overflow-hidden tech-grid bg-[var(--bg-primary)]">
 
 <div class="flex flex-1 overflow-hidden">
     <!-- Desktop Sidebar -->
-    <aside class="hidden md:flex flex-col w-64 bg-gray-950 border-r border-[var(--border-default)] shrink-0 font-mono">
+    <aside class="hidden md:flex flex-col w-64 bg-[var(--bg-card)] border-r border-[var(--border-default)] shrink-0 font-mono transition-colors">
         <div class="h-16 flex items-center px-6 border-b border-[var(--border-default)]">
             <a href="/" class="flex items-center gap-3 group">
-                <div class="w-8 h-8 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center group-hover:border-orange-500 transition-colors">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#F97316"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
+                <div class="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center group-hover:border-purple-500 transition-colors shadow-[0_0_12px_rgba(168,85,247,0.2)]">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#A855F7"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-heading font-extrabold text-base tracking-tight leading-none"><span class="text-white">Vibe</span><span class="text-gradient">forge</span></span>
+                    <span class="font-heading font-extrabold text-base tracking-tight leading-none"><span class="text-[var(--text-primary)]">Vibe</span><span class="text-gradient">forge</span></span>
                     <span class="text-[9px] text-purple-400 font-bold tracking-wider uppercase">SUPER_ADMIN</span>
                 </div>
             </a>
         </div>
-        <nav class="flex-1 py-4 px-3 space-y-1 text-xs">
-            <button onclick="nav('dashboard')" id="s-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 transition-all"><i class="ph-fill ph-squares-four text-lg"></i> Dashboard</button>
-            <button onclick="nav('users')" id="s-users" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-users text-lg"></i> Users & Roles</button>
-            <button onclick="nav('system')" id="s-system" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-gear text-lg"></i> System Specs</button>
-            <button onclick="nav('profile')" id="s-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-user text-lg"></i> Profil</button>
+        <nav class="flex-1 py-4 px-3 space-y-1.5 text-xs">
+            <button onclick="nav('dashboard')" id="s-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 transition-all cursor-pointer"><i class="ph-fill ph-squares-four text-lg"></i> Dashboard</button>
+            <button onclick="nav('users')" id="s-users" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"><i class="ph ph-users text-lg"></i> Users & Roles</button>
+            <button onclick="nav('system')" id="s-system" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"><i class="ph ph-gear text-lg"></i> System Specs</button>
+            <button onclick="nav('profile')" id="s-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"><i class="ph ph-user text-lg"></i> Profil</button>
         </nav>
-        <div class="p-4 border-t border-[var(--border-default)] bg-gray-900/50">
+        <div class="p-4 border-t border-[var(--border-default)] bg-[var(--bg-secondary)]/50">
             <div class="flex items-center gap-3 px-2 py-1.5">
-                <div class="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-xs">SA</div>
+                <div class="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-xs shadow-sm">SA</div>
                 <div class="overflow-hidden">
-                    <p class="text-xs font-bold text-white truncate">Super Admin</p>
+                    <p class="text-xs font-bold text-[var(--text-primary)] truncate">Super Admin</p>
                     <p class="text-[10px] text-purple-400 uppercase font-semibold">Manajemen</p>
                 </div>
             </div>
@@ -80,31 +124,31 @@
 
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-16 flex items-center justify-between px-6 bg-gray-950/80 border-b border-[var(--border-default)] shrink-0 font-mono text-xs">
+        <header class="h-16 flex items-center justify-between px-6 bg-[var(--bg-card)]/90 backdrop-blur-md border-b border-[var(--border-default)] shrink-0 font-mono text-xs z-10 transition-colors">
             <div class="flex items-center gap-3">
-                <h1 id="pageTitle" class="font-heading font-extrabold text-sm text-white tracking-wide uppercase">// DASHBOARD MANAJEMEN</h1>
-                <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[10px]">LIVE_METRICS</span>
+                <h1 id="pageTitle" class="font-heading font-extrabold text-sm text-[var(--text-primary)] tracking-wide uppercase">// DASHBOARD MANAJEMEN</h1>
+                <span class="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[10px] font-bold">LIVE_METRICS</span>
             </div>
             <div class="flex items-center gap-3">
                 <!-- Language Selector -->
                 <div class="relative group" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-purple-500 transition-colors text-xs" aria-label="Change Language">
-                        <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="id" class="w-4 h-3 rounded-sm">
-                        <span class="hidden sm:inline uppercase font-bold text-gray-300">id</span>
-                        <i class="ph ph-caret-down text-xs text-gray-500"></i>
+                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] hover:border-purple-500 transition-colors text-xs cursor-pointer" aria-label="Change Language">
+                        <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="id" class="w-4 h-3 rounded-sm shadow-sm">
+                        <span class="hidden sm:inline uppercase font-bold text-[var(--text-secondary)]">id</span>
+                        <i class="ph ph-caret-down text-xs text-[var(--text-muted)]"></i>
                     </button>
-                    <div x-show="open" x-transition class="absolute right-0 mt-1 bg-gray-900 rounded-xl shadow-2xl border border-gray-800 py-1 min-w-[150px] z-50 text-xs">
-                        <a href="?lang=id" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-purple-400 font-bold bg-purple-500/10">
+                    <div x-show="open" x-transition class="absolute right-0 mt-1 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[160px] z-50 text-xs font-mono">
+                        <a href="?lang=id" class="flex items-center gap-2.5 px-3 py-2 hover:bg-[var(--bg-hover)] transition-colors text-purple-400 font-bold bg-purple-500/10">
                             <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> Bahasa Indonesia
                         </a>
-                        <a href="?lang=en" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-gray-300">
+                        <a href="?lang=en" class="flex items-center gap-2.5 px-3 py-2 hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)]">
                             <img src="/assets/flags/en.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> English
                         </a>
                     </div>
                 </div>
 
-                <button id="themeToggle" class="p-2 hover:bg-gray-800 rounded-lg text-amber-400" aria-label="Toggle theme"><i class="ph ph-moon text-base"></i></button>
-                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400" title="Logout"><i class="ph ph-sign-out text-base"></i></a>
+                <button id="themeToggle" class="w-9 h-9 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] flex items-center justify-center transition-colors text-[var(--text-muted)] hover:text-amber-400 cursor-pointer" aria-label="Toggle theme"><i class="ph ph-moon text-base dark:text-amber-400"></i></button>
+                <a href="/logout/" class="w-9 h-9 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] hover:border-red-500/40 flex items-center justify-center transition-colors text-red-400 hover:bg-red-500/10" title="Logout"><i class="ph ph-sign-out text-base"></i></a>
             </div>
         </header>
 
@@ -113,12 +157,12 @@
 </div>
 
 <!-- Mobile Bottom Navigation -->
-<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 z-50 font-mono text-xs">
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-card)]/95 backdrop-blur-md border-t border-[var(--border-default)] z-50 font-mono text-xs shadow-lg">
     <div class="flex justify-around items-center h-16">
-        <button onclick="nav('dashboard')" class="flex flex-col items-center gap-1 text-purple-400" id="m-dashboard"><i class="ph-fill ph-squares-four text-xl"></i><span class="text-[9px]">Dashboard</span></button>
-        <button onclick="nav('users')" class="flex flex-col items-center gap-1 text-gray-400" id="m-users"><i class="ph ph-users text-xl"></i><span class="text-[9px]">Users</span></button>
-        <button onclick="nav('system')" class="flex flex-col items-center gap-1 text-gray-400" id="m-system"><i class="ph ph-gear text-xl"></i><span class="text-[9px]">System</span></button>
-        <button onclick="nav('profile')" class="flex flex-col items-center gap-1 text-gray-400" id="m-profile"><i class="ph ph-user text-xl"></i><span class="text-[9px]">Profil</span></button>
+        <button onclick="nav('dashboard')" class="flex flex-col items-center gap-1 text-purple-400" id="m-dashboard"><i class="ph-fill ph-squares-four text-xl"></i><span class="text-[9px] font-semibold">Dashboard</span></button>
+        <button onclick="nav('users')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]" id="m-users"><i class="ph ph-users text-xl"></i><span class="text-[9px] font-semibold">Users</span></button>
+        <button onclick="nav('system')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]" id="m-system"><i class="ph ph-gear text-xl"></i><span class="text-[9px] font-semibold">System</span></button>
+        <button onclick="nav('profile')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]" id="m-profile"><i class="ph ph-user text-xl"></i><span class="text-[9px] font-semibold">Profil</span></button>
     </div>
 </nav>
 
@@ -126,59 +170,68 @@
 const V = {
     dashboard: `
         <div class="space-y-6">
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber font-mono space-y-2">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-white">Selamat Datang, Super Admin!</h2>
-                    <span class="px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-bold">MANAJEMEN LEVEL</span>
+            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 glow-box-cyber font-mono space-y-2 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <h2 class="text-xl font-bold text-[var(--text-primary)]">Selamat Datang, Super Admin!</h2>
+                    <span class="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-bold self-start sm:self-auto uppercase tracking-wider">MANAJEMEN LEVEL</span>
                 </div>
-                <p class="text-xs text-gray-400 font-sans">Ringkasan kesehatan sistem, metrik repositori dual-engine, dan aktivitas pengguna.</p>
+                <p class="text-xs text-[var(--text-secondary)] font-sans leading-relaxed">Ringkasan kesehatan sistem, metrik repositori dual-engine, dan aktivitas pengguna.</p>
             </div>
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
-                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between text-gray-400">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
+                <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-5 glow-box-cyber space-y-2 hover:border-purple-500/40 transition-colors">
+                    <div class="flex items-center justify-between text-[var(--text-muted)]">
                         <span>Total Users</span>
-                        <i class="ph ph-users text-purple-400 text-xl"></i>
+                        <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400">
+                            <i class="ph ph-users text-lg"></i>
+                        </div>
                     </div>
-                    <p class="text-2xl font-bold text-white">3</p>
-                    <span class="text-[10px] text-emerald-400">1 Manajemen · 1 Admin · 1 Client</span>
+                    <p class="text-2xl font-bold text-[var(--text-primary)]">3</p>
+                    <span class="text-[10px] text-emerald-400 font-semibold">1 Manajemen · 1 Admin · 1 Client</span>
                 </div>
 
-                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between text-gray-400">
+                <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-5 glow-box-cyber space-y-2 hover:border-amber-500/40 transition-colors">
+                    <div class="flex items-center justify-between text-[var(--text-muted)]">
                         <span>Repo Engine Mode</span>
-                        <i class="ph ph-database text-amber-400 text-xl"></i>
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400">
+                            <i class="ph ph-database text-lg"></i>
+                        </div>
                     </div>
                     <p class="text-2xl font-bold text-amber-400">AUTO</p>
-                    <span class="text-[10px] text-gray-400">SQL detected / JSON Fallback</span>
+                    <span class="text-[10px] text-[var(--text-muted)]">SQL detected / JSON Fallback</span>
                 </div>
 
-                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between text-gray-400">
+                <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-5 glow-box-cyber space-y-2 hover:border-emerald-500/40 transition-colors">
+                    <div class="flex items-center justify-between text-[var(--text-muted)]">
                         <span>Security Level</span>
-                        <i class="ph ph-shield-check text-emerald-400 text-xl"></i>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                            <i class="ph ph-shield-check text-lg"></i>
+                        </div>
                     </div>
                     <p class="text-2xl font-bold text-emerald-400">ASVS-2</p>
-                    <span class="text-[10px] text-gray-400">Argon2ID + CSRF Active</span>
+                    <span class="text-[10px] text-[var(--text-muted)]">Argon2ID + CSRF Active</span>
                 </div>
 
-                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between text-gray-400">
+                <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-5 glow-box-cyber space-y-2 hover:border-indigo-500/40 transition-colors">
+                    <div class="flex items-center justify-between text-[var(--text-muted)]">
                         <span>Audit Trail Log</span>
-                        <i class="ph ph-list-bullets text-indigo-400 text-xl"></i>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                            <i class="ph ph-list-bullets text-lg"></i>
+                        </div>
                     </div>
-                    <p class="text-2xl font-bold text-white">128</p>
-                    <span class="text-[10px] text-indigo-400">Append-Only Active</span>
+                    <p class="text-2xl font-bold text-[var(--text-primary)]">128</p>
+                    <span class="text-[10px] text-indigo-400 font-semibold">Append-Only Active</span>
                 </div>
             </div>
 
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber space-y-4">
-                <h3 class="font-mono font-bold text-sm text-white flex items-center gap-2">
+            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 glow-box-cyber space-y-4">
+                <h3 class="font-mono font-bold text-sm text-[var(--text-primary)] flex items-center gap-2">
                     <i class="ph ph-activity text-purple-400"></i> SYSTEM LOG & AUDIT TRAIL
                 </h3>
-                <div class="bg-gray-900 rounded-xl border border-gray-800 p-4 font-mono text-xs text-gray-300 space-y-2 overflow-x-auto">
+                <div class="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-default)] p-4 font-mono text-xs text-[var(--text-secondary)] space-y-2 overflow-x-auto">
                     <div class="text-emerald-400">[2026-07-27 10:14:02] LOGIN_SUCCESS - admin@app.com (Role: manajemen) via IP 127.0.0.1</div>
-                    <div class="text-gray-400">[2026-07-27 09:30:15] REPO_INIT - Dual-engine switch evaluated: JSON storage fallback active</div>
+                    <div class="text-[var(--text-muted)]">[2026-07-27 09:30:15] REPO_INIT - Dual-engine switch evaluated: JSON storage fallback active</div>
                     <div class="text-amber-400">[2026-07-27 08:12:00] SECURITY_AUDIT - Argon2ID verification check passed</div>
                 </div>
             </div>
@@ -186,21 +239,21 @@ const V = {
     `,
     users: `
         <div class="space-y-6">
-            <div class="flex items-center justify-between font-mono">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono">
                 <div>
-                    <h2 class="text-lg font-bold text-white">User & Role Management (RBAC)</h2>
-                    <p class="text-xs text-gray-400">Kelola daftar akun pengguna dan hak akses shell.</p>
+                    <h2 class="text-lg font-bold text-[var(--text-primary)]">User & Role Management (RBAC)</h2>
+                    <p class="text-xs text-[var(--text-secondary)] font-sans">Kelola daftar akun pengguna dan hak akses shell.</p>
                 </div>
-                <button class="px-4 py-2 bg-purple-500/20 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-purple-500/30 transition-colors">
+                <button class="px-4 py-2 bg-purple-500/20 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-purple-500/30 transition-colors cursor-pointer self-start sm:self-auto">
                     <i class="ph ph-user-plus text-sm"></i> Tambah User
                 </button>
             </div>
 
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 overflow-hidden glow-box-cyber font-mono text-xs">
+            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] overflow-hidden glow-box-cyber font-mono text-xs">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-gray-800 bg-gray-900/60 text-gray-400">
+                            <tr class="border-b border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-muted)]">
                                 <th class="p-4">User ID</th>
                                 <th class="p-4">Nama User</th>
                                 <th class="p-4">Email</th>
@@ -209,30 +262,30 @@ const V = {
                                 <th class="p-4 text-right">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-800/60 text-gray-300">
-                            <tr>
+                        <tbody class="divide-y divide-[var(--border-default)] text-[var(--text-secondary)]">
+                            <tr class="hover:bg-[var(--bg-hover)] transition-colors">
                                 <td class="p-4 font-mono text-purple-400 font-bold">usr_001</td>
-                                <td class="p-4 font-bold text-white">Super Admin</td>
+                                <td class="p-4 font-bold text-[var(--text-primary)]">Super Admin</td>
                                 <td class="p-4">admin@app.com</td>
                                 <td class="p-4"><span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30 text-[10px]">manajemen</span></td>
                                 <td class="p-4"><span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active</span></td>
-                                <td class="p-4 text-right"><button class="text-gray-400 hover:text-white"><i class="ph ph-pencil-simple text-base"></i></button></td>
+                                <td class="p-4 text-right"><button class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"><i class="ph ph-pencil-simple text-base"></i></button></td>
                             </tr>
-                            <tr>
+                            <tr class="hover:bg-[var(--bg-hover)] transition-colors">
                                 <td class="p-4 font-mono text-orange-400 font-bold">usr_002</td>
-                                <td class="p-4 font-bold text-white">Admin Creator</td>
+                                <td class="p-4 font-bold text-[var(--text-primary)]">Admin Creator</td>
                                 <td class="p-4">admin@app.id</td>
                                 <td class="p-4"><span class="px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30 text-[10px]">admin</span></td>
                                 <td class="p-4"><span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active</span></td>
-                                <td class="p-4 text-right"><button class="text-gray-400 hover:text-white"><i class="ph ph-pencil-simple text-base"></i></button></td>
+                                <td class="p-4 text-right"><button class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"><i class="ph ph-pencil-simple text-base"></i></button></td>
                             </tr>
-                            <tr>
+                            <tr class="hover:bg-[var(--bg-hover)] transition-colors">
                                 <td class="p-4 font-mono text-emerald-400 font-bold">usr_003</td>
-                                <td class="p-4 font-bold text-white">Client User</td>
+                                <td class="p-4 font-bold text-[var(--text-primary)]">Client User</td>
                                 <td class="p-4">client@app.com</td>
                                 <td class="p-4"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px]">client</span></td>
                                 <td class="p-4"><span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active</span></td>
-                                <td class="p-4 text-right"><button class="text-gray-400 hover:text-white"><i class="ph ph-pencil-simple text-base"></i></button></td>
+                                <td class="p-4 text-right"><button class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"><i class="ph ph-pencil-simple text-base"></i></button></td>
                             </tr>
                         </tbody>
                     </table>
@@ -242,25 +295,25 @@ const V = {
     `,
     system: `
         <div class="space-y-6 font-mono text-xs">
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber space-y-4">
-                <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 glow-box-cyber space-y-4">
+                <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                     <i class="ph ph-cpu text-purple-400 text-lg"></i> SYSTEM SPECIFICATIONS & STATUS
                 </h2>
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
-                        <span class="text-gray-400">PHP Runtime</span>
-                        <p class="text-sm font-bold text-white">PHP 8.3+ Native (CLI/FPM)</p>
+                <div class="grid md:grid-cols-2 gap-4 font-sans">
+                    <div class="p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-2 hover:border-purple-500/30 transition-colors">
+                        <span class="text-[var(--text-muted)] font-mono text-xs">PHP Runtime</span>
+                        <p class="text-sm font-bold text-[var(--text-primary)]">PHP 8.3+ Native (CLI/FPM)</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
-                        <span class="text-gray-400">Repo Data Layer</span>
+                    <div class="p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-2 hover:border-purple-500/30 transition-colors">
+                        <span class="text-[var(--text-muted)] font-mono text-xs">Repo Data Layer</span>
                         <p class="text-sm font-bold text-amber-400">Auto-Switch Dual-Engine (PDO SQL / JSON)</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
-                        <span class="text-gray-400">Password Hashing Algorithm</span>
+                    <div class="p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-2 hover:border-purple-500/30 transition-colors">
+                        <span class="text-[var(--text-muted)] font-mono text-xs">Password Hashing Algorithm</span>
                         <p class="text-sm font-bold text-emerald-400">Argon2ID (m=65536, t=4, p=1)</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
-                        <span class="text-gray-400">Routing Paradigm</span>
+                    <div class="p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-2 hover:border-purple-500/30 transition-colors">
+                        <span class="text-[var(--text-muted)] font-mono text-xs">Routing Paradigm</span>
                         <p class="text-sm font-bold text-indigo-400">SPA Shell Proxy Pattern (/core/router.php)</p>
                     </div>
                 </div>
@@ -269,13 +322,13 @@ const V = {
     `,
     profile: `
         <div class="max-w-xl space-y-6 font-mono text-xs">
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber space-y-6">
+            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 glow-box-cyber space-y-6">
                 <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-xl">SA</div>
-                    <div>
-                        <h2 class="text-base font-bold text-white">Super Admin</h2>
-                        <p class="text-gray-400">admin@app.com</p>
-                        <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30 text-[10px] uppercase font-bold mt-1 inline-block">Role: manajemen</span>
+                    <div class="w-16 h-16 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-xl shadow-md">SA</div>
+                    <div class="space-y-1">
+                        <h2 class="text-base font-bold text-[var(--text-primary)]">Super Admin</h2>
+                        <p class="text-[var(--text-secondary)]">admin@app.com</p>
+                        <span class="px-2.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30 text-[10px] uppercase font-bold inline-block">Role: manajemen</span>
                     </div>
                 </div>
             </div>
@@ -296,8 +349,8 @@ function nav(key) {
     ['dashboard', 'users', 'system', 'profile'].forEach(k => {
         const d = document.getElementById(`s-${k}`);
         const m = document.getElementById(`m-${k}`);
-        if (d) d.className = (k === key) ? 'w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 transition-all' : 'w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors';
-        if (m) m.className = (k === key) ? 'flex flex-col items-center gap-1 text-purple-400' : 'flex flex-col items-center gap-1 text-gray-400';
+        if (d) d.className = (k === key) ? 'w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 transition-all cursor-pointer' : 'w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer';
+        if (m) m.className = (k === key) ? 'flex flex-col items-center gap-1 text-purple-400' : 'flex flex-col items-center gap-1 text-[var(--text-muted)]';
     });
 }
 nav('dashboard');

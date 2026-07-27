@@ -17,7 +17,20 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { brand: { primary: '#F97316', dark: '#0B0F17', card: '#111726', border: '#1E293B' } },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            primary: '#F97316',
+                            hover: '#EA580C',
+                            dark: '#0B0F17',
+                            card: '#111726',
+                            border: '#1E293B'
+                        }
+                    },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
                         heading: ['Plus Jakarta Sans', 'sans-serif'],
@@ -28,12 +41,42 @@
         }
     </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
+        :root {
+            --bg-primary: #0B0F17;
+            --bg-secondary: #0F172A;
+            --bg-card: #111726;
+            --bg-hover: #1E293B;
+            --border-default: #1E293B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --brand-primary: #F97316;
+            --brand-hover: #EA580C;
+        }
+
+        .light {
+            --bg-primary: #F8FAFC;
+            --bg-secondary: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --bg-hover: #E2E8F0;
+            --border-default: #E2E8F0;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+            --brand-primary: #EA580C;
+            --brand-hover: #C2410C;
+        }
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); transition: background-color 0.3s ease, color 0.3s ease; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .tech-grid {
+            background-image: linear-gradient(to right, rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(249, 115, 22, 0.03) 1px, transparent 1px);
+            background-size: 36px 36px;
+        }
+        .dark .tech-grid {
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                               linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 32px 32px;
         }
         .text-gradient {
             background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #F59E0B 100%);
@@ -42,38 +85,39 @@
             background-clip: text;
         }
         .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); }
-        .glow-box-cyber { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
+        .dark .glow-box-cyber { box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.15), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
+        .glow-box-cyber { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px var(--border-default); }
     </style>
 </head>
 <body class="antialiased h-screen flex flex-col overflow-hidden tech-grid bg-[var(--bg-primary)]">
 
 <div class="flex flex-1 overflow-hidden">
     <!-- Desktop Sidebar -->
-    <aside class="hidden md:flex flex-col w-64 bg-gray-950 border-r border-[var(--border-default)] shrink-0 font-mono">
+    <aside class="hidden md:flex flex-col w-64 bg-[var(--bg-card)] border-r border-[var(--border-default)] shrink-0 font-mono transition-colors">
         <div class="h-16 flex items-center px-6 border-b border-[var(--border-default)]">
             <a href="/" class="flex items-center gap-3 group">
-                <div class="w-8 h-8 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center group-hover:border-orange-500 transition-colors">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#F97316"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center group-hover:border-emerald-500 transition-colors shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#10B981"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-heading font-extrabold text-base tracking-tight leading-none"><span class="text-white">Vibe</span><span class="text-gradient">forge</span></span>
+                    <span class="font-heading font-extrabold text-base tracking-tight leading-none"><span class="text-[var(--text-primary)]">Vibe</span><span class="text-gradient">forge</span></span>
                     <span class="text-[9px] text-emerald-400 font-bold tracking-wider uppercase">CLIENT_PORTAL</span>
                 </div>
             </a>
         </div>
 
-        <nav class="flex-1 py-4 px-3 space-y-1 text-xs">
-            <button onclick="nav('home')" id="s-home" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 transition-all"><i class="ph-fill ph-house text-lg"></i> Beranda</button>
-            <button onclick="nav('templates')" id="s-templates" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-layout text-lg"></i> Templates</button>
-            <button onclick="nav('docs')" id="s-docs" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-book-open text-lg"></i> Dokumentasi</button>
-            <button onclick="nav('profile')" id="s-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-user text-lg"></i> Profil</button>
+        <nav class="flex-1 py-4 px-3 space-y-1.5 text-xs">
+            <button onclick="nav('home')" id="s-home" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer"><i class="ph-fill ph-house text-lg"></i> Beranda</button>
+            <button onclick="nav('templates')" id="s-templates" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"><i class="ph ph-layout text-lg"></i> Templates</button>
+            <button onclick="nav('docs')" id="s-docs" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"><i class="ph ph-book-open text-lg"></i> Dokumentasi</button>
+            <button onclick="nav('profile')" id="s-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"><i class="ph ph-user text-lg"></i> Profil</button>
         </nav>
 
-        <div class="p-4 border-t border-[var(--border-default)] bg-gray-900/50">
+        <div class="p-4 border-t border-[var(--border-default)] bg-[var(--bg-secondary)]/50">
             <div class="flex items-center gap-3 px-2 py-1.5">
-                <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs">CU</div>
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs shadow-sm">CU</div>
                 <div class="overflow-hidden">
-                    <p class="text-xs font-bold text-white truncate">Client User</p>
+                    <p class="text-xs font-bold text-[var(--text-primary)] truncate">Client User</p>
                     <p class="text-[10px] text-emerald-400 uppercase font-semibold">Client Role</p>
                 </div>
             </div>
@@ -82,31 +126,31 @@
 
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-16 flex items-center justify-between px-6 bg-gray-950/80 border-b border-[var(--border-default)] shrink-0 font-mono text-xs">
+        <header class="h-16 flex items-center justify-between px-6 bg-[var(--bg-card)]/90 backdrop-blur-md border-b border-[var(--border-default)] shrink-0 font-mono text-xs z-10 transition-colors">
             <div class="flex items-center gap-3">
-                <h1 id="pageTitle" class="font-heading font-extrabold text-sm text-white tracking-wide uppercase">// BERANDA CLIENT</h1>
-                <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px]">CONNECTED</span>
+                <h1 id="pageTitle" class="font-heading font-extrabold text-sm text-[var(--text-primary)] tracking-wide uppercase">// BERANDA CLIENT</h1>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">CONNECTED</span>
             </div>
             <div class="flex items-center gap-3">
                 <!-- Language Selector -->
                 <div class="relative group" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-emerald-500 transition-colors text-xs" aria-label="Change Language">
-                        <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="id" class="w-4 h-3 rounded-sm">
-                        <span class="hidden sm:inline uppercase font-bold text-gray-300">id</span>
-                        <i class="ph ph-caret-down text-xs text-gray-500"></i>
+                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] hover:border-emerald-500 transition-colors text-xs cursor-pointer" aria-label="Change Language">
+                        <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="id" class="w-4 h-3 rounded-sm shadow-sm">
+                        <span class="hidden sm:inline uppercase font-bold text-[var(--text-secondary)]">id</span>
+                        <i class="ph ph-caret-down text-xs text-[var(--text-muted)]"></i>
                     </button>
-                    <div x-show="open" x-transition class="absolute right-0 mt-1 bg-gray-900 rounded-xl shadow-2xl border border-gray-800 py-1 min-w-[150px] z-50 text-xs">
-                        <a href="?lang=id" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-emerald-400 font-bold bg-emerald-500/10">
+                    <div x-show="open" x-transition class="absolute right-0 mt-1 bg-[var(--bg-card)] rounded-xl shadow-2xl border border-[var(--border-default)] py-1 min-w-[160px] z-50 text-xs font-mono">
+                        <a href="?lang=id" class="flex items-center gap-2.5 px-3 py-2 hover:bg-[var(--bg-hover)] transition-colors text-emerald-400 font-bold bg-emerald-500/10">
                             <img src="/assets/flags/id.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> Bahasa Indonesia
                         </a>
-                        <a href="?lang=en" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-800 transition-colors text-gray-300">
+                        <a href="?lang=en" class="flex items-center gap-2.5 px-3 py-2 hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)]">
                             <img src="/assets/flags/en.svg" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm"> English
                         </a>
                     </div>
                 </div>
 
-                <button id="themeToggle" class="p-2 hover:bg-gray-800 rounded-lg text-amber-400" aria-label="Toggle theme"><i class="ph ph-moon text-base"></i></button>
-                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400" title="Logout"><i class="ph ph-sign-out text-base"></i></a>
+                <button id="themeToggle" class="w-9 h-9 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] flex items-center justify-center transition-colors text-[var(--text-muted)] hover:text-amber-400 cursor-pointer" aria-label="Toggle theme"><i class="ph ph-moon text-base dark:text-amber-400"></i></button>
+                <a href="/logout/" class="w-9 h-9 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-default)] hover:border-red-500/40 flex items-center justify-center transition-colors text-red-400 hover:bg-red-500/10" title="Logout"><i class="ph ph-sign-out text-base"></i></a>
             </div>
         </header>
 
@@ -115,12 +159,12 @@
 </div>
 
 <!-- Mobile Bottom Nav -->
-<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 z-50 font-mono text-xs">
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-card)]/95 backdrop-blur-md border-t border-[var(--border-default)] z-50 font-mono text-xs shadow-lg">
     <div class="flex justify-around items-center h-16">
-        <button onclick="nav('home')" class="flex flex-col items-center gap-1 text-emerald-400" id="m-home"><i class="ph-fill ph-house text-xl"></i><span class="text-[9px]">Beranda</span></button>
-        <button onclick="nav('templates')" class="flex flex-col items-center gap-1 text-gray-400" id="m-templates"><i class="ph ph-layout text-xl"></i><span class="text-[9px]">Template</span></button>
-        <button onclick="nav('docs')" class="flex flex-col items-center gap-1 text-gray-400" id="m-docs"><i class="ph ph-book-open text-xl"></i><span class="text-[9px]">Dokumen</span></button>
-        <button onclick="nav('profile')" class="flex flex-col items-center gap-1 text-gray-400" id="m-profile"><i class="ph ph-user text-xl"></i><span class="text-[9px]">Profil</span></button>
+        <button onclick="nav('home')" class="flex flex-col items-center gap-1 text-emerald-400" id="m-home"><i class="ph-fill ph-house text-xl"></i><span class="text-[9px] font-semibold">Beranda</span></button>
+        <button onclick="nav('templates')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]" id="m-templates"><i class="ph ph-layout text-xl"></i><span class="text-[9px] font-semibold">Template</span></button>
+        <button onclick="nav('docs')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]" id="m-docs"><i class="ph ph-book-open text-xl"></i><span class="text-[9px] font-semibold">Dokumen</span></button>
+        <button onclick="nav('profile')" class="flex flex-col items-center gap-1 text-[var(--text-muted)]" id="m-profile"><i class="ph ph-user text-xl"></i><span class="text-[9px] font-semibold">Profil</span></button>
     </div>
 </nav>
 
@@ -128,63 +172,72 @@
 const V = {
     home: `
         <div class="space-y-6">
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber font-mono space-y-2">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-white">Selamat Datang, Client User!</h2>
-                    <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">CLIENT ROLE</span>
+            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 glow-box-cyber font-mono space-y-2 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <h2 class="text-xl font-bold text-[var(--text-primary)]">Selamat Datang, Client User!</h2>
+                    <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold self-start sm:self-auto uppercase tracking-wider">CLIENT ROLE</span>
                 </div>
-                <p class="text-xs text-gray-400 font-sans">Eksplorasi arsitektur SPA Vibeforge untuk proyek aplikasi web Anda.</p>
+                <p class="text-xs text-[var(--text-secondary)] font-sans leading-relaxed">Eksplorasi arsitektur SPA Vibeforge untuk proyek aplikasi web Anda.</p>
             </div>
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
-                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between text-gray-400">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
+                <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-5 glow-box-cyber space-y-2 hover:border-orange-500/40 transition-colors">
+                    <div class="flex items-center justify-between text-[var(--text-muted)]">
                         <span>Active Projects</span>
-                        <i class="ph ph-folder-simple text-orange-400 text-xl"></i>
+                        <div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-[var(--brand-primary)]">
+                            <i class="ph ph-folder-simple text-lg"></i>
+                        </div>
                     </div>
-                    <p class="text-2xl font-bold text-white">1</p>
-                    <span class="text-[10px] text-gray-400">Vibeforge Template</span>
+                    <p class="text-2xl font-bold text-[var(--text-primary)]">1</p>
+                    <span class="text-[10px] text-[var(--text-muted)] font-semibold">Vibeforge Template</span>
                 </div>
 
-                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between text-gray-400">
+                <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-5 glow-box-cyber space-y-2 hover:border-emerald-500/40 transition-colors">
+                    <div class="flex items-center justify-between text-[var(--text-muted)]">
                         <span>Session Status</span>
-                        <i class="ph ph-check-circle text-emerald-400 text-xl"></i>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                            <i class="ph ph-check-circle text-lg"></i>
+                        </div>
                     </div>
                     <p class="text-2xl font-bold text-emerald-400">VALID</p>
-                    <span class="text-[10px] text-gray-400">Server session active</span>
+                    <span class="text-[10px] text-[var(--text-muted)]">Server session active</span>
                 </div>
 
-                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between text-gray-400">
+                <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-5 glow-box-cyber space-y-2 hover:border-indigo-500/40 transition-colors">
+                    <div class="flex items-center justify-between text-[var(--text-muted)]">
                         <span>Shell Mode</span>
-                        <i class="ph ph-browser text-indigo-400 text-xl"></i>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                            <i class="ph ph-browser text-lg"></i>
+                        </div>
                     </div>
-                    <p class="text-2xl font-bold text-white">CLIENT</p>
-                    <span class="text-[10px] text-indigo-400">public/client/index.php</span>
+                    <p class="text-2xl font-bold text-[var(--text-primary)]">CLIENT</p>
+                    <span class="text-[10px] text-indigo-400 font-semibold">public/client/index.php</span>
                 </div>
 
-                <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
-                    <div class="flex items-center justify-between text-gray-400">
+                <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-5 glow-box-cyber space-y-2 hover:border-amber-500/40 transition-colors">
+                    <div class="flex items-center justify-between text-[var(--text-muted)]">
                         <span>i18n Locale</span>
-                        <i class="ph ph-globe text-amber-400 text-xl"></i>
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400">
+                            <i class="ph ph-globe text-lg"></i>
+                        </div>
                     </div>
-                    <p class="text-2xl font-bold text-white">ID</p>
-                    <span class="text-[10px] text-amber-400">Bahasa Indonesia</span>
+                    <p class="text-2xl font-bold text-[var(--text-primary)]">ID</p>
+                    <span class="text-[10px] text-amber-400 font-semibold">Bahasa Indonesia</span>
                 </div>
             </div>
         </div>
     `,
     templates: `
         <div class="space-y-6 font-mono text-xs">
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber space-y-4">
-                <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 glow-box-cyber space-y-4">
+                <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                     <i class="ph ph-layout text-emerald-400 text-lg"></i> STARTER TEMPLATES
                 </h2>
-                <div class="grid md:grid-cols-3 gap-4">
-                    <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
-                        <span class="text-emerald-400 font-bold">Vibeforge Web App</span>
-                        <p class="text-gray-300">Template standar dengan 3 portal role & dual-engine repo.</p>
+                <div class="grid md:grid-cols-3 gap-4 font-sans">
+                    <div class="p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-2 hover:border-emerald-500/30 transition-colors">
+                        <span class="text-emerald-400 font-mono font-bold text-xs">Vibeforge Web App</span>
+                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Template standar dengan 3 portal role & dual-engine repo.</p>
                     </div>
                 </div>
             </div>
@@ -192,23 +245,23 @@ const V = {
     `,
     docs: `
         <div class="space-y-6 font-mono text-xs">
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber space-y-4">
-                <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 glow-box-cyber space-y-4">
+                <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                     <i class="ph ph-book-open text-emerald-400 text-lg"></i> DOCUMENTATION GUIDE
                 </h2>
-                <p class="text-gray-300">Baca file <code>docs/prd.md</code> & <code>docs/branding.md</code> di direktori proyek untuk panduan pengembangan penuh.</p>
+                <p class="text-xs text-[var(--text-secondary)] font-sans leading-relaxed">Baca file <code class="px-1.5 py-0.5 bg-[var(--bg-primary)] text-emerald-400 font-mono rounded border border-[var(--border-default)]">docs/prd.md</code> & <code class="px-1.5 py-0.5 bg-[var(--bg-primary)] text-emerald-400 font-mono rounded border border-[var(--border-default)]">docs/branding.md</code> di direktori proyek untuk panduan pengembangan penuh.</p>
             </div>
         </div>
     `,
     profile: `
         <div class="max-w-xl space-y-6 font-mono text-xs">
-            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber space-y-6">
+            <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 glow-box-cyber space-y-6">
                 <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xl">CU</div>
-                    <div>
-                        <h2 class="text-base font-bold text-white">Client User</h2>
-                        <p class="text-gray-400">client@app.com</p>
-                        <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] uppercase font-bold mt-1 inline-block">Role: client</span>
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xl shadow-md">CU</div>
+                    <div class="space-y-1">
+                        <h2 class="text-base font-bold text-[var(--text-primary)]">Client User</h2>
+                        <p class="text-[var(--text-secondary)]">client@app.com</p>
+                        <span class="px-2.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] uppercase font-bold inline-block">Role: client</span>
                     </div>
                 </div>
             </div>
@@ -229,8 +282,8 @@ function nav(key) {
     ['home', 'templates', 'docs', 'profile'].forEach(k => {
         const d = document.getElementById(`s-${k}`);
         const m = document.getElementById(`m-${k}`);
-        if (d) d.className = (k === key) ? 'w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 transition-all' : 'w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors';
-        if (m) m.className = (k === key) ? 'flex flex-col items-center gap-1 text-emerald-400' : 'flex flex-col items-center gap-1 text-gray-400';
+        if (d) d.className = (k === key) ? 'w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer' : 'w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer';
+        if (m) m.className = (k === key) ? 'flex flex-col items-center gap-1 text-emerald-400' : 'flex flex-col items-center gap-1 text-[var(--text-muted)]';
     });
 }
 nav('home');
