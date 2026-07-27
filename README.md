@@ -1,6 +1,6 @@
-# 🔥 Vibeforge — Tempa Aplikasi dari Dokumen ke Kode Jadi
+# 🔥 Vibeforge — Wujudkan Aplikasi dari Dokumen ke Kode Jadi
 
-> **Template starter PHP (Native) untuk membangun aplikasi web modern dengan pendekatan *vibe coding*: Anda menjelaskan aplikasi lewat dokumen (`docs/prd.md`, `docs/branding.md`), AI Coding Assistant (Claude Code, Cursor, Copilot CLI) yang menempanya jadi kode fungsional lengkap.**
+> **Template starter PHP (Native) untuk membangun aplikasi web modern dengan pendekatan *vibe coding*: Anda menjelaskan aplikasi lewat dokumen (`docs/prd.md`, `docs/branding.md`), AI Coding Assistant (Claude Code, Cursor, Copilot CLI) yang mewujudkannya jadi kode fungsional lengkap.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![PHP Version](https://img.shields.io/badge/PHP-8.1%2B-8892BF.svg?logo=php)](https://php.net)
@@ -22,7 +22,7 @@
 | Cek error di browser | Validasi otomatis: `php -l`, cek sintaks, preview lokal |
 | Desain UI acak | **6 template HTML referensi** (`references/*.html`) untuk konsistensi visual |
 
-> **Filosofi**: *AI coding assistant bukan pengganti Anda — ia adalah pemukul besi yang mengeksekusi rancangan Anda dengan presisi.*
+> **Filosofi**: *AI coding assistant bukan pengganti Anda — ia adalah mitra arsitek yang mengeksekusi rancangan Anda dengan presisi.*
 
 ---
 
@@ -425,6 +425,6 @@ limitations under the License.
 
 ---
 
-*Selamat menempa aplikasi Anda dengan Vibeforge.* 🔥
+*Selamat membangun aplikasi Anda dengan Vibeforge.* 🔥
 
 **Vibeforge Team** — [github.com/iqbalmurtadho24/vibeforge](https://github.com/iqbalmurtadho24/vibeforge)
