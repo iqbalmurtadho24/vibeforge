@@ -2,11 +2,22 @@
 # ================================================
 # Place this file in the project root (outside public/)
 
-# This is a secondary security layer
-# Main security is in public/.htaccess
-
 # Disable directory listing
 Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Block direct access to important directories
+    # Note: core/ is allowed for the router proxy to function
+    RewriteRule ^(include|modules|data|cache|migrations|docs)/ - [F,L]
+
+    # 2. Redirect traffic to public/ folder
+    # This makes the domain read from domain.com/public/
+    # Required for shared hosting where document root cannot be set to public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
 
 # Block access to sensitive files
 <FilesMatch "\.(env|log|sql|md|json|key|pem)$">
@@ -32,13 +43,6 @@ Options -Indexes
     Deny from all
 </FilesMatch>
 
-# Block direct access to important directories
-# Note: core/ is allowed for the router proxy to function
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteRule ^(include|modules|data|cache|migrations|docs)/ - [F,L]
-</IfModule>
-
 # Security headers
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"
@@ -47,9 +51,6 @@ Options -Indexes
 
 # open_basedir hardening.
 # NOTE: this path is environment-specific and MUST match the deploy location.
-# The hardcoded Windows/Laragon path below breaks on a Linux production host,
-# so it is disabled by default. Re-enable and set the correct absolute path
-# for the target server before/at deploy (e.g. /home/USER/public_html).
 # <IfModule mod_php.c>
-#     php_admin_value open_basedir "D:/laragon/www/[nama-app]:/tmp"
+#     php_admin_value open_basedir "/home/USER/public_html:/tmp"
 # </IfModule>
