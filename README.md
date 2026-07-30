@@ -30,6 +30,7 @@
 
 ### 🏗️ Arsitektur Siap Pakai (Shell Architecture)
 - **Landing Page** (`public/index.php`) — Hero, fitur, demo, install guide interaktif
+- **Static Showcase** ([`index.html`](index.html)) — Landing page statis untuk GitHub Pages / preview tanpa PHP — [🌐 Live Preview](https://vibeforge-dev.netlify.app/)
 - **Auth Shells**: `/login/`, `/register/`, `/logout/` — SPA via AJAX ke `core/router.php`
 - **Dashboard Shells** (Role-based):
   - `/manajemen/` — **Super Admin** (overview, users, system, audit)
@@ -77,24 +78,27 @@ Repo::table('users')->delete($id);
 - **Mode `mysql`**: Force MySQL, gagal keras kalau koneksi/tabel tidak ada
 - **Atomic JSON Write**: File lock terpisah (`.lock`), `rename()` atomic, tidak corrupt
 
-### ⚡ Setup Wizard Interaktif (`/install/`) & Deployment Console
+### ⚡ Setup Wizard 4-Step Unified Flow (`/install/`)
 - **Automated Setup Script (`scripts/setup-project.ps1`)**:
   - Auto-detection hak Administrator: jika dijalankan dari terminal non-admin, tampilkan countdown 3 detik lalu otomatis alihkan ke jendela PowerShell Administrator (`RunAs`).
   - Wizard interaktif pilih Local Disk (C/D/E/dll), Server (Laragon/XAMPP), dan Nama Aplikasi.
   - Otomatis `npx degit`, pembuatan Virtual Host (`nama_app.test`), penulisan Windows `hosts`, restart service/proses Apache, dan flush DNS.
 - **Automated Deployment Console (Landing Page `public/index.php`)**:
   - Form interaktif langsung di landing page untuk memilih Disk & Server, sanitasi nama app, jalankan setup terminal, dan redirect ke Wizard.
-- **Setup Wizard Dual-Mode (`public/install/`)**:
-  | Mode | Langkah | Deskripsi |
-  |------|---------|-----------|
-  | **Aplikasi Baru (Greenfield)** | 12 langkah | Overview → PRD → Branding → Logo → 6 HTML References → Config → Path |
-  | **Redesain (Refit)** | 5 langkah | Overview → Upload/Kelola `references/` (Codebase Lama) → Logo → Target Server → AI Re-architecting |
-- **Monaco Editor Integrasi**: Text editor browser profesional untuk Markdown (`prd.md`, `branding.md`) dan HTML (`references/*.html`) dengan fallback automatic textarea.
+- **4-Step Setup Wizard (`public/install/`)**:
+
+  | Tahap | Nama | Deskripsi |
+  |-------|------|-----------|
+  | **1** | **Install (Auto-Detect)** | Status deteksi otomatis: nama aplikasi, path folder, domain lokal, & PHP version. Tidak ada input manual — hanya tombol Mulai. |
+  | **2** | **Referensi (Opsional)** | Upload HTML/CSS/JS atau source aplikasi lama ke `references/`. Skip kalau mulai dari nol — struktur tetap diturunkan dari PRD di Tahap 4. |
+  | **3** | **Branding & Logo** | Brand identity otomatis mengikuti PRD final — cukup upload logo. Atau isi manual form lengkap (nama, tagline, palet warna, typography). |
+  | **4** | **PRD (7 Bagian)** | Generate PRD otomatis oleh AI dengan struktur 7 bagian (Problem, Goals, Users, Stories, FR, NFR, Scope), atau paste PRD sendiri. Lalu klik **Jalankan** untuk eksekusi AI. |
+
 - **Instant Role Demo Portals**:
   - Login 1-klik via AJAX di landing page untuk menguji RBAC tanpa ngetik kredensial:
-    - **Manajemen** (Super Admin): `admin@app.com`
-    - **Admin** (Creator): `admin@app.id`
-    - **Client** (Pendengar): `client@app.com`
+    - **Manajemen** (Super Admin): `manajemen@example.com`
+    - **Admin** (Creator): `admin@example.com`
+    - **Client** (Pendengar): `client@example.com`
 
 ---
 
@@ -122,7 +126,6 @@ irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/set
 > 4. Lalu otomatis: Download template via `npx degit`, buat Virtual Host + update Windows Hosts (`nama_app.test`), restart service Apache, flush DNS, dan membuka browser.
 
 ---
-
 **Opsi B: Manual (jika tidak ingin pakai script)**
 
 ```bash
@@ -141,7 +144,7 @@ cd nama_project_anda
 # XAMPP: Edit C:\xampp\apache\conf\extra\httpd-vhosts.conf → tambah VirtualHost → restart Apache
 ```
 
-### 2. Buka Setup Wizard (Opsional tapi Disarankan)
+### 2. Buka Setup Wizard
 ```
 # Laragon (Auto Virtual Host)
 http://nama_project_anda.test/install/
@@ -151,29 +154,18 @@ http://localhost/nama_project_anda/public/install/
 ```
 Atau gunakan **Installer Interaktif di Landing Page**:
 ```
-http://nama_project_anda.test/  →  Pilih Server, Disk, Nama App  →  "Proses"  →  "Unduh & Buka Terminal Otomatis"
+http://nama_project_anda.test/  →  Klik "MULAI BUAT APLIKASIMU"  →  Setup Wizard terbuka
 ```
 
-### 3. Isi Konsep Aplikasi (WAJIB Sebelum Menjalankan AI)
-**Mode Aplikasi Baru (12 langkah)**:
-1. **Overview**: Pemilihan mode & penjelasan arsitektur.
-2. **PRD** (`docs/prd.md`): Spesifikasi aplikasi, aktor, & alur fitur.
-3. **Branding** (`docs/branding.md`): Token warna, font, logo, tone.
-4. **Logo**: Upload asset logo (`docs/logo.png`).
-5. **Template Landing**: `references/landingpage.html`.
-6. **Form Auth**: `references/login.html` & `references/register.html`.
-7. **Modul Roles**: `modul_manajemen.html`, `modul_admin.html`, `modul_client.html`.
-8. **Config & Environment**: Variabel `.env` & koneksi data/DB.
-9. **AI Execution**: Buka CLI dan eksekusi `baca @docs/install.md`.
+### 3. Ikuti 4 Tahap Setup Wizard
+| Tahap | Yang Terjadi |
+| |-------|---------------|
+| **1. Install** | Auto-detect nama app, path, domain, PHP version. Klik Mulai. |
+| **2. Referensi** | Upload HTML/CSS/JS referensi (opsional). Skip jika mulai dari nol. |
+| **3. Branding & Logo** | Upload logo. Brand identity mengikuti PRD atau isi manual. |
+| **4. PRD** | Generate PRD otomatis (7 bagian) atau paste PRD sendiri. Klik **Jalankan** untuk eksekusi AI. |
 
-**Mode Redesain / Refit (5 langkah)**:
-1. **Overview**: Pilih Mode Redesain.
-2. **Upload References**: Masukkan codebase lama ke `references/`.
-3. **Logo Assets**: Upload asset logo baru.
-4. **Target Host**: Tentukan web server lokal (Laragon/XAMPP).
-5. **AI Re-architecting**: Jalankan AI CLI untuk auto-generate PRD & menyerap struktur lama.
-
-> ⚠️ **Jangan lewati langkah ini.** Kalau `prd.md`/`branding.md` kosong, AI akan berhenti dan minta Anda mengisi — ini disengaja supaya AI tidak menebak-nebak konsep aplikasi Anda.
+> ⚠️ **Jangan lewati Tahap 4.** Kalau `prd.md` kosong, AI akan berhenti dan minta Anda mengisi — ini disengaja supaya AI tidak menebak-nebak konsep aplikasi Anda.
 
 ### 4. Jalankan AI Coding Assistant
 ```bash
@@ -187,7 +179,7 @@ Baca dan jalankan docs/install.md
 
 ### 5. Ikuti 3 Tahap Eksekusi AI
 | Tahap | AI Lakukan | Anda Lakukan |
-|-------|------------|--------------|
+| |-------|------------|--------------|
 | **1. Audit & Rencana** | Baca `CLAUDE.md`, `prd.md`, `branding.md`, `references/`, cek struktur core → tulis `docs/build_plan.md` | **Review** `build_plan.md`, approve sebelum lanjut |
 | **2. Eksekusi Kode** | Buat `.env`, `data/users.json` (Argon2ID), seluruh shell PHP, jalankan `php -l` | **Cek** hasil validasi `php -l`, approve sebelum lanjut |
 | **3. Preview Lokal** | Hanya memberi instruksi — tidak bisa eksekusi GUI | **Wajib manual**: buka Laragon/XAMPP, aktifkan Auto Virtual Host, restart Apache, arahkan document root ke `public/`, cek di browser |
@@ -209,11 +201,12 @@ vibeforge/
 ├── LICENSE                      # Apache-2.0
 ├── SECURITY.md                  # Kebijakan keamanan
 ├── CHANGELOG.md                 # SemVer changelog
+├── index.html                   # Static landing page (GitHub Pages / preview tanpa PHP)
 ├── .env                         # Environment config (generate dari .env.example)
 ├── .env.example                 # Template env
 ├── .gitignore
 ├── public/                      # DOCUMENT ROOT (Apache/Nginx)
-│   ├── index.php                # Landing page
+│   ├── index.php                # Landing page (PHP, server-rendered)
 │   ├── login/index.php          # Halaman login
 │   ├── register/index.php       # Halaman register
 │   ├── logout/index.php         # Logout (redirect only)
@@ -224,7 +217,7 @@ vibeforge/
 │   ├── assets/css/branding.css  # CSS variables (warna utama)
 │   ├── assets/flags/            # Flag images untuk i18n
 │   ├── uploads/                 # User uploads
-│   ├── install/                 # Setup Wizard shell
+│   ├── install/                 # Setup Wizard (4-Step Unified Flow)
 │   └── .htaccess                # Security headers, CSP, block sensitive files
 ├── core/                        # Core library (router, auth, session, Repo, CSRF, ratelimit)
 ├── include/                     # config.php, helper.php (t(), escape(), dsb)
@@ -412,7 +405,6 @@ limitations under the License.
 - **Tailwind CSS** — Utility-first styling (CDN)
 - **Alpine.js** — Reactive UI components (CDN)
 - **Phosphor Icons** — Beautiful icon set (CDN)
-- **Monaco Editor** — Code editing in Setup Wizard (CDN)
 - **degit** — Git repo downloader for template bootstrap
 
 ---

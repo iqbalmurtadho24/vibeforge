@@ -33,8 +33,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Audit trail append-only (`data/audit_trail.json`)
 - `data/users.json` (live demo data, 3 role) dengan hash Argon2ID valid
 - OWASP ASVS Level 1-2 security baseline
+- `index.html` - static landing page di root project untuk GitHub Pages
+  dan preview tanpa PHP server
+- Setup Wizard 4-Step Unified Flow (`public/install/`):
+  - Tahap 1: Install (Auto-Detect) — deteksi otomatis nama app, path,
+    domain, PHP version
+  - Tahap 2: Referensi (Opsional) — upload HTML/CSS/JS referensi
+  - Tahap 3: Branding & Logo — upload logo + brand identity mengikuti
+    PRD atau manual
+  - Tahap 4: PRD (7 Bagian) — generate PRD otomatis oleh AI (Problem,
+    Goals, Users, Stories, FR, NFR, Scope) atau paste manual
+- Instant Role Demo Portals di landing page — login 1-klik via AJAX
+  untuk menguji RBAC tanpa mengetik kredensial
+- Automated Deployment Console di landing page — form interaktif
+  pilih Disk & Server, sanitasi nama app, jalankan setup terminal
 
 ### Changed
+- **Setup Wizard**: diganti dari dual-mode (12-step Greenfield / 5-step
+  Refit) menjadi **4-Step Unified Flow** — tidak ada lagi pilihan
+  Greenfield/Refit terpisah, frontend/role/storage ditentukan otomatis
+  dari PRD yang dihasilkan
+- **Demo user emails**: dari `admin@app.com` / `admin@app.id` /
+  `client@app.com` menjadi `manajemen@example.com` /
+  `admin@example.com` / `client@example.com`
+- **Branding flow**: brand identity otomatis mengikuti PRD final — user
+  hanya perlu upload logo, tidak wajib isi semua field manual
 - `.env.example`: `DB_MODE` default `json` -> `auto` (deteksi otomatis
   SQL/JSON per tabel, bukan flag manual)
 - `public/admin/index.php`, `public/client/index.php`,
@@ -55,11 +78,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Tahap 3), karena `php -l` di langkah 6 hanya menangkap parse error,
   bukan "fungsi belum di-require" yang fatal saat runtime
 
-### Deprecated
-- (List of deprecated features)
-
 ### Removed
-- (List of removed features)
+- Monaco Editor integrasi dari Setup Wizard — diganti dengan textarea
+  editor yang lebih ringan
+- Dual-mode wizard (Greenfield 12-step / Refit 5-step) — diganti dengan
+  4-Step Unified Flow
 
 ### Fixed
 - Semua shell (`public/index.php`, `login/`, `register/`, `admin/`,

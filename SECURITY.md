@@ -193,4 +193,4 @@ Subscribe to releases or watch the repo for notifications.
 
 ---
 
-*Last updated: 2026-07-26 | Version: 1.0*
+*Last updated: 2026-07-30 | Version: 3.2.0*
