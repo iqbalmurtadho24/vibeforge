@@ -1,258 +1,251 @@
-# 🔥 Vibeforge — Wujudkan Aplikasi dari Dokumen ke Kode Jadi
+# Vibeforge — Dari Dokumen ke Kode Jadi
 
-> **Template starter PHP (Native) untuk membangun aplikasi web modern dengan pendekatan *vibe coding*: Anda menjelaskan aplikasi lewat dokumen (`docs/prd.md`, `docs/branding.md`), AI Coding Assistant (Claude Code, Cursor, Copilot CLI) yang mewujudkannya jadi kode fungsional lengkap.**
+> **Template PHP Native untuk *vibe coding*: tulis konsep di `docs/prd.md` & `docs/branding.md`, AI Coding Assistant mewujudkannya jadi kode fungsional.**
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![PHP Version](https://img.shields.io/badge/PHP-8.1%2B-8892BF.svg?logo=php)](https://php.net)
-[![AI Assisted](https://img.shields.io/badge/AI%20Assisted-Vibe%20Coding-FF6B35.svg?logo=anthropic)](#)
-[![No Framework](https://img.shields.io/badge/No%20Framework-Native%20PHP-000000.svg?logo=php)](https://php.net)
-[![Security](https://img.shields.io/badge/Security-OWASP%20ASVS%20L1--2-green.svg)](#-security)
+[![License](https://img.shields.io/badge/Apache%202.0-blue.svg)](LICENSE)
+[![PHP](https://img.shields.io/badge/PHP-8.1+-8892BF.svg?logo=php)](https://php.net)
+[![AI Assisted](https://img.shields.io/badge/Vibe%20Coding-FF6B35.svg)](#)
+[![No Framework](https://img.shields.io/badge/Native%20PHP-000000.svg?logo=php)](https://php.net)
+[![Security](https://img.shields.io/badge/OWASP%20ASVS%20L1--2-green.svg)](SECURITY.md)
 [![i18n](https://img.shields.io/badge/i18n-ID%20%7C%20EN%20%7C%20AR-blue.svg)](#-internationalization-i18n)
 
 ---
 
-## 🎯 Apa Itu Vibeforge?
+## Daftar Isi
 
-**Vibeforge bukan framework** — ini **template + protokol kerja** yang memungkinkan Anda:
+- [Apa Itu Vibeforge?](#-apa-itu-vibeforge)
+- [Fitur Utama](#-fitur-utama)
+- [Quick Start](#-quick-start-3-menit)
+- [Struktur Project](#-struktur-project)
+- [Konfigurasi Environment](#-konfigurasi-environment)
+- [Internationalization](#-internationalization-i18n)
+- [Security](#-security)
+- [Deployment Checklist](#-deployment-checklist)
+- [Kontribusi](#-kontribusi)
 
-| Cara Tradisional | Vibeforge (Vibe Coding) |
-|------------------|-------------------------|
+---
+
+## Apa Itu Vibeforge?
+
+**Vibeforge bukan framework** — ini **template + protokol kerja**.
+
+| Tradisional | Vibeforge |
+|---|---|
 | Tulis kode manual file per file | Tulis **konsep** di `docs/prd.md` & `docs/branding.md` |
-| Setup auth, routing, DB dari nol | **Sudah siap**: Auth, Repo dual-mode (JSON/MySQL), i18n, Theme, CSP |
-| Cek error di browser | Validasi otomatis: `php -l`, cek sintaks, preview lokal |
-| Desain UI acak | **6 template HTML referensi** (`references/*.html`) untuk konsistensi visual |
+| Setup auth, routing, DB dari nol | **Sudah siap**: Auth, Repo dual-mode, i18n, Theme, CSP |
+| Cek error di browser | Validasi otomatis: `php -l`, cek sintaks |
+| Desain UI acak | **6 template HTML referensi** (`references/*.html`) |
 
-> **Filosofi**: *AI coding assistant bukan pengganti Anda — ia adalah mitra arsitek yang mengeksekusi rancangan Anda dengan presisi.*
+> *AI coding assistant bukan pengganti Anda — ia mitra arsitek yang mengeksekusi rancangan Anda dengan presisi.*
 
 ---
 
-## ✨ Fitur Utama
+## Fitur Utama
 
-### 🏗️ Arsitektur Siap Pakai (Shell Architecture)
-- **Landing Page** (`public/index.php`) — Hero, fitur, demo, install guide interaktif
-- **Static Showcase** ([`index.html`](index.html)) — Landing page statis untuk GitHub Pages / preview tanpa PHP — [🌐 Live Preview](https://vibeforge-dev.netlify.app/)
-- **Auth Shells**: `/login/`, `/register/`, `/logout/` — SPA via AJAX ke `core/router.php`
-- **Dashboard Shells** (Role-based):
-  - `/manajemen/` — **Super Admin** (overview, users, system, audit)
-  - `/admin/` — **Creator** (upload karya, analitik, royalti)
-  - `/client/` — **Client** (eksplorasi konten, player)
-- **Router Proxy Pattern** — Document root `public/`, AJAX ke `public/core/router.php` → `core/router.php`
+### Shell Architecture
 
-### 🔐 Auth & Security (Production-Ready)
-- **Password**: Argon2ID (`PASSWORD_ARGON2ID`)
-- **CSRF**: Token terpusat di `core/router.php` + `hash_equals()`
-- **Rate Limiting**: IP + username, fixed-window (`core/ratelimit.php`)
-- **Remember Me**: Selector + validator, per-device logout, invalidate on password change
-- **Re-auth Middleware**: Untuk aksi sensitif
-- **Prepared Statements**: PDO wrapper (mode MySQL)
+- **Landing Page** (`public/index.php`) — Hero, fitur, demo, install guide
+- **Static Showcase** (`index.html`) — GitHub Pages preview — [Live Demo](https://vibeforge-dev.netlify.app/)
+- **Auth Shells** — `/login/`, `/register/`, `/logout/` (SPA via AJAX)
+- **Dashboard Shells** (role-based):
+  - `/manajemen/` — Super Admin (overview, users, system, audit)
+  - `/admin/` — Creator (upload karya, analitik, royalti)
+  - `/client/` — Client (eksplorasi konten, player)
+- **Router Proxy Pattern** — Doc root `public/`, AJAX ke `public/core/router.php` → `core/router.php`
 
-### 🌍 Multi-Bahasa (i18n) Lengkap
-- **Deteksi Otomatis**: IP-based (ID/US/SA dll) → fallback ke English
-- **Manual Selector**: Flag dropdown di header (desktop) & bottom nav (mobile)
-- **RTL Support**: Bahasa Arab (`dir="rtl"`, CSS logical properties)
-- **Coverage**: Semua teks PHP + JS-injected content via `t('key')` / `window._i18n`
-- **File**: `locales/id.json`, `en.json`, `ar.json` + `languages.json` manifest
+### Auth & Security
 
-### 🌓 Dark/Light Theme
-- CSS Variables di `public/assets/css/branding.css` (single source of truth)
-- Persistensi: `localStorage` + `users.json` kolom `theme_preference`
-- Selector di header (desktop) & bottom nav (mobile)
+Argon2ID password hashing | CSRF token terpusat + `hash_equals()` | IP+username rate limiting | Remember-me selector+validator | Re-auth middleware | Prepared statements (PDO)
 
-### 📱 Responsive & Mobile-First
-- **Desktop**: Sidebar navigation vertikal
-- **Mobile**: Bottom nav horizontal + scroll spy (IntersectionObserver)
-- **Breakpoint**: `md: 768px` konsisten di semua shell
-- **No Horizontal Scroll**: `overflow-x-auto` pada tabel/code, `flex-wrap` pada toolbar
+### Data Access Layer — Repo Pattern
 
-### 💾 Data Access Layer — Repo Pattern (Auto-Switch SQL/JSON)
 ```php
-Repo::table('users')->all();
-Repo::table('users')->find($id);
-Repo::table('users')->where([...]);
-Repo::table('users')->insert([...]);
-Repo::table('users')->update($id, [...]);
-Repo::table('users')->delete($id);
+Repo::table('users')->all();                    // semua record
+Repo::table('users')->find($id);                // by ID
+Repo::table('users')->where(['role' => 'admin']); // filter
+Repo::table('users')->insert([...]);             // return ID baru
+Repo::table('users')->update($id, [...]);        // return bool
+Repo::table('users')->delete($id);               // return bool
 ```
-- **Mode `auto` (default)**: Deteksi per-entitas (MySQL kalau tabel ada, JSON kalau belum)
-- **Mode `json`**: Force JSON untuk demo/testing
-- **Mode `mysql`**: Force MySQL, gagal keras kalau koneksi/tabel tidak ada
-- **Atomic JSON Write**: File lock terpisah (`.lock`), `rename()` atomic, tidak corrupt
 
-### ⚡ Setup Wizard 4-Step Unified Flow (`/install/`)
-- **Automated Setup Script (`scripts/setup-project.ps1`)**:
-  - Auto-detection hak Administrator: jika dijalankan dari terminal non-admin, tampilkan countdown 3 detik lalu otomatis alihkan ke jendela PowerShell Administrator (`RunAs`).
-  - Wizard interaktif pilih Local Disk (C/D/E/dll), Server (Laragon/XAMPP), dan Nama Aplikasi.
-  - Otomatis `npx degit`, pembuatan Virtual Host (`nama_app.test`), penulisan Windows `hosts`, restart service/proses Apache, dan flush DNS.
-- **Automated Deployment Console (Landing Page `public/index.php`)**:
-  - Form interaktif langsung di landing page untuk memilih Disk & Server, sanitasi nama app, jalankan setup terminal, dan redirect ke Wizard.
-- **4-Step Setup Wizard (`public/install/`)**:
+| Mode | Perilaku |
+|---|---|
+| `auto` (default) | Deteksi per-entitas: MySQL jika tabel ada, JSON jika belum |
+| `json` | Force JSON — untuk demo/testing |
+| `mysql` | Force MySQL — gagal keras jika koneksi/tabel tidak ada |
 
-  | Tahap | Nama | Deskripsi |
-  |-------|------|-----------|
-  | **1** | **Install (Auto-Detect)** | Status deteksi otomatis: nama aplikasi, path folder, domain lokal, & PHP version. Tidak ada input manual — hanya tombol Mulai. |
-  | **2** | **Referensi (Opsional)** | Upload HTML/CSS/JS atau source aplikasi lama ke `references/`. Skip kalau mulai dari nol — struktur tetap diturunkan dari PRD di Tahap 4. |
-  | **3** | **Branding & Logo** | Brand identity otomatis mengikuti PRD final — cukup upload logo. Atau isi manual form lengkap (nama, tagline, palet warna, typography). |
-  | **4** | **PRD (7 Bagian)** | Generate PRD otomatis oleh AI dengan struktur 7 bagian (Problem, Goals, Users, Stories, FR, NFR, Scope), atau paste PRD sendiri. Lalu klik **Jalankan** untuk eksekusi AI. |
+### Internationalization
 
-- **Instant Role Demo Portals**:
-  - Login 1-klik via AJAX di landing page untuk menguji RBAC tanpa ngetik kredensial:
-    - **Manajemen** (Super Admin): `manajemen@example.com`
-    - **Admin** (Creator): `admin@example.com`
-    - **Client** (Pendengar): `client@example.com`
+- **Deteksi otomatis** — IP-based (ID/US/SA dll), fallback English
+- **Manual selector** — Flag dropdown di header (desktop) & bottom nav (mobile)
+- **RTL support** — Bahasa Arab (`dir="rtl"`, CSS logical properties)
+- **Full coverage** — PHP + JS-injected content via `t('key')` / `window._i18n`
+
+### Dark/Light Theme
+
+CSS variables di `branding.css` (single source of truth) | `localStorage` + `users.json` per-user preference | Selector di header & bottom nav
+
+### Responsive & Mobile-First
+
+Desktop: sidebar vertikal | Mobile: bottom nav + scroll spy | Breakpoint `md: 768px` konsisten | No horizontal scroll
+
+### Setup Wizard 4-Step
+
+| Tahap | Nama | Deskripsi |
+|---|---|---|
+| **1** | Install (Auto-Detect) | Deteksi nama app, path, domain, PHP version — hanya tombol Mulai |
+| **2** | Referensi (Opsional) | Upload HTML/CSS/JS referensi — skip jika mulai dari nol |
+| **3** | Branding & Logo | Upload logo, brand identity mengikuti PRD atau isi manual |
+| **4** | PRD (7 Bagian) | Generate PRD otomatis oleh AI atau paste PRD sendiri, lalu klik **Jalankan** |
+
+**Instant Role Demo** — Login 1-klik di landing page:
+
+| Role | Email |
+|---|---|
+| Manajemen (Super Admin) | `manajemen@example.com` |
+| Admin (Creator) | `admin@example.com` |
+| Client (Pendengar) | `client@example.com` |
 
 ---
 
-## 🚀 Quick Start (3 Menit)
+## Quick Start (3 Menit)
 
 ### Prasyarat
-- **Node.js** (hanya untuk `npx degit` — bukan runtime aplikasi)
-- **XAMPP** (`htdocs/`) **atau** **Laragon** (`www/`)
+
+- **Node.js** (hanya untuk `npx degit`)
+- **Laragon** (`www/`) atau **XAMPP** (`htdocs/`)
 - **AI Coding CLI**: [Claude Code](https://code.claude.com) / Cursor / GitHub Copilot CLI
-- **VS Code** (disarankan: terminal + editor terintegrasi)
+- **VS Code** (disarankan)
 
-### 1. Download Template & Setup Virtual Host (Interaktif)
+### 1. Download & Setup Virtual Host
 
-> Windows PowerShell (Jalankan langsung di terminal PowerShell / CMD):
-```bash
+**Opsi A — Script Otomatis (Disarankan)**
+
+```powershell
 irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex
 ```
 
-> 💡 **Auto Admin Elevation**: Jika terminal yang Anda gunakan **bukan Administrator**, script secara otomatis menampilkan loading/countdown 3 detik dan langsung mengalihkan eksekusi ke jendela PowerShell Administrator baru (`RunAs`).
+Script memandu: pilih disk → pilih server → masukkan nama app → otomatis download, buat Virtual Host, update Windows hosts, restart Apache, flush DNS, buka browser.
 
-> Script akan memandu Anda:
-> 1. **Pilih Local Disk** (C: / D: / E: / dst)
-> 2. **Pilih Server** (ketik `l` untuk Laragon atau `x` untuk XAMPP lalu Enter)
-> 3. **Masukkan Nama Aplikasi** (tanpa spasi, gunakan `_` atau `-`)
-> 4. Lalu otomatis: Download template via `npx degit`, buat Virtual Host + update Windows Hosts (`nama_app.test`), restart service Apache, flush DNS, dan membuka browser.
+> Jika terminal bukan Administrator, script otomatis menampilkan countdown 3 detik lalu alihkan ke jendela PowerShell Administrator.
 
----
-**Opsi B: Manual (jika tidak ingin pakai script)**
+**Opsi B — Manual**
 
 ```bash
-# Laragon
-cd C:\laragon\www
-
-# atau XAMPP
-cd C:\xampp\htdocs
-
-# Unduh Vibeforge — GANTI nama_project_anda (tanpa spasi, gunakan _ atau -)
+cd C:\laragon\www   # atau C:\xampp\htdocs
 npx -y degit iqbalmurtadho24/vibeforge nama_project_anda
 cd nama_project_anda
-
-# Lalu setup virtual host manual:
-# Laragon: Menu Laragon → Apache → Sites Enabled → Add `nama_project_anda.test` → Reload Apache
-# XAMPP: Edit C:\xampp\apache\conf\extra\httpd-vhosts.conf → tambah VirtualHost → restart Apache
 ```
+
+Lalu setup Virtual Host manual:
+- **Laragon**: Menu → Apache → Sites Enabled → Add `nama_project_anda.test` → Reload
+- **XAMPP**: Edit `httpd-vhosts.conf` → tambah VirtualHost → restart Apache
 
 ### 2. Buka Setup Wizard
+
 ```
-# Laragon (Auto Virtual Host)
+# Laragon
 http://nama_project_anda.test/install/
 
 # XAMPP
 http://localhost/nama_project_anda/public/install/
 ```
-Atau gunakan **Installer Interaktif di Landing Page**:
-```
-http://nama_project_anda.test/  →  Klik "MULAI BUAT APLIKASIMU"  →  Setup Wizard terbuka
-```
 
-### 3. Ikuti 4 Tahap Setup Wizard
+Atau langsung dari landing page: `http://nama_project_anda.test/` → klik "MULAI BUAT APLIKASIMU"
+
+### 3. Ikuti 4 Tahap Wizard
+
 | Tahap | Yang Terjadi |
-| |-------|---------------|
+|---|---|
 | **1. Install** | Auto-detect nama app, path, domain, PHP version. Klik Mulai. |
-| **2. Referensi** | Upload HTML/CSS/JS referensi (opsional). Skip jika mulai dari nol. |
-| **3. Branding & Logo** | Upload logo. Brand identity mengikuti PRD atau isi manual. |
-| **4. PRD** | Generate PRD otomatis (7 bagian) atau paste PRD sendiri. Klik **Jalankan** untuk eksekusi AI. |
+| **2. Referensi** | Upload referensi (opsional). Skip jika mulai dari nol. |
+| **3. Branding** | Upload logo. Brand identity mengikuti PRD atau isi manual. |
+| **4. PRD** | Generate PRD otomatis atau paste PRD sendiri. Klik **Jalankan**. |
 
-> ⚠️ **Jangan lewati Tahap 4.** Kalau `prd.md` kosong, AI akan berhenti dan minta Anda mengisi — ini disengaja supaya AI tidak menebak-nebak konsep aplikasi Anda.
+> Jangan lewati Tahap 4. Jika `prd.md` kosong, AI akan berhenti dan minta Anda mengisi.
 
 ### 4. Jalankan AI Coding Assistant
+
 ```bash
-# Di terminal (masih di folder project)
 claude
 ```
-Kemudian ketik:
+
+Lalu ketik:
+
 ```
 Baca dan jalankan docs/install.md
 ```
 
-### 5. Ikuti 3 Tahap Eksekusi AI
-| Tahap | AI Lakukan | Anda Lakukan |
-| |-------|------------|--------------|
-| **1. Audit & Rencana** | Baca `CLAUDE.md`, `prd.md`, `branding.md`, `references/`, cek struktur core → tulis `docs/build_plan.md` | **Review** `build_plan.md`, approve sebelum lanjut |
-| **2. Eksekusi Kode** | Buat `.env`, `data/users.json` (Argon2ID), seluruh shell PHP, jalankan `php -l` | **Cek** hasil validasi `php -l`, approve sebelum lanjut |
-| **3. Preview Lokal** | Hanya memberi instruksi — tidak bisa eksekusi GUI | **Wajib manual**: buka Laragon/XAMPP, aktifkan Auto Virtual Host, restart Apache, arahkan document root ke `public/`, cek di browser |
+### 5. Eksekusi AI (3 Tahap)
 
-> 💡 **Tips**: Kurangi gangguan approval per-file (opsional):
-> ```bash
-> claude --permission-mode acceptEdits
-> ```
-> atau tekan `Shift+Tab` di dalam sesi. Ini hanya mengurangi prompt per-file — tetap lakukan review Anda di setiap *batas tahap* seperti tabel di atas.
+| Tahap | AI Lakukan | Anda Lakukan |
+|---|---|---|
+| **1. Audit & Rencana** | Baca `CLAUDE.md`, `prd.md`, `branding.md`, `references/` → tulis `docs/build_plan.md` | Review `build_plan.md`, approve sebelum lanjut |
+| **2. Eksekusi Kode** | Buat `.env`, `data/users.json`, seluruh shell PHP, jalankan `php -l` | Cek hasil validasi, approve sebelum lanjut |
+| **3. Preview Lokal** | Beri instruksi saja — tidak bisa eksekusi GUI | Buka browser, cek hasil di Laragon/XAMPP |
+
+> **Tips**: Kurangi approval per-file dengan `claude --permission-mode acceptEdits` atau tekan `Shift+Tab` di sesi. Tetap review di setiap batas tahap.
 
 ---
 
-## 📁 Struktur Project
+## Struktur Project
 
 ```
 vibeforge/
 ├── CLAUDE.md                    # Konstitusi project (wajib baca AI)
-├── README.md                    # File ini
+├── README.md
 ├── LICENSE                      # Apache-2.0
-├── SECURITY.md                  # Kebijakan keamanan
-├── CHANGELOG.md                 # SemVer changelog
-├── index.html                   # Static landing page (GitHub Pages / preview tanpa PHP)
-├── .env                         # Environment config (generate dari .env.example)
-├── .env.example                 # Template env
+├── SECURITY.md
+├── CHANGELOG.md
+├── index.html                   # Static landing (GitHub Pages)
+├── .env / .env.example
 ├── .gitignore
-├── public/                      # DOCUMENT ROOT (Apache/Nginx)
-│   ├── index.php                # Landing page (PHP, server-rendered)
-│   ├── login/index.php          # Halaman login
-│   ├── register/index.php       # Halaman register
-│   ├── logout/index.php         # Logout (redirect only)
-│   ├── manajemen/index.php      # Super Admin dashboard
-│   ├── admin/index.php          # Creator dashboard
-│   ├── client/index.php         # Client dashboard
-│   ├── core/router.php          # Router proxy (WAJIB ADA!)
-│   ├── assets/css/branding.css  # CSS variables (warna utama)
-│   ├── assets/flags/            # Flag images untuk i18n
-│   ├── uploads/                 # User uploads
-│   ├── install/                 # Setup Wizard (4-Step Unified Flow)
-│   └── .htaccess                # Security headers, CSP, block sensitive files
-├── core/                        # Core library (router, auth, session, Repo, CSRF, ratelimit)
-├── include/                     # config.php, helper.php (t(), escape(), dsb)
+│
+├── public/                      # DOCUMENT ROOT
+│   ├── index.php                # Landing page
+│   ├── login/index.php
+│   ├── register/index.php
+│   ├── logout/index.php
+│   ├── manajemen/index.php      # Super Admin
+│   ├── admin/index.php          # Creator
+│   ├── client/index.php         # Client
+│   ├── core/router.php          # Router proxy (WAJIB!)
+│   ├── install/                 # Setup Wizard
+│   ├── assets/css/branding.css  # CSS variables
+│   ├── assets/flags/            # Flag images (i18n)
+│   ├── uploads/
+│   └── .htaccess                # Security headers, CSP
+│
+├── core/                        # Router, auth, session, Repo, CSRF, ratelimit
+├── include/                     # config.php, helper.php (t(), escape())
 ├── modules/                     # Modul AJAX per role (auth/, install/, dll)
 ├── data/                        # JSON dummy (users.json, dll)
 ├── cache/                       # debug.log (APP_DEBUG only)
-├── locales/                     # i18n translations
-│   ├── languages.json           # Manifest bahasa (manifest tunggal!)
-│   ├── id.json                  # Indonesia
-│   ├── en.json                  # English
-│   └── ar.json                  # العربية (RTL)
-├── docs/                        # Dokumentasi aplikasi SPESIFIK
-│   ├── prd.md                   # WAJIB diisi (konsep aplikasi)
-│   ├── branding.md              # WAJIB diisi (identitas visual)
-│   ├── install.md               # Protokol AI (3 tahap, auto-generated)
-│   ├── audit_protocol.md        # Audit template
-│   └── openapi.yaml             # API spec (jika ada endpoint publik)
-├── references/                  # Template visual (acuan struktur)
+├── locales/                     # i18n
+│   ├── languages.json           # Manifest bahasa
+│   ├── id.json / en.json / ar.json
+├── docs/                        # Dokumentasi spesifik aplikasi
+│   ├── prd.md                   # WAJIB diisi
+│   ├── branding.md              # WAJIB diisi
+│   ├── install.md               # Protokol AI (auto-generated)
+│   └── audit_protocol.md
+├── references/                  # Template visual (golden reference)
 │   ├── landingpage.html
-│   ├── login.html
-│   ├── register.html
+│   ├── login.html / register.html
 │   ├── modul_manajemen.html
 │   ├── modul_admin.html
 │   └── modul_client.html
 ├── migrations/                  # SQL (production only)
-└── .htaccess                    # Proteksi kedua (document root salah arah)
+└── .htaccess                    # Proteksi jika doc root salah arah
 ```
 
 ---
 
-## 🔧 Konfigurasi Environment
+## Konfigurasi Environment
 
-### `.env` (Contoh Production)
+### Production
+
 ```env
-# App Identity
 APP_DISPLAY_NAME="Nama Aplikasi Anda"
 APP_TAGLINE="Tagline aplikasi"
 APP_ENV=production
@@ -283,12 +276,14 @@ RATE_LIMIT_WINDOW=300
 ```
 
 ### Generate Keys
+
 ```bash
 php -r "echo bin2hex(random_bytes(32)).PHP_EOL;"   # APP_KEY / CSRF_KEY
 php -r "echo bin2hex(random_bytes(64)).PHP_EOL;"   # REMEMBER_ME_SECRET
 ```
 
 ### Development Override
+
 ```env
 APP_ENV=development
 APP_DEBUG=true
@@ -298,22 +293,21 @@ SESSION_SECURE=false
 
 ---
 
-## 🌐 Internationalization (i18n)
+## Internationalization (i18n)
 
 ### Tambah Bahasa Baru
+
 1. Tambah entry di `locales/languages.json`:
-```json
-{
-  "id": { "name": "Bahasa Indonesia", "flag": "/assets/flags/id.svg", "rtl": false },
-  "en": { "name": "English", "flag": "/assets/flags/en.svg", "rtl": false },
-  "ar": { "name": "العربية", "flag": "/assets/flags/ar.svg", "rtl": true },
-  "jp": { "name": "日本語", "flag": "/assets/flags/jp.svg", "rtl": false }
-}
-```
-2. Buat `locales/jp.json` dengan key-value yang sama struktur.
-3. Selesai — selector otomatis muncul, tidak perlu ubah kode PHP.
+   ```json
+   {
+     "jp": { "name": "日本語", "flag": "/assets/flags/jp.svg", "rtl": false }
+   }
+   ```
+2. Buat `locales/jp.json` dengan key-value struktur sama.
+3. Selesai — selector otomatis muncul, tanpa ubah kode PHP.
 
 ### Gunakan di Kode
+
 ```php
 // PHP
 <?= t('hero.title') ?>
@@ -322,41 +316,35 @@ SESSION_SECURE=false
 // JavaScript (di shell PHP)
 window._i18n = {
   greetingMorning: '<?= json_encode(t("greeting.morning")) ?>',
-  // ...
 };
-// Lalu di JS murni:
+// JS murni:
 element.textContent = window._i18n.greetingMorning;
 ```
 
 ---
 
-## 🛡️ Security
+## Security
 
-Lihat **[SECURITY.md](SECURITY.md)** untuk:
-- Vulnerability reporting (private disclosure)
-- Security checklist untuk developer & deployment
-- Implemented protections table
-- Required `.env` configuration
-- Standards compliance (OWASP ASVS L1-2, Top 10, CWE)
+Lihat **[SECURITY.md](SECURITY.md)** untuk detail lengkap.
 
-**Ringkasan Cepat**:
-- Password: Argon2ID ✅
-- CSRF: Centralized token + `hash_equals()` ✅
-- SQLi: Prepared statements only ✅
-- XSS: `escape()` / `t()` + CSP ✅
-- Rate Limit: IP + username fixed-window ✅
-- Session: Regenerate ID, secure cookies ✅
+| Proteksi | Implementasi |
+|---|---|
+| Password | Argon2ID (`PASSWORD_ARGON2ID`) |
+| CSRF | Token terpusat + `hash_equals()` |
+| SQL Injection | Prepared statements via PDO |
+| XSS | `escape()` / `t()` + CSP headers |
+| Rate Limiting | IP + username, fixed-window |
+| Session | Regenerate ID, secure cookies |
 
 ---
 
-## 📦 Deployment Checklist
+## Deployment Checklist
 
-Sebelum production:
 - [ ] `APP_ENV=production`
 - [ ] `APP_DEBUG=false`
 - [ ] `DB_MODE=mysql` (bukan `auto`/`json`)
 - [ ] Generate fresh `APP_KEY`, `CSRF_KEY`, `REMEMBER_ME_SECRET`
-- [ ] Database MySQL ready + user dengan privileges minimal
+- [ ] Database MySQL ready + user minimal privileges
 - [ ] HTTPS enforced (valid TLS cert)
 - [ ] Document root → `public/`
 - [ ] `.htaccess` security rules active (CSP, block `.env`/`*.log`/`*.sql`)
@@ -366,10 +354,10 @@ Sebelum production:
 
 ---
 
-## 🤝 Kontribusi
+## Kontribusi
 
 1. Fork repo
-2. Buat branch: `git checkout -b feature/nama-fitur`
+2. Branch: `git checkout -b feature/nama-fitur`
 3. Commit: `git commit -m "feat: deskripsi singkat"`
 4. Push: `git push origin feature/nama-fitur`
 5. Open Pull Request
@@ -378,7 +366,7 @@ Sebelum production:
 
 ---
 
-## 📄 Lisensi
+## Lisensi
 
 **Apache License 2.0** — lihat [LICENSE](LICENSE).
 
@@ -400,20 +388,20 @@ limitations under the License.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Tailwind CSS** — Utility-first styling (CDN)
 - **Alpine.js** — Reactive UI components (CDN)
-- **Phosphor Icons** — Beautiful icon set (CDN)
+- **Phosphor Icons** — Icon set (CDN)
 - **degit** — Git repo downloader for template bootstrap
 
 ---
 
-## 📞 Support & Community
+## Support & Community
 
-- **GitHub Issues**: Bug reports, feature requests
-- **GitHub Discussions**: Questions, showcase, general chat
-- **Security**: [SECURITY.md](SECURITY.md) — private disclosure only
+- **GitHub Issues** — Bug reports, feature requests
+- **GitHub Discussions** — Questions, showcase, general chat
+- **Security** — [SECURITY.md](SECURITY.md) — private disclosure only
 
 ---
 
