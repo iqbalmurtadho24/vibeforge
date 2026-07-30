@@ -1,10 +1,12 @@
 <?php
 /**
  * Vibeforge - Installation Wizard Shell
- * IT Professional Edition
+ * 4-Step Unified Flow
  *
- * Flow: Welcome Overview (1) -> PRD (2) -> Branding (3) -> Logo (4) ->
- *        HTML Templates (5-10) -> Server Config (11) -> Install Path (12)
+ * Tahap 1: Install (Auto-Detect)
+ * Tahap 2: Referensi (Opsional)
+ * Tahap 3: Branding & Logo
+ * Tahap 4: PRD (7 Bagian)
  */
 defined('APP_ENTRY') or define('APP_ENTRY', true);
 
@@ -13,91 +15,32 @@ require_once __DIR__ . '/../../include/helper.php';
 require_once __DIR__ . '/../../core/session.php';
 require_once __DIR__ . '/../../core/csrf.php';
 require_once __DIR__ . '/header.php';
-
-initSession();
-if (!empty($_GET['lang']) && in_array($_GET['lang'], getAvailableLocaleCodes(), true)) {
-    $_SESSION['language'] = $_GET['lang'];
-}
-$currentLang = $_SESSION['language'] ?? detectLanguage();
-$_SESSION['language'] = $currentLang;
-$csrfToken = generateCsrfToken();
-$isLoggedIn = isLoggedIn();
-$dashboardUrl = getDashboardUrl();
-
-$projectRoot = dirname(__DIR__, 2);
-
-// Pre-load existing file contents for pre-population
-$filesData = [
-    'prd'            => file_exists($projectRoot . '/docs/prd.md')                   ? file_get_contents($projectRoot . '/docs/prd.md')                   : '',
-    'branding'       => file_exists($projectRoot . '/docs/branding.md')              ? file_get_contents($projectRoot . '/docs/branding.md')              : '',
-    'landingPage'    => file_exists($projectRoot . '/references/landingpage.html')   ? file_get_contents($projectRoot . '/references/landingpage.html')   : '',
-    'loginPage'      => file_exists($projectRoot . '/references/login.html')         ? file_get_contents($projectRoot . '/references/login.html')         : '',
-    'registerPage'   => file_exists($projectRoot . '/references/register.html')       ? file_get_contents($projectRoot . '/references/register.html')       : '',
-    'manajemenPage'  => file_exists($projectRoot . '/references/modul_manajemen.html') ? file_get_contents($projectRoot . '/references/modul_manajemen.html') : '',
-    'adminPage'      => file_exists($projectRoot . '/references/modul_admin.html')    ? file_get_contents($projectRoot . '/references/modul_admin.html')    : '',
-    'clientPage'     => file_exists($projectRoot . '/references/modul_client.html')   ? file_get_contents($projectRoot . '/references/modul_client.html')   : '',
-    'logoBase64'     => file_exists($projectRoot . '/docs/logo.png')                 ? base64_encode(file_get_contents($projectRoot . '/docs/logo.png'))   : '',
-];
-
-$installConfig = [];
-$configPath = $projectRoot . '/data/install_config.json';
-if (file_exists($configPath)) {
-    $installConfig = json_decode(file_get_contents($configPath), true) ?? [];
-}
 ?>
 <!DOCTYPE html>
-<html lang="<?= $currentLang ?>" class="dark">
+<html lang="<?= $currentLang ?>" dir="<?= isRtlLanguage() ? 'rtl' : 'ltr' ?>" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setup Wizard - <?= APP_DISPLAY_NAME ?> Engine</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F97316'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
+    <title>Setup Wizard — <?= APP_DISPLAY_NAME ?></title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F97316'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../assets/css/branding.css">
-
-    <!-- Monaco Editor Loader -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
-        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' } });
-        window.monacoLoaded = false;
-        window.monacoLoadFailed = false;
-
-        var monacoTimeout = setTimeout(function() {
-            if (!window.monacoLoaded) {
-                window.monacoLoadFailed = true;
-                window.monacoLoaded = true;
-                if (typeof renderStep === 'function') renderStep();
-            }
-        }, 10000);
-
-        require(['vs/editor/editor.main'], function() {
-            clearTimeout(monacoTimeout);
-            window.monacoLoaded = true;
-            if (typeof window.onMonacoReady === 'function') window.onMonacoReady();
-        }, function(err) {
-            clearTimeout(monacoTimeout);
-            window.monacoLoadFailed = true;
-            window.monacoLoaded = true;
-        });
+        var origWarn = console.warn;
+        console.warn = function() { if (arguments[0] && typeof arguments[0] === 'string' && arguments[0].includes('cdn.tailwindcss.com should not be used in production')) return; origWarn.apply(console, arguments); };
     </script>
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/branding.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            primary: '#F97316',
-                            hover: '#EA580C',
-                            dark: '#0B0F17',
-                            card: '#111726',
-                            border: '#1E293B'
-                        }
+                        brand: { primary: '#F97316', hover: '#EA580C', dark: '#0B0F17', card: '#111726', border: '#1E293B' }
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
@@ -111,65 +54,37 @@ if (file_exists($configPath)) {
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-primary); color: var(--text-primary); }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .tech-grid {
-            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 32px 32px;
-        }
-        .glow-mesh {
-            background: radial-gradient(circle at 50% 10%, rgba(249, 115, 22, 0.12) 0%, rgba(11, 15, 23, 0) 70%);
-        }
+        .tech-grid { background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 32px 32px; }
         .text-gradient { background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #F59E0B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .bg-gradient-brand { background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); }
-        .glow-orange { box-shadow: 0 0 35px rgba(249, 115, 22, 0.25); }
-        .glow-orange-sm { box-shadow: 0 0 20px rgba(249, 115, 22, 0.15); }
-        .glow-box-cyber { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
+        .glow-orange { box-shadow: 0 0 35px rgba(249,115,22,0.25); }
+        .glow-orange-sm { box-shadow: 0 0 20px rgba(249,115,22,0.15); }
+        .glow-box-cyber { box-shadow: 0 0 0 1px rgba(249,115,22,0.2), 0 10px 30px -10px rgba(0,0,0,0.8); }
         .step-dot { transition: all 0.3s ease; }
-        .step-dot.active { background: var(--brand-primary); border-color: var(--brand-primary); transform: scale(1.15); color: #fff; box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
+        .step-dot.active { background: var(--brand-primary); border-color: var(--brand-primary); transform: scale(1.15); color: #fff; box-shadow: 0 0 15px rgba(249,115,22,0.4); }
         .step-dot.completed { background: #10B981; border-color: #10B981; color: #fff; }
         .step-dot.inactive { background: var(--bg-card); border-color: var(--border-default); color: var(--text-muted); }
-        .step-connector { width: 14px; height: 2px; background: var(--border-default); transition: background 0.3s ease; }
+        .step-connector { width: 28px; height: 2px; background: var(--border-default); transition: background 0.3s ease; }
         .step-connector.completed { background: #10B981; }
-        .form-input { width: 100%; padding: 0.75rem 1rem; background: var(--bg-card); border: 1px solid var(--border-default); border-radius: 0.75rem; color: var(--text-primary); font-size: 0.875rem; transition: all 0.2s; }
-        .form-input:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15); }
-        .form-label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary); }
-        .upload-zone { border: 2px dashed var(--border-default); border-radius: 1rem; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; }
-        .upload-zone:hover, .upload-zone.dragover { border-color: var(--brand-primary); background: rgba(249, 115, 22, 0.05); }
-        .editor-container { height: 420px; border: 1px solid var(--border-default); border-radius: 0.75rem; overflow: hidden; background: #0B0F17; }
-        .step-content { animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes checkmark { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-        .success-check { animation: checkmark 0.4s ease-out; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .fallback-notice { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #FBBF24; padding: 0.6rem 1rem; border-radius: 0.75rem; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 0.5rem; }
+        .editor-container { min-height: 420px; border-radius: 12px; overflow: hidden; }
+        .prd-form-field { width: 100%; padding: 0.625rem 0.75rem; background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-primary); transition: border-color 0.2s; resize: vertical; }
+        .prd-form-field:focus { border-color: var(--brand-primary); outline: none; }
+        .prd-form-field-sm { padding: 0.5rem 0.625rem; background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-primary); transition: border-color 0.2s; }
+        .prd-form-field-sm:focus { border-color: var(--brand-primary); outline: none; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .success-check { animation: successPop 0.5s ease; }
+        @keyframes successPop { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .check-item { transition: all 0.3s ease; }
+        .check-pass { border-color: #10B981; }
+        .check-fail { border-color: #EF4444; }
     </style>
 </head>
-<body class="antialiased min-h-screen pt-24 tech-grid bg-[var(--bg-primary)] text-[var(--text-primary)]">
-    <div class="min-h-screen flex flex-col glow-mesh">
-
-        <!-- Top Status Bar -->
-        <div class="fixed top-0 w-full bg-[var(--bg-secondary)] border-b border-[var(--border-default)] py-1 px-4 text-[11px] font-mono text-[var(--text-secondary)] hidden sm:flex items-center justify-between z-50">
-            <div class="flex items-center gap-4">
-                <span class="flex items-center gap-1.5 text-emerald-400 font-bold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    INSTALLER: ACTIVE
-                </span>
-                <span class="text-[var(--border-default)]">|</span>
-                <span>PHP 8.3+ Runtime</span>
-                <span class="text-[var(--border-default)]">|</span>
-                <span>Config Engine: Dual-Mode</span>
-            </div>
-            <div class="flex items-center gap-4">
-                <span>Wizard Version: 3.2.0</span>
-                <span class="text-[var(--border-default)]">|</span>
-                <span class="text-[var(--brand-primary)]">VIBEFORGE_ENGINE</span>
-            </div>
-        </div>
+<body class="min-h-screen flex flex-col antialiased tech-grid bg-[var(--bg-primary)]">
+    <div class="flex-1 flex flex-col">
 
         <!-- Navbar -->
-        <nav class="fixed top-7 w-full z-40 bg-[var(--bg-primary)]/85 backdrop-blur-xl border-b border-[var(--border-default)]">
+        <nav class="sticky top-0 w-full z-50 bg-[var(--bg-primary)]/85 backdrop-blur-xl border-b border-[var(--border-default)]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
                     <a href="/" class="flex items-center gap-3 group">
@@ -182,12 +97,6 @@ if (file_exists($configPath)) {
                         </div>
                     </a>
 
-                    <div class="hidden md:flex items-center gap-8 font-medium text-sm">
-                        <a href="/#fitur" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5"><i class="ph ph-cpu text-base text-[var(--brand-primary)]"></i> Arsitektur</a>
-                        <a href="/#cara-pasang" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5"><i class="ph ph-terminal-window text-base text-[var(--brand-primary)]"></i> Installer</a>
-                        <a href="/#demo" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5"><i class="ph ph-shield-check text-base text-[var(--brand-primary)]"></i> Demo Roles</a>
-                    </div>
-
                     <div class="flex items-center gap-3">
                         <a href="/" class="px-3 py-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-mono font-semibold rounded-lg hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5"><i class="ph ph-arrow-left"></i> BERANDA</a>
                         <button id="themeToggle" class="w-9 h-9 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] flex items-center justify-center transition-colors text-[var(--text-muted)] hover:text-amber-400" aria-label="Toggle theme"><i class="ph ph-moon text-lg dark:text-amber-400"></i></button>
@@ -199,12 +108,11 @@ if (file_exists($configPath)) {
         <!-- Progress Stepper Header -->
         <div class="bg-[var(--bg-card)]/90 backdrop-blur-md border-b border-[var(--border-default)] px-4 py-4 mt-2">
             <div class="max-w-7xl mx-auto space-y-3">
-                <div class="flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider" id="phaseLabels"></div>
-
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-2 bg-[var(--bg-primary)] px-4 py-2.5 rounded-xl border border-[var(--border-default)]">
+                <div class="flex items-center justify-center gap-2 overflow-x-auto hide-scrollbar pb-1" id="stepsDots"></div>
+                <div class="flex items-center justify-between gap-2 bg-[var(--bg-primary)] px-4 py-2.5 rounded-xl border border-[var(--border-default)]">
                     <div class="flex items-center gap-3">
-                        <span class="px-2.5 py-0.5 rounded bg-orange-500/10 border border-orange-500/30 text-[var(--brand-primary)] font-mono text-xs font-bold" id="stepLabel">STEP 01/12</span>
-                        <span class="text-xs font-heading font-bold text-[var(--text-primary)] flex items-center gap-2" id="stepName"><i class="ph ph-map-trifold text-[var(--brand-primary)]"></i> Overview</span>
+                        <span class="px-2.5 py-0.5 rounded bg-orange-500/10 border border-orange-500/30 text-[var(--brand-primary)] font-mono text-xs font-bold" id="stepLabel">TAHAP 1/4</span>
+                        <span class="text-xs font-heading font-bold text-[var(--text-primary)] flex items-center gap-2" id="stepName"><i class="ph ph-hard-drives text-[var(--brand-primary)]"></i> Install</span>
                     </div>
                     <div class="flex items-center gap-2 font-mono text-xs">
                         <span id="saveStatus" class="text-emerald-400 hidden flex items-center gap-1.5 font-bold">
@@ -212,40 +120,25 @@ if (file_exists($configPath)) {
                         </span>
                     </div>
                 </div>
-
-                <div class="flex items-center justify-center pt-1 overflow-x-auto hide-scrollbar pb-1" id="stepsDots"></div>
             </div>
         </div>
 
         <!-- Main Content -->
         <main class="flex-1 px-4 py-8">
             <div class="max-w-4xl mx-auto">
-                <div id="eduBanner" class="mb-6 p-4 bg-gray-950 border border-[var(--border-default)] rounded-2xl flex items-start gap-4 shadow-xl glow-box-cyber">
-                    <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)] shrink-0"><i class="ph ph-cpu text-2xl"></i></div>
-                    <div>
-                        <h4 class="font-heading font-bold text-sm text-[var(--text-primary)] mb-1" id="eduTitle">Developer Reference Context</h4>
-                        <p class="text-xs text-[var(--text-secondary)] leading-relaxed" id="eduDesc">File yang Anda edit di sini akan langsung disimpan ke project lokal.</p>
-                    </div>
-                </div>
-
                 <div id="wizardContent" class="step-content"></div>
 
-                <div class="mt-8 flex items-center justify-between gap-3 pt-4 border-t border-[var(--border-default)] font-mono">
+                <!-- Navigation Buttons -->
+                <div id="navButtons" class="mt-8 flex items-center justify-center gap-3 pt-6 border-t border-[var(--border-default)] font-mono">
                     <button id="prevBtn" onclick="prevStep()" class="hidden px-6 py-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl text-xs font-bold hover:border-[var(--brand-primary)] transition-all flex items-center gap-2">
-                        <i class="ph ph-arrow-left text-sm"></i> PREV STEP
+                        <i class="ph ph-arrow-left text-sm"></i> SEBELUMNYA
                     </button>
-                    <div class="flex-1"></div>
-                    <div class="flex items-center gap-3">
-                        <button id="nextBtn" onclick="nextStep()" class="hidden px-6 py-3 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-md glow-orange-sm flex items-center gap-2">
-                            NEXT STEP <i class="ph ph-arrow-right text-sm"></i>
-                        </button>
-                        <button id="finishBtn" onclick="finishWizard()" class="hidden px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2">
-                            <i class="ph ph-check text-base"></i> CONFIRM & GENERATE
-                        </button>
-                        <button id="executeBtn" onclick="executeTerminal()" class="hidden px-6 py-3 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-xl glow-orange flex items-center gap-2">
-                            <i class="ph ph-terminal-window text-base"></i> LAUNCH TERMINAL
-                        </button>
-                    </div>
+                    <button id="nextBtn" onclick="nextStep()" class="hidden px-10 py-4 bg-gradient-brand text-white text-sm font-extrabold rounded-2xl hover:opacity-95 transition-all shadow-xl glow-orange flex items-center gap-2.5 tracking-wide">
+                        <i class="ph ph-play text-lg"></i> MULAI
+                    </button>
+                    <button id="executeBtn" onclick="executeTerminal()" class="hidden px-8 py-3.5 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-xl glow-orange flex items-center gap-2">
+                        <i class="ph ph-terminal-window text-base"></i> JALANKAN AI
+                    </button>
                 </div>
             </div>
         </main>
@@ -256,17 +149,17 @@ if (file_exists($configPath)) {
         <div class="bg-gray-950 rounded-2xl p-8 max-w-md w-full border border-gray-800 shadow-2xl relative glow-box-cyber text-center" onclick="event.stopPropagation()">
             <button onclick="closeSuccessModal()" class="absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-colors" aria-label="Close"><i class="ph ph-x text-lg"></i></button>
             <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-5 success-check"><i class="ph ph-check-circle text-4xl text-emerald-400"></i></div>
-            <h2 class="text-2xl font-heading font-extrabold mb-2">Konfigurasi Disimpan!</h2>
-            <p class="text-xs text-[var(--text-secondary)] mb-6">Seluruh file spesifikasi aplikasi Anda telah diperbarui.</p>
-
-            <div class="bg-black/60 rounded-xl p-4 text-left mb-6 border border-gray-800 font-mono text-xs">
+            <h2 class="text-2xl font-heading font-extrabold mb-2">Siap Dieksekusi!</h2>
+            <p class="text-xs text-[var(--text-secondary)] mb-4">File spesifikasi sudah diperbarui. <code class="text-[var(--brand-primary)]">docs/install.md</code> berisi instruksi lengkap termasuk file yang akan di-generate otomatis.</p>
+            <div class="bg-black/60 rounded-xl p-4 text-left mb-4 border border-gray-800 font-mono text-xs">
                 <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-wider">// Saved Specifications:</p>
-                <ul id="savedFilesList" class="space-y-1.5 mb-4 max-h-32 overflow-y-auto hide-scrollbar"></ul>
-                <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-wider">// AI Prompt Command:</p>
+                <ul id="savedFilesList" class="space-y-1.5 mb-4 max-h-40 overflow-y-auto hide-scrollbar"></ul>
+                <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-wider">// Claude Code Command:</p>
                 <div class="flex items-center gap-2 bg-gray-900 p-2.5 rounded-lg border border-gray-800">
-                    <code class="text-orange-400 font-mono text-xs flex-1 truncate">baca dan jalankan @docs/install.md</code>
-                    <button onclick="copyModalInstallCommand()" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-[11px] transition-colors shrink-0 flex items-center gap-1"><i class="ph ph-copy"></i> Copy</button>
+                    <code class="text-orange-400 font-mono text-xs flex-1 truncate" id="modalCommandText">baca dan jalankan @docs/install.md</code>
+                    <button onclick="copyAndLaunchClaude()" class="px-3 py-1.5 bg-gradient-brand text-white rounded text-[11px] font-bold transition-all hover:opacity-90 shrink-0 flex items-center gap-1.5 shadow-md"><i class="ph ph-copy"></i> Copy & Jalankan</button>
                 </div>
+                <p class="text-[10px] text-gray-500 mt-2 leading-relaxed">Command akan disalin ke clipboard, lalu PowerShell terbuka otomatis dengan <code class="text-gray-400">claude</code> siap dijalankan — tinggal paste (Ctrl+V) dan Enter.</p>
             </div>
             <a href="/" class="w-full py-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl font-mono text-xs font-bold text-[var(--text-primary)] hover:border-[var(--brand-primary)] transition-all inline-flex items-center justify-center gap-2">
                 <i class="ph ph-house text-base"></i> KEMBALI KE BERANDA
@@ -289,72 +182,118 @@ if (file_exists($configPath)) {
     </div>
 
     <script>
+    // =====================================================
+    // Vibeforge Setup Wizard — 4-Step Unified Flow
+    // =====================================================
+
     var csrfToken = '<?= $csrfToken ?>';
     var currentStep = 1;
-    var totalSteps = 12;
+    var totalSteps = 4;
     var editor = null;
     var autoSaveTimeout = null;
     var isNavigating = false;
     var savedFiles = new Set();
-
-    var urlParams = new URLSearchParams(window.location.search);
-    var paramMode = urlParams.get('mode');
-    var paramDrive = urlParams.get('drive');
-    var paramServer = urlParams.get('serverType');
-
-    var appMode = paramMode === 'redesign' ? 'redesign' : 'new';
     var refFiles = [];
+    var hasReferences = false; // YA/TIDAK state — locks Tahap 3 & 4 when false
+    var brandingMode = 'manual'; // 'auto' | 'manual' — for Tahap 3 when YA
+    var prdMode = 'manual'; // 'auto' | 'manual' — for Tahap 4 when YA
+    var pageStructure = { landing: true, login: true, register: true, manajemen: true, admin: true, client: true };
 
+    // Auto-detected environment data from PHP
+    var envData = {
+        appName: <?= $jsAppName ?>,
+        projectPath: <?= $jsProjectPath ?>,
+        localDomain: <?= $jsLocalDomain ?>,
+        phpVersion: <?= $jsPhpVersion ?>,
+        serverType: <?= $jsServerType ?>,
+        serverLabel: <?= $jsServerLabel ?>,
+        docRoot: <?= $jsDocRoot ?>
+    };
+
+    // Pre-loaded file data
     var formData = <?= json_encode($filesData) ?>;
     formData.logo = null;
-    formData.serverType = paramServer || <?= $jsServer ?>;
-    formData.drive = paramDrive || <?= $jsDrive ?>;
-    formData.installPath = <?= $jsInstallPath ?>;
-    formData.referencesPath = <?= $jsReferencesPath ?>;
-    formData.availableDrives = <?= $jsAvailableDrives ?>;
 
-    var stepsNew = [
-        { id: 1,  name: 'Overview',    icon: 'ph-map-trifold',   file: null,           type: 'welcome' },
-        { id: 2,  name: 'PRD',         icon: 'ph-file-text',     file: 'docs/prd.md',  type: 'markdown' },
-        { id: 3,  name: 'Branding',    icon: 'ph-palette',       file: 'docs/branding.md', type: 'markdown' },
-        { id: 4,  name: 'Logo',        icon: 'ph-image',         file: 'docs/logo.png', type: 'image' },
-        { id: 5,  name: 'Landing',     icon: 'ph-browser',       file: 'references/landingpage.html',   type: 'html' },
-        { id: 6,  name: 'Login',       icon: 'ph-sign-in',       file: 'references/login.html',         type: 'html' },
-        { id: 7,  name: 'Register',    icon: 'ph-user-plus',     file: 'references/register.html',      type: 'html' },
-        { id: 8,  name: 'Manajemen',   icon: 'ph-users-three',   file: 'references/modul_manajemen.html', type: 'html' },
-        { id: 9,  name: 'Admin',       icon: 'ph-rocket-launch', file: 'references/modul_admin.html',   type: 'html' },
-        { id: 10, name: 'Client',      icon: 'ph-user',          file: 'references/modul_client.html',  type: 'html' },
-        { id: 11, name: 'Server',      icon: 'ph-hard-drives',   file: null,           type: 'config' },
-        { id: 12, name: 'Path',        icon: 'ph-folder',         file: null,           type: 'config' }
+    // =====================================================
+    // Step Definitions — 4-Step Unified Flow
+    // =====================================================
+    var steps = [
+        { id: 1, name: 'Install',    icon: 'ph-hard-drives',    type: 'install' },
+        { id: 2, name: 'Referensi',  icon: 'ph-folder-simple',  type: 'references' },
+        { id: 3, name: 'Branding',   icon: 'ph-palette',        type: 'branding' },
+        { id: 4, name: 'PRD',        icon: 'ph-file-text',      type: 'prd' }
     ];
 
-    var stepsRedesign = [
-        { id: 1,  name: 'Overview',    icon: 'ph-map-trifold',   file: null,           type: 'welcome' },
-        { id: 2,  name: 'References',  icon: 'ph-folder-simple', file: null,           type: 'ref_manager' },
-        { id: 3,  name: 'Logo',        icon: 'ph-image',         file: 'docs/logo.png', type: 'image' },
-        { id: 4,  name: 'Server',      icon: 'ph-hard-drives',   file: null,           type: 'config' },
-        { id: 5,  name: 'Path',        icon: 'ph-folder',         file: null,           type: 'config' }
-    ];
+    // Default PRD template (7 bagian)
+    var prdTemplate = '# PRD: ' + envData.appName + '\n' +
+        '\n' +
+        '## 1. Problem Statement\n' +
+        '[Masalah apa yang mau diberesin? Siapa yang ngerasain? Kenapa solusi yang ada sekarang belum cukup?]\n' +
+        '\n' +
+        '## 2. Goals\n' +
+        '- G1: [Tujuan] -> ukurannya: [metrik yang kelihatan]\n' +
+        '- G2: [Tujuan] -> ukurannya: [metrik]\n' +
+        '\n' +
+        '## 3. Target User\n' +
+        '- [Siapa mereka? Peran? Butuh apa? Masalah mereka apa? Harus konsisten dengan halaman yang dicentang di Tahap 3B.]\n' +
+        '\n' +
+        '## 4. User Stories\n' +
+        '- US-1 (P1): Sebagai [user], saya ingin [aksi] supaya [manfaat].\n' +
+        '- US-2 (P1): Sebagai [user], saya ingin [aksi] supaya [manfaat].\n' +
+        '\n' +
+        '## 5. Functional Requirements\n' +
+        '- FR-1 (P1): [Sistem harus bisa ...]\n' +
+        '- FR-2 (P1): [Sistem harus bisa ...]\n' +
+        '- FR-3 (P2): [Sistem harus bisa ...]\n' +
+        '\n' +
+        '## 6. Non-Functional Requirements\n' +
+        '- NFR-1 (P1): [Kecepatan / keamanan / skala ...]\n' +
+        '\n' +
+        '## 7. Scope\n' +
+        'IN (versi 1.0): [fitur yang masuk sekarang]\n' +
+        'OUT (nanti): [fitur yang ditunda]\n';
 
-    var steps = stepsNew;
+    // Default branding template (form fields as markdown)
+    var brandingTemplate = '# Branding: ' + envData.appName + '\n' +
+        '\n' +
+        '## 1. Nama Aplikasi & Tagline\n' +
+        '- Nama: ' + envData.appName + '\n' +
+        '- Tagline: [Tagline aplikasi Anda]\n' +
+        '\n' +
+        '## 2. Deskripsi Singkat / Value Proposition\n' +
+        '[Apa yang membuat aplikasi ini berbeda dan bernilai bagi pengguna?]\n' +
+        '\n' +
+        '## 3. Target Audience & Tone of Voice\n' +
+        '- Target: [Siapa pengguna utama?]\n' +
+        '- Tone: [formal / santai / profesional / kreatif]\n' +
+        '\n' +
+        '## 4. Palet Warna\n' +
+        '- Primary: #F97316\n' +
+        '- Secondary: #1E293B\n' +
+        '- Accent: #10B981\n' +
+        '\n' +
+        '## 5. Typography\n' +
+        '- Heading: Plus Jakarta Sans\n' +
+        '- Body: Inter\n' +
+        '\n' +
+        '## 6. Logo & Asset Guidelines\n' +
+        '[Upload logo di atas. Format: PNG/SVG, rekomendasi 512x512px.]\n';
 
+    // =====================================================
+    // Step Navigation
+    // =====================================================
     function initSteps() {
         var dotsContainer = document.getElementById('stepsDots');
-        var labelsContainer = document.getElementById('phaseLabels');
-        if (labelsContainer) {
-            labelsContainer.innerHTML = steps.map(function(s) {
-                return '<span>' + s.name + '</span>';
-            }).join('');
-        }
         if (!dotsContainer) return;
         dotsContainer.innerHTML = '';
+
         steps.forEach(function(s, i) {
             var dot = document.createElement('div');
             dot.className = 'step-dot border shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-xs cursor-pointer';
             dot.setAttribute('data-step', s.id);
             dot.setAttribute('onclick', 'jumpToStep(' + s.id + ')');
             dot.setAttribute('title', s.name);
-            dot.innerHTML = s.type === 'welcome' ? '<i class="ph ph-map-trifold text-sm"></i>' : (s.id < 10 ? '0' + s.id : s.id);
+            dot.innerHTML = '<i class="ph ' + s.icon + ' text-sm"></i>';
             dotsContainer.appendChild(dot);
             if (i < steps.length - 1) {
                 var connector = document.createElement('div');
@@ -364,23 +303,13 @@ if (file_exists($configPath)) {
         });
     }
 
-    function setAppMode(mode) {
-        appMode = mode;
-        if (mode === 'redesign') {
-            steps = stepsRedesign;
-            totalSteps = stepsRedesign.length;
-        } else {
-            steps = stepsNew;
-            totalSteps = stepsNew.length;
-        }
-        initSteps();
-        renderStep();
-    }
-
     function updateStepUI() {
-        document.getElementById('stepLabel').textContent = 'STEP ' + (currentStep < 10 ? '0' + currentStep : currentStep) + '/' + (totalSteps < 10 ? '0' + totalSteps : totalSteps);
+        document.getElementById('stepLabel').textContent = 'TAHAP ' + currentStep + '/4';
         var step = steps[currentStep - 1];
         document.getElementById('stepName').innerHTML = '<i class="ph ' + step.icon + ' text-[var(--brand-primary)]"></i> ' + step.name;
+
+        // Block steps beyond 2 if references YA but folder empty
+        var refsBlocked = hasReferences === true && refFiles.length === 0;
 
         var dots = document.querySelectorAll('.step-dot');
         var connectors = document.querySelectorAll('.step-connector');
@@ -389,472 +318,1252 @@ if (file_exists($configPath)) {
             if (i + 1 < currentStep) dot.classList.add('completed');
             else if (i + 1 === currentStep) dot.classList.add('active');
             else dot.classList.add('inactive');
+            // Disable dots beyond step 2 if refs blocked
+            if (refsBlocked && i + 1 > 2) {
+                dot.classList.add('opacity-40', 'pointer-events-none');
+            }
         });
         connectors.forEach(function(c, i) {
             c.className = 'step-connector';
             if (i + 1 < currentStep) c.classList.add('completed');
+            if (refsBlocked && i + 1 >= 2) {
+                c.classList.add('opacity-40');
+            }
         });
 
-        var isWelcome = currentStep === 1;
-        var isServer = step.type === 'config' && step.name === 'Server';
-        var isPath = step.type === 'config' && step.name === 'Path';
+        // Show/hide navigation buttons
+        var isFirst = currentStep === 1;
+        var isLast = currentStep === totalSteps;
+        var prevBtn = document.getElementById('prevBtn');
+        var nextBtn = document.getElementById('nextBtn');
+        var executeBtn = document.getElementById('executeBtn');
+        var navContainer = document.getElementById('navButtons');
 
-        document.getElementById('prevBtn').classList.toggle('hidden', isWelcome);
-        document.getElementById('nextBtn').classList.toggle('hidden', isServer || isPath || isWelcome);
-        document.getElementById('finishBtn').classList.toggle('hidden', !isServer);
-        document.getElementById('executeBtn').classList.toggle('hidden', !isPath);
+        prevBtn.classList.toggle('hidden', isFirst);
+        nextBtn.classList.toggle('hidden', isLast);
 
-        var banner = document.getElementById('eduBanner');
-        if (step.type === 'welcome') {
-            banner.style.display = 'none';
+        // Step 4: hide nextBtn, show prevBtn (KEMBALI to step 3), show executeBtn
+        if (isLast) {
+            nextBtn.classList.add('hidden'); // Sembunyikan "SELANJUTNYA"
+            // prevBtn tetap visible (tidak di-hide) -> menjadi "KEMBALI"
+        }
+
+        executeBtn.classList.toggle('hidden', !isLast);
+
+        // Disable next if refs blocked on step 2
+        if (currentStep === 2 && refsBlocked) {
+            nextBtn.classList.add('opacity-40', 'pointer-events-none');
         } else {
-            banner.style.display = 'flex';
-            var bannerTitle = document.getElementById('eduTitle');
-            var bannerDesc = document.getElementById('eduDesc');
-            if (step.type === 'markdown') {
-                bannerTitle.textContent = 'Dokumen Konsep Aplikasi (PRD / Branding)';
-                bannerDesc.textContent = 'AI coding assistant membutuhkan PRD & Branding untuk memandu pembuatan fitur bisnis secara presisi.';
-            } else if (step.type === 'html') {
-                bannerTitle.textContent = 'Referensi Layout Halaman HTML';
-                bannerDesc.textContent = 'File HTML ini adalah template visual. AI akan membacanya sebagai pedoman struktur & styling.';
-            } else if (step.type === 'image') {
-                bannerTitle.textContent = 'Unggah Logo Aplikasi (PNG)';
-                bannerDesc.textContent = 'Upload file logo PNG resmi aplikasi Anda.';
-            } else {
-                bannerTitle.textContent = 'Konfigurasi Lokasi & Server';
-                bannerDesc.textContent = 'Tentukan jenis server lokal dan folder kerja Anda.';
-            }
+            nextBtn.classList.remove('opacity-40', 'pointer-events-none');
+        }
+
+        // Step 1: centered CTA, steps 2-3: between layout, step 4: centered
+        if (navContainer) {
+            navContainer.style.justifyContent = (isFirst || isLast) ? 'center' : 'space-between';
+        }
+
+        // Update button text based on step
+        if (isFirst) {
+            nextBtn.innerHTML = '<i class="ph ph-sparkle text-lg"></i> MULAI BUAT APLIKASIMU';
+            nextBtn.className = 'px-10 py-4 bg-gradient-brand text-white text-sm font-extrabold rounded-2xl hover:opacity-95 transition-all shadow-xl glow-orange flex items-center gap-2.5 tracking-wide';
+        } else if (isLast) {
+            // Step 4: prevBtn becomes "KEMBALI"
+            prevBtn.innerHTML = '<i class="ph ph-arrow-left text-sm"></i> KEMBALI';
+            nextBtn.classList.add('hidden');
+        } else {
+            nextBtn.innerHTML = 'SELANJUTNYA <i class="ph ph-arrow-right text-sm"></i>';
+            nextBtn.className = 'px-6 py-3 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-md glow-orange-sm flex items-center gap-2';
+        }
+
+        // Save status indicator
+        var status = document.getElementById('saveStatus');
+        if (step.type === 'install') {
+            status.classList.add('hidden');
         }
     }
 
     function renderStep() {
         var content = document.getElementById('wizardContent');
+        var step = steps[currentStep - 1];
+
+        // Dispose Monaco editor if leaving an editor step
         if (editor) { editor.dispose(); editor = null; }
 
-        var currentStepObj = steps[currentStep - 1];
-
-        if (currentStepObj.type === 'welcome') {
-            content.innerHTML = renderWelcomeStep();
-        } else if (currentStepObj.type === 'markdown') {
-            var title = currentStepObj.name === 'PRD' ? 'PRD (Product Requirements Document)' : 'Branding Identity';
-            var dataKey = currentStepObj.name === 'PRD' ? 'prd' : 'branding';
-            content.innerHTML = renderCodeEditorStep(title, currentStepObj.file, dataKey, 'markdown');
-            initMonacoEditor('markdown', dataKey);
-        } else if (currentStepObj.type === 'image') {
-            content.innerHTML = renderLogoUploadStep();
-        } else if (currentStepObj.type === 'html') {
-            var stepMapHtml = {
-                'references/landingpage.html': { title: 'HTML Landing Page', key: 'landingPage' },
-                'references/login.html': { title: 'HTML Login', key: 'loginPage' },
-                'references/register.html': { title: 'HTML Register', key: 'registerPage' },
-                'references/modul_manajemen.html': { title: 'HTML Manajemen', key: 'manajemenPage' },
-                'references/modul_admin.html': { title: 'HTML Admin', key: 'adminPage' },
-                'references/modul_client.html': { title: 'HTML Client', key: 'clientPage' }
-            };
-            var hInfo = stepMapHtml[currentStepObj.file];
-            if (hInfo) {
-                content.innerHTML = renderCodeEditorStep(hInfo.title, currentStepObj.file, hInfo.key, 'html');
-                initMonacoEditor('html', hInfo.key);
-            }
-        } else if (currentStepObj.type === 'ref_manager') {
-            content.innerHTML = renderReferencesManagerStep();
-            loadReferencesList();
-        } else if (currentStepObj.type === 'config') {
-            if (currentStepObj.name === 'Server') {
-                content.innerHTML = renderServerStep();
-            } else {
-                content.innerHTML = renderPathStep();
-            }
+        switch (step.type) {
+            case 'install':
+                content.innerHTML = renderInstallStep();
+                break;
+            case 'references':
+                content.innerHTML = renderReferencesStep();
+                loadReferencesList();
+                setupRefDropZone();
+                break;
+            case 'branding':
+                content.innerHTML = renderBrandingStep();
+                // Only init Monaco when manual mode with branding template (not form fields)
+                // Form fields are used for manual branding now, so no Monaco needed
+                break;
+            case 'prd':
+                content.innerHTML = renderPrdStep();
+                // PRD uses form fields, no Monaco needed
+                break;
         }
 
         updateStepUI();
-        initUploadZones();
+    }
 
-        if (currentStepObj.type === 'image' && formData.logoBase64) {
-            var preview = document.getElementById('logoPreview');
-            var container = document.getElementById('logoPreviewContainer');
-            var placeholder = document.getElementById('logoPlaceholder');
-            if (preview && container && placeholder) {
-                preview.src = 'data:image/png;base64,' + formData.logoBase64;
-                container.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-            }
+    function nextStep() {
+        // Block if references step: YA selected but no files uploaded
+        if (currentStep === 2 && hasReferences === true && refFiles.length === 0) {
+            showToast('Referensi Kosong!', 'Upload minimal 1 file referensi, atau pilih TIDAK.', true);
+            return;
+        }
+        if (currentStep < totalSteps) {
+            saveCurrentStep();
+            currentStep++;
+            renderStep();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }
 
-    function renderWelcomeStep() {
+    function prevStep() {
+        if (currentStep > 1) {
+            saveCurrentStep();
+            currentStep--;
+            renderStep();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function jumpToStep(stepId) {
+        if (stepId >= 1 && stepId <= totalSteps) {
+            // Block if references step incomplete
+            if (hasReferences === true && refFiles.length === 0 && stepId > 2) {
+                showToast('Referensi Kosong!', 'Upload minimal 1 file referensi sebelum lanjut.', true);
+                return;
+            }
+            saveCurrentStep();
+            currentStep = stepId;
+            renderStep();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    // =====================================================
+    // TAHAP 1 — Install (Auto-Detect)
+    // =====================================================
+    function renderInstallStep() {
+        var phpOk = compareVersions(envData.phpVersion, '8.3.0') >= 0;
+        var domainOk = envData.localDomain && envData.localDomain.indexOf('.test') !== -1;
+        var serverOk = envData.serverType === 'laragon' || envData.serverType === 'xampp';
+
+        var checks = [
+            { label: 'PHP Version', value: envData.phpVersion, ok: phpOk, detail: phpOk ? 'PHP 8.3+ terpenuhi' : 'Minimal PHP 8.3 diperlukan' },
+            { label: 'Web Server', value: envData.serverLabel, ok: serverOk, detail: serverOk ? 'Server terdeteksi' : 'Laragon/XAMPP tidak terdeteksi' },
+            { label: 'Local Domain', value: envData.localDomain, ok: domainOk, detail: domainOk ? 'Virtual host aktif' : 'Domain .test tidak terdeteksi' },
+            { label: 'Project Path', value: envData.projectPath, ok: true, detail: 'Document root terdeteksi' }
+        ];
+
+        var allPass = checks.every(function(c) { return c.ok; });
+
+        var checksHtml = checks.map(function(c) {
+            var icon = c.ok ? '<i class="ph ph-check-circle text-emerald-400 text-xl"></i>' : '<i class="ph ph-warning-circle text-red-400 text-xl"></i>';
+            var borderClass = c.ok ? 'check-pass' : 'check-fail';
+            return '<div class="check-item flex items-center gap-4 p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] ' + borderClass + '">' +
+                '<div class="w-10 h-10 rounded-lg ' + (c.ok ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20') + ' flex items-center justify-center shrink-0">' + icon + '</div>' +
+                '<div class="flex-1 min-w-0">' +
+                    '<div class="flex items-center justify-between gap-2">' +
+                        '<span class="font-mono text-xs font-bold text-[var(--text-primary)]">' + c.label + '</span>' +
+                        '<span class="font-mono text-xs font-bold ' + (c.ok ? 'text-emerald-400' : 'text-red-400') + '">' + c.value + '</span>' +
+                    '</div>' +
+                    '<span class="text-[11px] text-[var(--text-muted)]">' + c.detail + '</span>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+
+        // App name row — editable with inline rename
+        var appNameRow = '<div class="check-item flex items-center gap-4 p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)] check-pass">' +
+            '<div class="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0">' +
+                '<i class="ph ph-app-window text-xl text-[var(--brand-primary)]"></i>' +
+            '</div>' +
+            '<div class="flex-1 min-w-0">' +
+                '<div class="flex items-center gap-2 mb-1.5">' +
+                    '<span class="font-mono text-xs font-bold text-[var(--text-primary)]">Nama Aplikasi</span>' +
+                    '<span class="font-mono text-[10px] text-[var(--text-muted)]">(klik untuk ganti)</span>' +
+                '</div>' +
+                '<div class="flex items-center gap-2">' +
+                    '<input type="text" id="appNameInput" value="' + envData.appName + '" ' +
+                        'class="flex-1 px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg font-mono text-xs font-bold text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none transition-colors" ' +
+                        'placeholder="nama-aplikasi" ' +
+                        'pattern="[a-z][a-z0-9_-]*" ' +
+                        'onkeydown="if(event.key===\'Enter\')renameApp()">' +
+                    '<button onclick="renameApp()" id="renameBtn" class="px-4 py-2 bg-gradient-brand text-white text-xs font-bold rounded-lg hover:opacity-90 transition-all shadow-md flex items-center gap-1.5 shrink-0">' +
+                        '<i class="ph ph-floppy-disk text-sm"></i> Ganti' +
+                    '</button>' +
+                '</div>' +
+                '<div id="renameStatus" class="mt-1.5 hidden"></div>' +
+            '</div>' +
+        '</div>';
+
         return '<div class="space-y-8">' +
             '<div class="text-center max-w-xl mx-auto space-y-3">' +
                 '<div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-orange-500/10 border border-orange-500/30 mb-2 glow-orange">' +
-                    '<i class="ph ph-magic-wand text-4xl text-[var(--brand-primary)]"></i>' +
+                    '<i class="ph ph-hard-drives text-4xl text-[var(--brand-primary)]"></i>' +
                 '</div>' +
-                '<h2 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight">Vibeforge Setup Wizard</h2>' +
-                '<p class="text-[var(--text-secondary)] text-sm leading-relaxed">Pilih alur persiapan proyek aplikasi Anda untuk memandu AI assistant:</p>' +
+                '<h2 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight">Tahap 1 — Install</h2>' +
+                '<p class="text-[var(--text-secondary)] text-sm leading-relaxed">Status deteksi otomatis lingkungan server Anda. Ganti nama aplikasi jika perlu, lalu mulai.</p>' +
             '</div>' +
 
-            '<!-- Mode Selection Cards -->' +
-            '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">' +
-                '<div onclick="setAppMode(\'new\')" class="cursor-pointer p-6 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-[var(--brand-primary)] glow-box-cyber ' + (appMode === 'new' ? 'border-[var(--brand-primary)] bg-orange-500/5 shadow-lg' : 'border-[var(--border-default)]') + '">' +
-                    '<div class="flex items-center justify-between mb-4">' +
-                        '<div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)]"><i class="ph ph-sparkle text-2xl"></i></div>' +
-                        '<span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-full ' + (appMode === 'new' ? 'bg-[var(--brand-primary)] text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">GREENFIELD FLOW</span>' +
+            '<div class="max-w-2xl mx-auto space-y-3">' +
+                '<div class="flex items-center gap-2 mb-2">' +
+                    '<span class="font-mono text-[10px] font-bold text-[var(--brand-primary)] tracking-widest uppercase">// AUTO-DETECT STATUS //</span>' +
+                '</div>' +
+
+                appNameRow +
+                checksHtml +
+
+            '</div>' +
+
+            (allPass
+                ? '<div class="text-center max-w-2xl mx-auto pt-4">' +
+                    '<div class="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex items-center gap-3">' +
+                        '<i class="ph ph-shield-check text-2xl text-emerald-400"></i>' +
+                        '<div class="text-left">' +
+                            '<p class="font-heading font-bold text-sm text-emerald-400">Semua persyaratan terpenuhi</p>' +
+                            '<p class="text-xs text-[var(--text-secondary)]">Lingkungan siap — klik tombol di bawah untuk mulai membuat aplikasi.</p>' +
+                        '</div>' +
                     '</div>' +
-                    '<h3 class="font-heading font-bold text-lg mb-2">Aplikasi Baru (12 Steps)</h3>' +
-                    '<p class="text-xs text-[var(--text-secondary)] leading-relaxed mb-4">Alur lengkap: Susun PRD, Branding, Logo, hingga kustomisasi 6 template HTML referensi.</p>' +
-                    '<ul class="text-xs font-mono text-[var(--text-muted)] space-y-2 border-t border-[var(--border-default)] pt-4">' +
-                        '<li class="flex items-center gap-2"><i class="ph ph-check-circle text-emerald-400 text-base"></i> Editor dokumen PRD & Branding</li>' +
-                        '<li class="flex items-center gap-2"><i class="ph ph-check-circle text-emerald-400 text-base"></i> Editor 6 template HTML visual</li>' +
-                    '</ul>' +
-                '</div>' +
-
-                '<div onclick="setAppMode(\'redesign\')" class="cursor-pointer p-6 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-purple-500 glow-box-cyber ' + (appMode === 'redesign' ? 'border-purple-500 bg-purple-500/5 shadow-lg' : 'border-[var(--border-default)]') + '">' +
-                    '<div class="flex items-center justify-between mb-4">' +
-                        '<div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400"><i class="ph ph-paint-brush text-2xl"></i></div>' +
-                        '<span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-full ' + (appMode === 'redesign' ? 'bg-purple-600 text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">REFIT FLOW</span>' +
+                  '</div>'
+                : '<div class="text-center max-w-2xl mx-auto pt-4">' +
+                    '<div class="p-4 bg-red-500/5 border border-red-500/20 rounded-xl flex items-center gap-3">' +
+                        '<i class="ph ph-warning text-2xl text-red-400"></i>' +
+                        '<div class="text-left">' +
+                            '<p class="font-heading font-bold text-sm text-red-400">Ada persyaratan yang belum terpenuhi</p>' +
+                            '<p class="text-xs text-[var(--text-secondary)]">Perbaiki item yang ditandai merah sebelum melanjutkan.</p>' +
+                        '</div>' +
                     '</div>' +
-                    '<h3 class="font-heading font-bold text-lg mb-2">Redesain Aplikasi (5 Steps)</h3>' +
-                    '<p class="text-xs text-[var(--text-secondary)] leading-relaxed mb-4">Alur cepat: Upload Logo, kelola folder References, konfigurasi Server & Path.</p>' +
-                    '<ul class="text-xs font-mono text-[var(--text-muted)] space-y-2 border-t border-[var(--border-default)] pt-4">' +
-                        '<li class="flex items-center gap-2"><i class="ph ph-check-circle text-purple-400 text-base"></i> Upload Logo + Kelola References</li>' +
-                        '<li class="flex items-center gap-2"><i class="ph ph-check-circle text-purple-400 text-base"></i> Auto PRD/Branding dari References</li>' +
-                    '</ul>' +
-                '</div>' +
-            '</div>' +
-
-            '<div class="text-center pt-2" id="welcomeCTA">' +
-                '<button onclick="startEditor()" class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-brand text-white font-mono font-bold text-xs rounded-xl hover:opacity-90 transition-opacity glow-orange shadow-lg cursor-pointer">' +
-                    '<i class="ph ph-rocket-launch text-base"></i> START CONFIGURATION <i class="ph ph-arrow-right text-base"></i>' +
-                '</button>' +
-            '</div>' +
+                  '</div>'
+            ) +
         '</div>';
     }
 
-    function renderCodeEditorStep(title, targetFile, dataKey, lang) {
-        var fallbackNotice = window.monacoLoadFailed ? '<div class="fallback-notice mb-3"><i class="ph ph-warning"></i> Monaco Editor tidak tersedia. Menggunakan editor textarea standar.</div>' : '';
-        return '<div class="space-y-4">' +
-            '<div class="flex items-center justify-between flex-wrap gap-2">' +
-                '<div><h2 class="text-2xl font-heading font-bold mb-1">' + title + '</h2><p class="text-xs font-mono text-[var(--text-secondary)]">Target File: <code class="px-2 py-0.5 bg-[var(--bg-card)] rounded text-[var(--brand-primary)] border border-[var(--border-default)]">' + targetFile + '</code></p></div>' +
-                '<button id="copyBtn" class="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl text-xs font-mono font-bold hover:border-[var(--brand-primary)] transition-all flex items-center gap-2 shadow-sm"><i class="ph ph-copy"></i> SALIN REFERENSI</button>' +
-            '</div>' +
-            fallbackNotice +
-            '<div id="monaco-editor-container" class="editor-container shadow-2xl border border-[var(--border-default)]"></div>' +
-            '<div class="flex items-center gap-4 text-xs font-mono text-[var(--text-muted)] border-t border-[var(--border-default)] pt-4">' +
-                '<span>Timpa dengan file lokal:</span>' +
-                '<input type="file" id="fileInput" class="hidden" accept=".html,.md,.txt" onchange="handleFileUpload(this, \'' + dataKey + '\')">' +
-                '<button onclick="document.getElementById(\'fileInput\').click()" class="px-3.5 py-1.5 bg-[var(--bg-card)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] rounded-lg flex items-center gap-1.5 transition-colors text-xs font-bold text-gray-300"><i class="ph ph-upload-simple"></i> Upload File</button>' +
-            '</div>' +
-        '</div>';
-    }
+    function renameApp() {
+        var input = document.getElementById('appNameInput');
+        var btn = document.getElementById('renameBtn');
+        var status = document.getElementById('renameStatus');
+        var newName = input.value.trim().toLowerCase();
 
-    function renderLogoUploadStep() {
-        var existingLogo = formData.logoBase64 ? '<img src="data:image/png;base64,' + formData.logoBase64 + '" class="max-h-32 mx-auto mb-3 rounded-lg shadow-md border border-[var(--border-default)]">' : '';
-        var hasExisting = formData.logoBase64 || formData.logo;
-
-        return '<div class="space-y-6">' +
-            '<div><h2 class="text-2xl font-heading font-bold mb-2">Upload Logo Aplikasi</h2><p class="text-xs font-mono text-[var(--text-secondary)]">Disimpan otomatis ke <code class="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-default)] rounded text-[var(--brand-primary)]">docs/logo.png</code></p></div>' +
-            '<div class="upload-zone bg-[var(--bg-card)] border-2 border-dashed border-[var(--border-default)] rounded-2xl p-8 hover:border-[var(--brand-primary)] transition-all glow-box-cyber" id="uploadZone" onclick="document.getElementById(\'logoInput\').click()">' +
-                '<input type="file" id="logoInput" class="hidden" accept=".png,image/png" onchange="handleLogoUpload(this)">' +
-                '<div id="logoPreviewContainer" class="' + (hasExisting ? '' : 'hidden') + '"><img id="logoPreview" class="max-h-32 mx-auto mb-3 rounded-lg shadow-md border border-[var(--border-default)]"></div>' +
-                '<div id="logoPlaceholder" class="' + (hasExisting ? 'hidden' : '') + '"><i class="ph ph-image text-4xl text-[var(--brand-primary)] mb-3"></i><p class="text-sm font-semibold text-[var(--text-primary)]">Klik / Drag & Drop logo PNG</p><p class="text-xs font-mono text-[var(--text-muted)] mt-1">Format: PNG (Max 2MB)</p></div>' +
-            '</div>' +
-            (hasExisting ? '<div class="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold"><i class="ph ph-check-circle text-sm"></i><span>Logo file ready: docs/logo.png</span></div>' : '') +
-        '</div>';
-    }
-
-    function renderReferencesManagerStep() {
-        return '<div class="space-y-6">' +
-            '<div><h2 class="text-2xl font-heading font-bold mb-2">Folder References Manager</h2><p class="text-xs font-mono text-[var(--text-secondary)]">Kelola file referensi aplikasi lama di <code class="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-default)] rounded text-purple-400">references/</code></p></div>' +
-
-            '<div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-2xl flex items-start gap-3.5 font-mono text-xs">' +
-                '<i class="ph ph-info text-xl text-purple-400 shrink-0 mt-0.5"></i>' +
-                '<div class="text-[11px] text-[var(--text-secondary)] space-y-1.5 leading-relaxed">' +
-                    '<p class="font-bold text-purple-300">// Refit Mode Protocol:</p>' +
-                    '<p>1. Folder <code class="px-1 bg-black/50 text-purple-300 rounded">references/</code> telah siap untuk menampung referensi codebase lama.</p>' +
-                    '<p>2. Unggah file / folder codebase lama via tombol di bawah atau buka folder File Explorer.</p>' +
-                    '<p>3. PRD & Branding akan otomatis dirangkum oleh AI CLI saat menjalankan <code class="px-1 bg-black/50 text-purple-300 rounded">@docs/install.md</code>.</p>' +
-                '</div>' +
-            '</div>' +
-
-            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-4 glow-box-cyber">' +
-                '<div class="flex items-center justify-between flex-wrap gap-3">' +
-                    '<h3 class="font-heading font-bold text-lg flex items-center gap-2"><i class="ph ph-folder-open text-purple-400"></i> Contents: references/</h3>' +
-                    '<div class="flex items-center gap-2 font-mono text-xs">' +
-                        '<button onclick="openReferencesFolder()" class="px-3.5 py-1.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-xl font-bold hover:bg-blue-500/20 transition-colors flex items-center gap-1.5"><i class="ph ph-folder-simple-open"></i> File Explorer</button>' +
-                        '<button onclick="clearReferencesFolder()" class="px-3.5 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-bold hover:bg-red-500/20 transition-colors flex items-center gap-1.5"><i class="ph ph-trash"></i> Clear</button>' +
-                        '<button onclick="loadReferencesList()" class="px-3.5 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl font-bold hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5"><i class="ph ph-arrows-clockwise"></i> Refresh</button>' +
-                    '</div>' +
-                '</div>' +
-
-                '<div id="refFilesContainer" class="min-h-[140px] bg-black/60 rounded-xl p-4 border border-[var(--border-default)] flex flex-col justify-center items-center text-center font-mono">' +
-                    '<i class="ph ph-circle-notch text-2xl text-[var(--brand-primary)] animate-spin"></i>' +
-                    '<p class="text-xs text-[var(--text-muted)] mt-2">Reading directory...</p>' +
-                '</div>' +
-
-                '<div class="pt-2 border-t border-[var(--border-default)] font-mono text-xs">' +
-                    '<p class="text-[11px] text-[var(--text-muted)] mb-3">// Upload files or folder:</p>' +
-                    '<input type="file" id="refFileInput" class="hidden" multiple onchange="handleRefUpload(this)">' +
-                    '<input type="file" id="refFolderInput" class="hidden" webkitdirectory directory multiple onchange="handleRefUpload(this)">' +
-                    '<div class="flex items-center gap-2.5 flex-wrap">' +
-                        '<button onclick="openReferencesFolder()" class="px-4 py-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-xl font-bold hover:bg-blue-500/20 transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph ph-folder-simple-open"></i> Open Folder</button>' +
-                        '<button onclick="document.getElementById(\'refFileInput\').click()" class="px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] rounded-xl font-bold hover:bg-[var(--bg-hover)] transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph ph-file-plus"></i> Upload Files</button>' +
-                        '<button onclick="document.getElementById(\'refFolderInput\').click()" class="px-4 py-2 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-500 transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph ph-folder-plus"></i> Upload Folder</button>' +
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-        '</div>';
-    }
-
-    async function openReferencesFolder() {
-        showToast('System Action', 'Membuka folder references/ di File Explorer...');
-        try {
-            var res = await fetch('/core/router.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    module: 'install',
-                    action: 'open_folder',
-                    folder: 'references',
-                    csrf_token: csrfToken
-                })
-            });
-            var data = await res.json();
-            if (data.success) {
-                showToast('Terbuka', 'Folder references/ dibuka di File Explorer');
-            } else {
-                showToast('Error', data.error || 'Gagal membuka folder', true);
-            }
-        } catch(e) {
-            showToast('Error', 'Gagal koneksi ke server', true);
+        if (!newName || !/^[a-z][a-z0-9_-]*$/.test(newName)) {
+            status.className = 'mt-1.5 text-xs font-mono text-red-400';
+            status.textContent = 'Nama hanya boleh huruf kecil, angka, strip, underscore. Harus diawali huruf.';
+            status.classList.remove('hidden');
+            return;
         }
+
+        if (newName === envData.appName) {
+            status.className = 'mt-1.5 text-xs font-mono text-amber-400';
+            status.textContent = 'Nama baru sama dengan nama saat ini.';
+            status.classList.remove('hidden');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ph ph-circle-notch text-sm animate-spin"></i> Mengganti...';
+        status.classList.add('hidden');
+
+        fetch('/core/router.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                module: 'install',
+                action: 'rename_app',
+                newName: newName,
+                oldName: envData.appName,
+                csrf_token: csrfToken
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                btn.innerHTML = '<i class="ph ph-check text-sm"></i> Berhasil!';
+                status.className = 'mt-1.5 text-xs font-mono text-emerald-400';
+                status.innerHTML = '<i class="ph ph-check-circle"></i> Aplikasi di-rename menjadi <strong>' + newName + '</strong>. Halaman akan dialihkan ke <code class="px-1 py-0.5 bg-[var(--bg-card)] rounded">' + data.newUrl + '</code> dalam 5 detik...';
+                status.classList.remove('hidden');
+
+                // Redirect to new domain after delay (folder rename + Laragon reload takes ~5s)
+                setTimeout(function() {
+                    window.location.href = data.newUrl;
+                }, 5000);
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ph ph-floppy-disk text-sm"></i> Ganti';
+                status.className = 'mt-1.5 text-xs font-mono text-red-400';
+                status.textContent = data.error || 'Gagal mengganti nama aplikasi';
+                status.classList.remove('hidden');
+            }
+        })
+        .catch(function(err) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph ph-floppy-disk text-sm"></i> Ganti';
+            status.className = 'mt-1.5 text-xs font-mono text-red-400';
+            status.textContent = 'Gagal menghubungi server';
+            status.classList.remove('hidden');
+        });
     }
 
-    async function loadReferencesList() {
-        var container = document.getElementById('refFilesContainer');
+    function compareVersions(a, b) {
+        var pa = a.split('.').map(Number);
+        var pb = b.split('.').map(Number);
+        for (var i = 0; i < Math.max(pa.length, pb.length); i++) {
+            var na = pa[i] || 0;
+            var nb = pb[i] || 0;
+            if (na > nb) return 1;
+            if (na < nb) return -1;
+        }
+        return 0;
+    }
+
+    // =====================================================
+    // TAHAP 2 — Referensi (Opsional)
+    // =====================================================
+    function renderReferencesStep() {
+        var yaSelected = hasReferences === true;
+        var tidakSelected = hasReferences === false;
+
+        return '<div class="space-y-8">' +
+            '<div class="text-center max-w-xl mx-auto space-y-3">' +
+                '<div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-amber-500/10 border border-amber-500/30 mb-2">' +
+                    '<i class="ph ph-folder-simple text-4xl text-amber-400"></i>' +
+                '</div>' +
+                '<h2 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight">Tahap 2 — Referensi</h2>' +
+                '<p class="text-[var(--text-secondary)] text-sm leading-relaxed">Sudah punya referensi HTML/CSS/JS atau PHP? Jawaban menentukan alur Tahap 3 & 4.</p>' +
+            '</div>' +
+
+            '<div class="max-w-2xl mx-auto space-y-4">' +
+
+                // ===== YA / TIDAK Checklist =====
+                '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">' +
+
+                    // YA card
+                    '<div onclick="setHasReferences(true)" class="cursor-pointer p-6 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-[var(--brand-primary)] glow-box-cyber ' + (yaSelected ? 'border-[var(--brand-primary)] bg-orange-500/5 shadow-lg' : 'border-[var(--border-default)]') + '">' +
+                        '<div class="flex items-center justify-between mb-4">' +
+                            '<div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)]"><i class="ph ph-upload-simple text-2xl"></i></div>' +
+                            '<span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-full ' + (yaSelected ? 'bg-[var(--brand-primary)] text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">YA</span>' +
+                        '</div>' +
+                        '<h3 class="font-heading font-bold text-lg mb-2">Sudah Punya Referensi</h3>' +
+                        '<p class="text-xs text-[var(--text-secondary)] leading-relaxed">Upload file HTML/CSS/JS/PHP — bisa desain baru maupun source aplikasi lama yang mau diredesain.</p>' +
+                    '</div>' +
+
+                    // TIDAK card
+                    '<div onclick="setHasReferences(false)" class="cursor-pointer p-6 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-emerald-500 glow-box-cyber ' + (tidakSelected ? 'border-emerald-500 bg-emerald-500/5 shadow-lg' : 'border-[var(--border-default)]') + '">' +
+                        '<div class="flex items-center justify-between mb-4">' +
+                            '<div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400"><i class="ph ph-sparkle text-2xl"></i></div>' +
+                            '<span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-full ' + (tidakSelected ? 'bg-emerald-500 text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">TIDAK</span>' +
+                        '</div>' +
+                        '<h3 class="font-heading font-bold text-lg mb-2">Mulai dari Nol</h3>' +
+                        '<p class="text-xs text-[var(--text-secondary)] leading-relaxed">Struktur, halaman, dan role diturunkan sepenuhnya dari PRD di Tahap 4. Tidak ada template generik tetap.</p>' +
+                    '</div>' +
+
+                '</div>' +
+
+                // ===== TIDAK info box =====
+                (tidakSelected ?
+                    '<div class="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex items-start gap-3">' +
+                        '<i class="ph ph-info text-xl text-emerald-400 mt-0.5 shrink-0"></i>' +
+                        '<div class="text-xs text-[var(--text-secondary)] leading-relaxed">' +
+                            '<p class="font-bold text-emerald-400 mb-1">Mode: Generate dari Nol</p>' +
+                            '<p>Tidak ada file referensi di-upload. AI akan <strong>mengenerate otomatis</strong>:</p>' +
+                            '<ul class="mt-1.5 space-y-1">' +
+                                '<li>• `references/*.html` — template HTML untuk setiap halaman</li>' +
+                                '<li>• `docs/branding.md` — brand identity otomatis</li>' +
+                                '<li>• `docs/prd.md` — PRD 7 bagian otomatis</li>' +
+                            '</ul>' +
+                            '<p class="mt-1.5 text-amber-400 font-bold">⚠ Centang halaman yang diperlukan di Tahap 3B — yang tidak dicentang tidak akan di-generate.</p>' +
+                        '</div>' +
+                    '</div>'
+                : '') +
+
+                // ===== YA: Upload zone + folder browse + file list =====
+                (yaSelected ?
+                    '<div class="space-y-4">' +
+
+                        // Upload zone (drag-drop + file input + folder input)
+                        '<div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] glow-box-cyber">' +
+                            '<div class="flex items-center justify-between mb-4">' +
+                                '<h3 class="font-heading font-bold text-sm text-[var(--text-primary)]">Upload File Referensi</h3>' +
+                                '<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">OPSIONAL</span>' +
+                            '</div>' +
+
+                            // Drag-drop zone
+                            '<div id="refDropZone" class="border-2 border-dashed border-[var(--border-default)] rounded-xl p-8 text-center hover:border-[var(--brand-primary)] transition-colors cursor-pointer" onclick="document.getElementById(\'refUploadInput\').click()">' +
+                                '<i class="ph ph-cloud-arrow-up text-4xl text-[var(--text-muted)] mb-2"></i>' +
+                                '<p class="text-xs text-[var(--text-secondary)]">Klik untuk upload atau drag file ke sini</p>' +
+                                '<p class="text-[10px] text-[var(--text-muted)] mt-1">HTML, CSS, JS, PHP, atau file lain ke folder references/</p>' +
+                            '</div>' +
+                            '<input type="file" id="refUploadInput" class="hidden" multiple accept=".html,.css,.js,.json,.md,.txt,.png,.svg,.jpg,.php" onchange="uploadReferenceFiles(this)">' +
+
+                            // Action buttons row
+                            '<div class="flex items-center gap-3 mt-4">' +
+                                '<button onclick="document.getElementById(\'refFolderInput\').click()" class="px-4 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] text-[var(--text-primary)] text-xs font-bold rounded-lg transition-all flex items-center gap-2">' +
+                                    '<i class="ph ph-folder-open text-base text-[var(--brand-primary)]"></i> Upload Folder' +
+                                '</button>' +
+                                '<input type="file" id="refFolderInput" class="hidden" webkitdirectory multiple onchange="uploadReferenceFiles(this)">' +
+                                '<button onclick="openReferencesFolder()" class="px-4 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] text-[var(--text-primary)] text-xs font-bold rounded-lg transition-all flex items-center gap-2">' +
+                                    '<i class="ph ph-folder-open text-base text-amber-400"></i> Buka Folder Lokal' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>' +
+
+                        // File list
+                        '<div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)]">' +
+                            '<div class="flex items-center justify-between mb-4">' +
+                                '<h3 class="font-heading font-bold text-sm text-[var(--text-primary)]">File Referensi Saat Ini</h3>' +
+                                '<span class="font-mono text-[10px] text-[var(--text-muted)]" id="refCountLabel">0 file</span>' +
+                            '</div>' +
+                            '<div id="refListContainer" class="space-y-2 max-h-64 overflow-y-auto hide-scrollbar">' +
+                                '<p class="text-xs text-[var(--text-muted)] text-center py-4">Belum ada file referensi</p>' +
+                            '</div>' +
+                        '</div>' +
+
+                    '</div>'
+                : '') +
+
+            '</div>' +
+        '</div>';
+    }
+
+    function setHasReferences(value) {
+        hasReferences = value;
+        renderStep();
+    }
+
+    function openReferencesFolder() {
+        fetch('/core/router.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                module: 'install',
+                action: 'open_folder',
+                folder: 'references',
+                csrf_token: csrfToken
+            })
+        }).catch(function(err) { console.error('Open folder error:', err); });
+    }
+
+    function setupRefDropZone() {
+        var zone = document.getElementById('refDropZone');
+        if (!zone) return;
+
+        zone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.add('border-[var(--brand-primary)]', 'bg-orange-500/5');
+        });
+        zone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.remove('border-[var(--brand-primary)]', 'bg-orange-500/5');
+        });
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.remove('border-[var(--brand-primary)]', 'bg-orange-500/5');
+
+            if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+
+            // Build a fake input-like object for uploadReferenceFiles
+            var dtFiles = e.dataTransfer.files;
+            uploadReferenceFilesFromList(dtFiles);
+        });
+    }
+
+    function uploadReferenceFilesFromList(fileList) {
+        if (!fileList || fileList.length === 0) return;
+        showSavingOverlay();
+
+        var promises = [];
+        for (var i = 0; i < fileList.length; i++) {
+            (function(file) {
+                promises.push(new Promise(function(resolve) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Preserve relative path for webkitdirectory uploads
+                        var relativePath = file.webkitRelativePath || file.name;
+                        fetch('/core/router.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                module: 'install',
+                                action: 'save',
+                                file: 'references/' + relativePath,
+                                content: e.target.result,
+                                csrf_token: csrfToken
+                            })
+                        }).then(resolve).catch(resolve);
+                    };
+                    reader.readAsText(file);
+                }));
+            })(fileList[i]);
+        }
+
+        Promise.all(promises).then(function() {
+            hideSavingOverlay();
+            showToast('Berhasil!', fileList.length + ' item berhasil diunggah');
+            loadReferencesList();
+        });
+    }
+
+    function loadReferencesList() {
+        var container = document.getElementById('refListContainer');
         if (!container) return;
 
-        try {
-            var res = await fetch('/core/router.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ module: 'install', action: 'list_references', csrf_token: csrfToken })
-            });
-            var data = await res.json();
+        fetch('/core/router.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ module: 'install', action: 'ref_list', csrf_token: csrfToken })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
             refFiles = data.files || [];
+            var countLabel = document.getElementById('refCountLabel');
+            if (countLabel) countLabel.textContent = refFiles.length + ' file';
+
+            // Auto-detect: if files exist, set hasReferences = true
+            if (refFiles.length > 0 && hasReferences === false) {
+                hasReferences = true;
+            }
 
             if (refFiles.length === 0) {
-                container.innerHTML = '<div class="py-6"><i class="ph ph-folder-open text-4xl text-[var(--text-muted)] mb-2 block"></i><p class="text-xs font-bold text-[var(--text-secondary)] font-mono">Folder references/ Kosong</p><p class="text-[11px] text-[var(--text-muted)] mt-1 font-mono">Silakan upload file/folder referensi aplikasi lama.</p></div>';
+                container.innerHTML = '<p class="text-xs text-[var(--text-muted)] text-center py-4">Belum ada file referensi</p>';
             } else {
-                var html = '<div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 text-left font-mono text-xs">';
-                refFiles.forEach(function(file) {
-                    var isDir = file.is_dir;
-                    var icon = isDir ? 'ph-folder-simple text-amber-400' : 'ph-file-code text-purple-400';
-                    var bg = isDir ? 'bg-amber-500/10' : 'bg-purple-500/10';
-                    var kb = isDir ? 'DIR' : (file.size / 1024).toFixed(1) + ' KB';
-
-                    html += '<div class="p-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl flex items-center gap-3">' +
-                        '<div class="w-9 h-9 rounded-lg ' + bg + ' flex items-center justify-center shrink-0"><i class="ph ' + icon + ' text-lg"></i></div>' +
-                        '<div class="flex-1 min-w-0"><p class="text-xs font-semibold text-[var(--text-primary)] truncate">' + file.name + '</p><p class="text-[10px] text-[var(--text-muted)]">' + kb + ' · ' + file.updated_at + '</p></div>' +
+                container.innerHTML = refFiles.map(function(f) {
+                    return '<div class="flex items-center justify-between p-3 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)]">' +
+                        '<div class="flex items-center gap-2.5 min-w-0">' +
+                            '<i class="ph ph-file text-base text-[var(--text-muted)] shrink-0"></i>' +
+                            '<span class="font-mono text-xs text-[var(--text-primary)] truncate">' + f.name + '</span>' +
+                        '</div>' +
+                        '<button onclick="deleteReferenceFile(\'' + f.name + '\')" class="shrink-0 px-2 py-1 text-red-400 hover:bg-red-500/10 rounded transition-colors"><i class="ph ph-trash text-xs"></i></button>' +
                     '</div>';
-                });
-                html += '</div>';
-                container.innerHTML = html;
+                }).join('');
             }
-        } catch(e) {
-            container.innerHTML = '<p class="text-xs font-mono text-red-400">Gagal mendeteksi isi folder references</p>';
-        }
+            // Refresh step dots / next button state
+            updateStepUI();
+        })
+        .catch(function() {
+            container.innerHTML = '<p class="text-xs text-[var(--text-muted)] text-center py-4">Tidak dapat memuat daftar file</p>';
+        });
     }
 
-    async function clearReferencesFolder() {
-        if (!confirm('Apakah Anda yakin ingin menghapus seluruh file di folder references/?')) return;
-        showSavingOverlay();
-        try {
-            var res = await fetch('/core/router.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ module: 'install', action: 'clear_references', csrf_token: csrfToken })
-            });
-            var data = await res.json();
-            if (data.success) {
-                showToast('Dibersihkan!', data.deleted_count + ' file referensi berhasil dihapus');
-                loadReferencesList();
-            }
-        } catch(e) {
-            showToast('Gagal!', 'Gagal membersihkan folder', true);
-        } finally {
-            hideSavingOverlay();
-        }
-    }
-
-    async function handleRefUpload(input) {
+    async function uploadReferenceFiles(input) {
         if (!input.files || input.files.length === 0) return;
-        showSavingOverlay();
+        uploadReferenceFilesFromList(input.files);
+        input.value = '';
+    }
 
-        for (var i = 0; i < input.files.length; i++) {
-            var file = input.files[i];
-            var relativePath = file.webkitRelativePath || file.name;
-            var reader = new FileReader();
-            await new Promise(function(resolve) {
-                reader.onload = async function(e) {
-                    await fetch('/core/router.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            module: 'install',
-                            action: 'save',
-                            file: 'references/' + relativePath,
-                            content: e.target.result,
-                            csrf_token: csrfToken
-                        })
-                    });
-                    resolve();
-                };
-                reader.readAsText(file);
-            });
+    function deleteReferenceFile(name) {
+        if (!confirm('Hapus file referensi "' + name + '"?')) return;
+
+        fetch('/core/router.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                module: 'install',
+                action: 'delete_ref',
+                file: name,
+                csrf_token: csrfToken
+            })
+        })
+        .then(function() { loadReferencesList(); })
+        .catch(function() { showToast('Gagal!', 'Tidak dapat menghapus file', true); });
+    }
+
+    // =====================================================
+    // TAHAP 3 — Branding & Logo
+    // =====================================================
+    function renderBrandingStep() {
+        var noRef = hasReferences === false; // Tahap 2 = TIDAK
+        var yaSelected = hasReferences === true;
+
+        // When no refs: only manual form, auto option disabled
+        // When has refs: show both auto/manual options
+        var modeSelectorHtml = '';
+        if (yaSelected) {
+            var autoActive = brandingMode === 'auto';
+            var manualActive = brandingMode === 'manual';
+            modeSelectorHtml = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">' +
+                // AUTO card
+                '<div onclick="setBrandingMode(\'auto\')" class="cursor-pointer p-5 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-[var(--brand-primary)] glow-box-cyber ' + (autoActive ? 'border-[var(--brand-primary)] bg-orange-500/5 shadow-lg' : 'border-[var(--border-default)]') + '">' +
+                    '<div class="flex items-center justify-between mb-3">' +
+                        '<div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)]"><i class="ph ph-sparkle text-xl"></i></div>' +
+                        '<span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-full ' + (autoActive ? 'bg-[var(--brand-primary)] text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">OTOMATIS</span>' +
+                    '</div>' +
+                    '<h3 class="font-heading font-bold text-sm mb-1">Branding Otomatis</h3>' +
+                    '<p class="text-[11px] text-[var(--text-secondary)] leading-relaxed">Brand identity digenerate otomatis dari PRD final. Cukup upload logo — sisanya diturunkan saat AI mengeksekusi.</p>' +
+                '</div>' +
+                // MANUAL card
+                '<div onclick="setBrandingMode(\'manual\')" class="cursor-pointer p-5 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-purple-500 glow-box-cyber ' + (manualActive ? 'border-purple-500 bg-purple-500/5 shadow-lg' : 'border-[var(--border-default)]') + '">' +
+                    '<div class="flex items-center justify-between mb-3">' +
+                        '<div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400"><i class="ph ph-pencil-simple text-xl"></i></div>' +
+                        '<span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-full ' + (manualActive ? 'bg-purple-600 text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">MANUAL</span>' +
+                    '</div>' +
+                    '<h3 class="font-heading font-bold text-sm mb-1">Isi Branding Manual</h3>' +
+                    '<p class="text-[11px] text-[var(--text-secondary)] leading-relaxed">Edit form branding lengkap — nama, tagline, warna, typography. Template sudah terisi, tinggal ditimpa.</p>' +
+                '</div>' +
+            '</div>';
         }
 
-        hideSavingOverlay();
-        showToast('Berhasil!', input.files.length + ' item berhasil diunggah');
-        loadReferencesList();
-    }
+        // No refs info banner
+        var noRefBanner = noRef ?
+            '<div class="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl flex items-start gap-3 mb-6">' +
+                '<i class="ph ph-info text-xl text-amber-400 mt-0.5 shrink-0"></i>' +
+                '<div class="text-xs text-[var(--text-secondary)] leading-relaxed">' +
+                    '<p class="font-bold text-amber-400 mb-1">Mode: Branding Manual (Tahap 2 → TIDAK)</p>' +
+                    '<p>Tidak ada referensi untuk di-audit — branding otomatis tidak tersedia. Isi form manual di bawah. Template sudah terisi sebagai placeholder, tinggal edit.</p>' +
+                '</div>' +
+            '</div>'
+        : '';
 
-    function renderServerStep() {
-        var drives = formData.availableDrives || ['C', 'D', 'E', 'F', 'G', 'H'];
-        var currentDrive = formData.drive || 'C';
-        var server = formData.serverType || 'laragon';
-        var subPath = server === 'laragon' ? 'laragon\\www' : 'xampp\\htdocs';
-        var fullPathPreview = currentDrive + ':\\' + subPath;
+        // Auto mode: only logo upload
+        var autoContent = brandingMode === 'auto' && yaSelected ?
+            '<div class="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex items-start gap-3 mb-6">' +
+                '<i class="ph ph-sparkle text-xl text-emerald-400 mt-0.5 shrink-0"></i>' +
+                '<div class="text-xs text-[var(--text-secondary)] leading-relaxed">' +
+                    '<p class="font-bold text-emerald-400 mb-1">Branding Otomatis Aktif</p>' +
+                    '<p>Brand identity (tagline, deskripsi, tone, palet warna) akan digenerate otomatis dari hasil audit referensi saat AI mengeksekusi TAHAP 2.</p>' +
+                    '<p class="mt-1">Upload logo di bawah — boleh skip pakai placeholder default.</p>' +
+                '</div>' +
+            '</div>'
+        : '';
 
-        var driveButtons = drives.map(function(d) {
-            var activeClass = d === currentDrive
-                ? 'bg-[var(--brand-primary)] text-white font-bold border-[var(--brand-primary)] shadow-md'
-                : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--bg-hover)]';
+        // Manual form (always shown when noRef, or when manual selected)
+        var showManual = noRef || brandingMode === 'manual';
+        var manualFormHtml = showManual ?
+            '<div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] glow-box-cyber">' +
+                '<div class="flex items-center justify-between mb-5">' +
+                    '<h3 class="font-heading font-bold text-sm text-[var(--text-primary)]">Brand Identity</h3>' +
+                    '<span class="font-mono text-[10px] text-[var(--text-muted)]">Target: <code class="px-1.5 py-0.5 bg-[var(--bg-primary)] rounded text-[var(--brand-primary)]">docs/branding.md</code></span>' +
+                '</div>' +
+                '<div class="space-y-4">' +
+                    // 1. Nama & Tagline
+                    '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">' +
+                        '<div>' +
+                            '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 block">Nama Aplikasi</label>' +
+                            '<input type="text" id="brandAppName" value="' + envData.appName + '" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg font-mono text-xs font-bold text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none transition-colors">' +
+                        '</div>' +
+                        '<div>' +
+                            '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 block">Tagline</label>' +
+                            '<input type="text" id="brandTagline" value="[Tagline aplikasi Anda]" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg font-mono text-xs text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none transition-colors">' +
+                        '</div>' +
+                    '</div>' +
+                    // 2. Deskripsi Singkat
+                    '<div>' +
+                        '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 block">Deskripsi Singkat / Value Proposition</label>' +
+                        '<textarea id="brandDesc" rows="2" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg font-mono text-xs text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none transition-colors resize-none" placeholder="Apa yang membuat aplikasi ini berbeda dan bernilai bagi pengguna?">[Apa yang membuat aplikasi ini berbeda dan bernilai bagi pengguna?]</textarea>' +
+                    '</div>' +
+                    // 3. Target Audience & Tone
+                    '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">' +
+                        '<div>' +
+                            '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 block">Target Audience</label>' +
+                            '<input type="text" id="brandAudience" value="[Siapa pengguna utama?]" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg font-mono text-xs text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none transition-colors">' +
+                        '</div>' +
+                        '<div>' +
+                            '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 block">Tone of Voice</label>' +
+                            '<select id="brandTone" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg font-mono text-xs text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none transition-colors">' +
+                                '<option value="formal">Formal</option>' +
+                                '<option value="santai">Santai</option>' +
+                                '<option value="profesional" selected>Profesional</option>' +
+                                '<option value="kreatif">Kreatif</option>' +
+                            '</select>' +
+                        '</div>' +
+                    '</div>' +
+                    // 4. Palet Warna
+                    '<div>' +
+                        '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 block">Palet Warna</label>' +
+                        '<div class="grid grid-cols-3 gap-4">' +
+                            '<div class="flex items-center gap-2">' +
+                                '<input type="color" id="brandColorPrimary" value="#F97316" class="w-10 h-10 rounded-lg border border-[var(--border-default)] cursor-pointer shrink-0">' +
+                                '<div class="flex-1 min-w-0">' +
+                                    '<span class="font-mono text-[10px] font-bold text-[var(--text-primary)]">Primary</span>' +
+                                    '<input type="text" id="brandColorPrimaryHex" value="#F97316" class="w-full px-2 py-1 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded font-mono text-[10px] text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none">' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="flex items-center gap-2">' +
+                                '<input type="color" id="brandColorSecondary" value="#1E293B" class="w-10 h-10 rounded-lg border border-[var(--border-default)] cursor-pointer shrink-0">' +
+                                '<div class="flex-1 min-w-0">' +
+                                    '<span class="font-mono text-[10px] font-bold text-[var(--text-primary)]">Secondary</span>' +
+                                    '<input type="text" id="brandColorSecondaryHex" value="#1E293B" class="w-full px-2 py-1 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded font-mono text-[10px] text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none">' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="flex items-center gap-2">' +
+                                '<input type="color" id="brandColorAccent" value="#10B981" class="w-10 h-10 rounded-lg border border-[var(--border-default)] cursor-pointer shrink-0">' +
+                                '<div class="flex-1 min-w-0">' +
+                                    '<span class="font-mono text-[10px] font-bold text-[var(--text-primary)]">Accent</span>' +
+                                    '<input type="text" id="brandColorAccentHex" value="#10B981" class="w-full px-2 py-1 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded font-mono text-[10px] text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none">' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    // 5. Typography
+                    '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">' +
+                        '<div>' +
+                            '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 block">Heading Font</label>' +
+                            '<input type="text" id="brandFontHeading" value="Plus Jakarta Sans" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg font-mono text-xs text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none transition-colors">' +
+                        '</div>' +
+                        '<div>' +
+                            '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 block">Body Font</label>' +
+                            '<input type="text" id="brandFontBody" value="Inter" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg font-mono text-xs text-[var(--text-primary)] focus:border-[var(--brand-primary)] focus:outline-none transition-colors">' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>'
+        : '';
 
-            return '<button type="button" onclick="updateDrive(\'' + d + '\')" class="shrink-0 px-4 py-2.5 rounded-xl border text-xs font-mono font-bold transition-all flex items-center gap-1.5 ' + activeClass + '">' +
-                '<i class="ph ph-hard-drive text-base"></i> (' + d + ':)' +
-            '</button>';
-        }).join('');
+        // Logo upload (always available)
+        var logoUploadHtml = '<div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] glow-box-cyber">' +
+            '<div class="flex items-center justify-between mb-4">' +
+                '<h3 class="font-heading font-bold text-sm text-[var(--text-primary)]">Logo Aplikasi</h3>' +
+                '<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">' + (brandingMode === 'auto' && yaSelected ? 'RECOMMENDED' : 'RECOMMENDED') + '</span>' +
+            '</div>' +
+            '<div class="flex items-center gap-6">' +
+                '<div id="logoPreviewContainer" class="' + (formData.logoBase64 ? '' : 'hidden') + ' w-24 h-24 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-default)] flex items-center justify-center overflow-hidden shrink-0">' +
+                    '<img id="logoPreview" src="' + (formData.logoBase64 ? 'data:image/png;base64,' + formData.logoBase64 : '') + '" class="max-w-full max-h-full object-contain">' +
+                '</div>' +
+                '<div id="logoPlaceholder" class="' + (formData.logoBase64 ? 'hidden' : '') + ' w-24 h-24 rounded-xl bg-[var(--bg-primary)] border-2 border-dashed border-[var(--border-default)] flex items-center justify-center shrink-0">' +
+                    '<i class="ph ph-image text-3xl text-[var(--text-muted)]"></i>' +
+                '</div>' +
+                '<div class="flex-1 space-y-2">' +
+                    '<input type="file" id="logoInput" class="hidden" accept="image/png,image/svg+xml,image/jpeg" onchange="handleLogoUpload(this)">' +
+                    '<button onclick="document.getElementById(\'logoInput\').click()" class="px-4 py-2.5 bg-gradient-brand text-white text-xs font-bold rounded-lg hover:opacity-90 transition-all shadow-md flex items-center gap-2">' +
+                        '<i class="ph ph-upload-simple text-sm"></i> Upload Logo' +
+                    '</button>' +
+                    '<p class="text-[10px] text-[var(--text-muted)]">PNG, SVG, atau JPG. Disimpan ke docs/logo.png. Boleh skip pakai placeholder default.</p>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
 
-        return '<div class="space-y-6">' +
-            '<div><h2 class="text-2xl font-heading font-bold mb-2">Web Server Runtime</h2><p class="text-xs font-mono text-[var(--text-secondary)]">Pilih lingkungan web server lokal target:</p></div>' +
-            '<div class="grid grid-cols-2 gap-4">' +
-                '<label class="cursor-pointer">' +
-                    '<input type="radio" name="serverType" value="laragon" class="hidden peer" ' + (server === 'laragon' ? 'checked' : '') + ' onchange="updateServerType(\'laragon\')">' +
-                    '<div class="p-6 bg-[var(--bg-card)] border-2 border-[var(--border-default)] rounded-2xl transition-all peer-checked:border-[var(--brand-primary)] peer-checked:bg-orange-500/5 glow-box-cyber">' +
-                        '<div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-4"><i class="ph ph-bug text-2xl text-emerald-400"></i></div>' +
-                        '<h3 class="font-heading font-bold text-lg mb-1">Laragon Engine</h3><p class="text-xs text-[var(--text-muted)]">Apache/Nginx isolated environment</p><p class="text-xs text-[var(--brand-primary)] mt-3 font-mono" id="laragonPathPreview">' + currentDrive + ':\\laragon\\www</p>' +
+        // === Tahap 3B — Struktur Halaman ===
+        var structureHtml = '<div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)]">' +
+            '<div class="flex items-center justify-between mb-4">' +
+                '<h3 class="font-heading font-bold text-sm text-[var(--text-primary)]">Struktur Halaman</h3>' +
+                '<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">TAHAP 3B</span>' +
+            '</div>' +
+            '<p class="text-xs text-[var(--text-secondary)] mb-4">Centang halaman yang mau dibuat. Yang tidak dicentang tidak akan dibuat sama sekali, walau PRD menyebutnya.</p>' +
+            '<div class="space-y-3">' +
+                // Landing Page
+                '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors cursor-pointer">' +
+                    '<input type="checkbox" id="pageLanding" ' + (pageStructure.landing ? 'checked' : '') + ' onchange="updatePageStructure(\'landing\', this.checked)" class="w-4 h-4 rounded border-[var(--border-default)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="flex items-center gap-2"><i class="ph ph-browser text-base text-[var(--brand-primary)]"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Landing Page</span></div>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Tidak dicentang = domain lokal langsung mengarah ke halaman Login.</span>' +
                     '</div>' +
                 '</label>' +
-                '<label class="cursor-pointer">' +
-                    '<input type="radio" name="serverType" value="xampp" class="hidden peer" ' + (server === 'xampp' ? 'checked' : '') + ' onchange="updateServerType(\'xampp\')">' +
-                    '<div class="p-6 bg-[var(--bg-card)] border-2 border-[var(--border-default)] rounded-2xl transition-all peer-checked:border-[var(--brand-primary)] peer-checked:bg-orange-500/5 glow-box-cyber">' +
-                        '<div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mb-4"><i class="ph ph-file-css text-2xl text-blue-400"></i></div>' +
-                        '<h3 class="font-heading font-bold text-lg mb-1">XAMPP Engine</h3><p class="text-xs text-[var(--text-muted)]">Apache + PHP + MySQL stack</p><p class="text-xs text-[var(--brand-primary)] mt-3 font-mono" id="xamppPathPreview">' + currentDrive + ':\\xampp\\htdocs</p>' +
+                // Login (wajib)
+                '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-emerald-500/30 cursor-not-allowed opacity-80">' +
+                    '<input type="checkbox" checked disabled class="w-4 h-4 rounded border-emerald-500 text-emerald-500">' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="flex items-center gap-2"><i class="ph ph-sign-in text-base text-emerald-400"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Login</span><span class="font-mono text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">WAJIB</span></div>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Halaman login selalu ada.</span>' +
+                    '</div>' +
+                '</label>' +
+                // Register
+                '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors cursor-pointer">' +
+                    '<input type="checkbox" id="pageRegister" ' + (pageStructure.register ? 'checked' : '') + ' onchange="updatePageStructure(\'register\', this.checked)" class="w-4 h-4 rounded border-[var(--border-default)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="flex items-center gap-2"><i class="ph ph-user-plus text-base text-[var(--brand-primary)]"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Register</span></div>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Tidak dicentang = akun baru hanya dibuat lewat Super Admin.</span>' +
+                    '</div>' +
+                '</label>' +
+                // Manajemen (wajib)
+                '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-emerald-500/30 cursor-not-allowed opacity-80">' +
+                    '<input type="checkbox" checked disabled class="w-4 h-4 rounded border-emerald-500 text-emerald-500">' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="flex items-center gap-2"><i class="ph ph-crown text-base text-emerald-400"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Halaman Manajemen / Super Admin</span><span class="font-mono text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">WAJIB</span></div>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Dashboard Super Admin selalu ada.</span>' +
+                    '</div>' +
+                '</label>' +
+                // Admin
+                '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors cursor-pointer">' +
+                    '<input type="checkbox" id="pageAdmin" ' + (pageStructure.admin ? 'checked' : '') + ' onchange="updatePageStructure(\'admin\', this.checked)" class="w-4 h-4 rounded border-[var(--border-default)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="flex items-center gap-2"><i class="ph ph-rocket-launch text-base text-[var(--brand-primary)]"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Halaman Admin (Biasa)</span></div>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Tidak dicentang = hanya ada Super Admin, tidak ada level "admin biasa" terpisah.</span>' +
+                    '</div>' +
+                '</label>' +
+                // Client
+                '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors cursor-pointer">' +
+                    '<input type="checkbox" id="pageClient" ' + (pageStructure.client ? 'checked' : '') + ' onchange="updatePageStructure(\'client\', this.checked)" class="w-4 h-4 rounded border-[var(--border-default)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="flex items-center gap-2"><i class="ph ph-headphones text-base text-[var(--brand-primary)]"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Halaman Client</span></div>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Tidak dicentang = tidak ada halaman client terpisah.</span>' +
                     '</div>' +
                 '</label>' +
             '</div>' +
-            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 glow-box-cyber">' +
-                '<label class="form-label font-mono font-bold text-xs uppercase text-[var(--text-secondary)] block">// Select Target Local Disk Drive:</label>' +
-                '<div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin hide-scrollbar" id="driveContainer">' +
-                    driveButtons +
+        '</div>';
+
+        return '<div class="space-y-8">' +
+            '<div class="text-center max-w-xl mx-auto space-y-3">' +
+                '<div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-purple-500/10 border border-purple-500/30 mb-2">' +
+                    '<i class="ph ph-palette text-4xl text-purple-400"></i>' +
                 '</div>' +
-                '<p class="text-xs font-mono text-[var(--text-muted)] pt-2 border-t border-[var(--border-default)]">Target Server Path: <code class="px-2 py-0.5 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded text-[var(--brand-primary)] font-mono font-bold" id="serverFullPathPreview">' + fullPathPreview + '</code></p>' +
+                '<h2 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight">Tahap 3 — Branding & Logo</h2>' +
+                '<p class="text-[var(--text-secondary)] text-sm leading-relaxed">' + (noRef ? 'Isi form branding manual di bawah. Template sudah terisi — tinggal edit.' : 'Pilih mode branding: otomatis dari PRD atau isi manual. Lalu upload logo.') + '</p>' +
+                '<button onclick="copyBrandPrompt()" class="mt-2 px-4 py-2 bg-[var(--bg-card)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] rounded-xl text-xs font-bold text-[var(--text-primary)] transition-all inline-flex items-center gap-2 font-mono"><i class="ph ph-clipboard-text text-base text-[var(--brand-primary)]"></i> Copy Prompt AI</button>' +
+            '</div>' +
+
+            '<div class="max-w-2xl mx-auto space-y-6">' +
+
+                noRefBanner +
+                modeSelectorHtml +
+                autoContent +
+
+                logoUploadHtml +
+                manualFormHtml +
+                structureHtml +
+
             '</div>' +
         '</div>';
     }
 
-    function updateDrive(driveVal) {
-        formData.drive = driveVal;
-        var subPath = formData.serverType === 'laragon' ? 'laragon\\www' : 'xampp\\htdocs';
-        formData.installPath = driveVal + ':\\' + subPath;
-
+    function setBrandingMode(mode) {
+        brandingMode = mode;
         renderStep();
-        triggerAutoSave('serverConfig', formData.serverType);
     }
 
-    function updateServerType(val) {
-        formData.serverType = val;
-        var drive = formData.drive || 'C';
-        var subPath = val === 'laragon' ? 'laragon\\www' : 'xampp\\htdocs';
-        formData.installPath = drive + ':\\' + subPath;
-
-        renderStep();
-        triggerAutoSave('serverConfig', val);
+    function updatePageStructure(key, checked) {
+        pageStructure[key] = checked;
     }
 
-    function renderPathStep() {
-        var drive = formData.drive || 'C';
-        var server = formData.serverType || 'laragon';
-        var folderName = 'vibeforge';
-        var basePath = drive + ':\\' + (server === 'laragon' ? 'laragon\\www' : 'xampp\\htdocs');
-        var projectPath = basePath + '\\' + folderName;
+    // Sync color picker with hex input
+    document.addEventListener('input', function(e) {
+        if (e.target.id === 'brandColorPrimary') { var hex = document.getElementById('brandColorPrimaryHex'); if (hex) hex.value = e.target.value; }
+        if (e.target.id === 'brandColorSecondary') { var hex = document.getElementById('brandColorSecondaryHex'); if (hex) hex.value = e.target.value; }
+        if (e.target.id === 'brandColorAccent') { var hex = document.getElementById('brandColorAccentHex'); if (hex) hex.value = e.target.value; }
+        if (e.target.id === 'brandColorPrimaryHex' && /^#[0-9a-fA-F]{6}$/.test(e.target.value)) { var picker = document.getElementById('brandColorPrimary'); if (picker) picker.value = e.target.value; }
+        if (e.target.id === 'brandColorSecondaryHex' && /^#[0-9a-fA-F]{6}$/.test(e.target.value)) { var picker = document.getElementById('brandColorSecondary'); if (picker) picker.value = e.target.value; }
+        if (e.target.id === 'brandColorAccentHex' && /^#[0-9a-fA-F]{6}$/.test(e.target.value)) { var picker = document.getElementById('brandColorAccent'); if (picker) picker.value = e.target.value; }
+    });
 
-        return '<div class="space-y-6">' +
-            '<div><h2 class="text-2xl font-heading font-bold mb-2">Lokasi Project & Execution</h2><p class="text-xs font-mono text-[var(--text-secondary)]">Selesai! Konfirmasi lokasi workspace sebelum membuka CLI.</p></div>' +
+    function handleLogoUpload(input) {
+        if (!input.files || !input.files[0]) return;
+        var file = input.files[0];
+        formData.logo = file;
 
-            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 glow-box-cyber">' +
-                '<div class="flex items-center justify-between mb-1">' +
-                    '<h3 class="font-mono text-xs font-bold uppercase text-gray-300 flex items-center gap-2"><i class="ph ph-folder-simple text-[var(--brand-primary)] text-base"></i> Target Directory Path</h3>' +
-                    '<button onclick="copyProjectPath()" class="px-3 py-1 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg text-xs font-mono font-bold hover:border-[var(--brand-primary)] transition-colors flex items-center gap-1.5"><i class="ph ph-copy"></i> Salin Path</button>' +
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('logoPreview').src = e.target.result;
+            document.getElementById('logoPreviewContainer').classList.remove('hidden');
+            document.getElementById('logoPlaceholder').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function handleFileUpload(input, dataKey) {
+        if (!input.files || !input.files[0]) return;
+        var file = input.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            formData[dataKey] = e.target.result;
+            if (editor && typeof editor.setValue === 'function') {
+                editor.setValue(e.target.result);
+            }
+            triggerAutoSave(dataKey, e.target.result);
+        };
+        reader.readAsText(file);
+        input.value = '';
+    }
+
+    // =====================================================
+    // TAHAP 4 — PRD (7 Bagian)
+    // =====================================================
+    function renderPrdStep() {
+        var noRef = hasReferences === false; // Tahap 2 = TIDAK
+        var yaSelected = hasReferences === true;
+
+        // When no refs: only manual, auto disabled
+        // When has refs: show both auto/manual options
+        var modeSelectorHtml = '';
+        if (yaSelected) {
+            var autoActive = prdMode === 'auto';
+            var manualActive = prdMode === 'manual';
+            modeSelectorHtml = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">' +
+                // AUTO card
+                '<div onclick="setPrdMode(\'auto\')" class="cursor-pointer p-5 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-[var(--brand-primary)] glow-box-cyber ' + (autoActive ? 'border-[var(--brand-primary)] bg-orange-500/5 shadow-lg' : 'border-[var(--border-default)]') + '">' +
+                    '<div class="flex items-center justify-between mb-3">' +
+                        '<div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)]"><i class="ph ph-sparkle text-xl"></i></div>' +
+                        '<span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-full ' + (autoActive ? 'bg-[var(--brand-primary)] text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">OTOMATIS</span>' +
+                    '</div>' +
+                    '<h3 class="font-heading font-bold text-sm mb-1">Generate PRD Otomatis</h3>' +
+                    '<p class="text-[11px] text-[var(--text-secondary)] leading-relaxed">AI akan generate PRD lengkap 7 bagian dari hasil audit referensi. Sertakan self-review 4 pertanyaan sebelum final.</p>' +
                 '</div>' +
-                '<div class="bg-black/80 rounded-xl p-4 font-mono text-xs border border-gray-800 text-emerald-400 select-all"><span class="text-gray-500 select-none">PS&gt; cd </span><span id="pathPreview">' + projectPath + '</span></div>' +
-                '<p class="text-[11px] font-mono text-[var(--text-muted)]">Default directory name: <code class="px-1.5 py-0.5 bg-[var(--bg-primary)] rounded text-[var(--brand-primary)] font-bold">vibeforge</code></p>' +
+                // MANUAL card
+                '<div onclick="setPrdMode(\'manual\')" class="cursor-pointer p-5 bg-[var(--bg-card)] rounded-2xl border-2 transition-all hover:border-purple-500 glow-box-cyber ' + (manualActive ? 'border-purple-500 bg-purple-500/5 shadow-lg' : 'border-[var(--border-default)]') + '">' +
+                    '<div class="flex items-center justify-between mb-3">' +
+                        '<div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400"><i class="ph ph-pencil-simple text-xl"></i></div>' +
+                        '<span class="font-mono text-[10px] font-bold px-2.5 py-1 rounded-full ' + (manualActive ? 'bg-purple-600 text-white' : 'bg-[var(--bg-surface)] text-[var(--text-muted)]') + '">MANUAL</span>' +
+                    '</div>' +
+                    '<h3 class="font-heading font-bold text-sm mb-1">Edit PRD Manual</h3>' +
+                    '<p class="text-[11px] text-[var(--text-secondary)] leading-relaxed">Isi form 7 bagian sesuai kebutuhan aplikasi. Peringatan jika ada bagian belum diisi.</p>' +
+                '</div>' +
+            '</div>';
+        }
+
+        // No refs info banner
+        var noRefBanner = noRef ?
+            '<div class="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl flex items-start gap-3">' +
+                '<i class="ph ph-info text-xl text-amber-400 mt-0.5 shrink-0"></i>' +
+                '<div class="text-xs text-[var(--text-secondary)] leading-relaxed">' +
+                    '<p class="font-bold text-amber-400 mb-1">Mode: PRD Manual (Tahap 2 → TIDAK)</p>' +
+                    '<p>Tidak ada referensi untuk di-audit — PRD otomatis tidak tersedia. Isi form 7 bagian di bawah. Pastikan tiap bagian tidak kosong sebelum klik Jalankan.</p>' +
+                '</div>' +
+            '</div>'
+        : '';
+
+        // Auto mode content
+        var autoContent = prdMode === 'auto' && yaSelected ?
+            '<div class="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex items-start gap-3 mb-4">' +
+                '<i class="ph ph-sparkle text-xl text-emerald-400 mt-0.5 shrink-0"></i>' +
+                '<div class="text-xs text-[var(--text-secondary)] leading-relaxed">' +
+                    '<p class="font-bold text-emerald-400 mb-1">PRD Otomatis Aktif</p>' +
+                    '<p>AI akan generate PRD 7 bagian lengkap dari hasil audit referensi. Setelah generate, self-review 4 pertanyaan akan dijalankan sebelum PRD dianggap final.</p>' +
+                    '<p class="mt-1">Upload logo di Tahap 3, lalu klik <strong>Jalankan AI</strong> untuk eksekusi.</p>' +
+                '</div>' +
+            '</div>'
+        : '';
+
+        // Manual mode: show structured form
+        var showManual = noRef || prdMode === 'manual';
+
+        // Initialize PRD content if empty
+        if (!formData.prd || formData.prd.trim() === '') {
+            formData.prd = prdTemplate;
+        }
+
+        // Parse existing PRD into sections for form pre-fill
+        var prdSections = parsePrdToSections(formData.prd);
+
+        var manualEditorHtml = showManual ?
+            '<div class="p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] glow-box-cyber space-y-5">' +
+                '<div class="flex items-center justify-between">' +
+                    '<h3 class="font-heading font-bold text-sm text-[var(--text-primary)]">Product Requirements Document</h3>' +
+                    '<span class="font-mono text-[10px] text-[var(--text-muted)]">Target: <code class="px-1.5 py-0.5 bg-[var(--bg-primary)] rounded text-[var(--brand-primary)]">docs/prd.md</code></span>' +
+                '</div>' +
+
+                // Section 1: Problem Statement
+                '<div class="space-y-2">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<span class="w-6 h-6 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-[10px] font-bold text-emerald-400">1</span>' +
+                        '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Problem Statement</label>' +
+                    '</div>' +
+                    '<textarea id="prdProblem" rows="3" class="prd-form-field" placeholder="Masalah apa yang mau diberesin? Siapa yang ngerasain? Kenapa solusi yang ada sekarang belum cukup?">' + escapeHtml(prdSections.problem) + '</textarea>' +
+                '</div>' +
+
+                // Section 2: Goals
+                '<div class="space-y-2">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<span class="w-6 h-6 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-[10px] font-bold text-emerald-400">2</span>' +
+                        '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Goals</label>' +
+                    '</div>' +
+                    '<textarea id="prdGoals" rows="3" class="prd-form-field" placeholder="- G1: [Tujuan] -> ukurannya: [metrik yang kelihatan]&#10;- G2: [Tujuan] -> ukurannya: [metrik]">' + escapeHtml(prdSections.goals) + '</textarea>' +
+                '</div>' +
+
+                // Section 3: Target User
+                '<div class="space-y-2">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<span class="w-6 h-6 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-[10px] font-bold text-emerald-400">3</span>' +
+                        '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Target User</label>' +
+                    '</div>' +
+                    '<textarea id="prdUsers" rows="3" class="prd-form-field" placeholder="Siapa mereka? Peran? Butuh apa? Masalah mereka apa?">' + escapeHtml(prdSections.users) + '</textarea>' +
+                '</div>' +
+
+                // Section 4: User Stories
+                '<div class="space-y-2">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<span class="w-6 h-6 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-[10px] font-bold text-emerald-400">4</span>' +
+                        '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">User Stories</label>' +
+                    '</div>' +
+                    '<textarea id="prdStories" rows="3" class="prd-form-field" placeholder="- US-1 (P1): Sebagai [user], saya ingin [aksi] supaya [manfaat].&#10;- US-2 (P1): Sebagai [user], saya ingin [aksi] supaya [manfaat].">' + escapeHtml(prdSections.stories) + '</textarea>' +
+                '</div>' +
+
+                // Section 5: Functional Requirements
+                '<div class="space-y-2">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<span class="w-6 h-6 rounded-md bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-[10px] font-bold text-amber-400">5</span>' +
+                        '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Functional Requirements</label>' +
+                    '</div>' +
+                    '<textarea id="prdFR" rows="3" class="prd-form-field" placeholder="- FR-1 (P1): [Sistem harus bisa ...]&#10;- FR-2 (P1): [Sistem harus bisa ...]&#10;- FR-3 (P2): [Sistem harus bisa ...]">' + escapeHtml(prdSections.fr) + '</textarea>' +
+                '</div>' +
+
+                // Section 6: Non-Functional Requirements
+                '<div class="space-y-2">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<span class="w-6 h-6 rounded-md bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-[10px] font-bold text-amber-400">6</span>' +
+                        '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Non-Functional Requirements</label>' +
+                    '</div>' +
+                    '<textarea id="prdNFR" rows="2" class="prd-form-field" placeholder="- NFR-1 (P1): [Kecepatan / keamanan / skala ...]">' + escapeHtml(prdSections.nfr) + '</textarea>' +
+                '</div>' +
+
+                // Section 7: Scope
+                '<div class="space-y-2">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<span class="w-6 h-6 rounded-md bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[10px] font-bold text-orange-400">7</span>' +
+                        '<label class="font-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Scope</label>' +
+                    '</div>' +
+                    '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">' +
+                        '<div>' +
+                            '<label class="font-mono text-[9px] font-bold text-emerald-400 uppercase tracking-wider mb-1 block">IN (versi 1.0)</label>' +
+                            '<textarea id="prdScopeIn" rows="2" class="prd-form-field-sm" placeholder="Fitur yang masuk sekarang">' + escapeHtml(prdSections.scopeIn) + '</textarea>' +
+                        '</div>' +
+                        '<div>' +
+                            '<label class="font-mono text-[9px] font-bold text-red-400 uppercase tracking-wider mb-1 block">OUT (nanti)</label>' +
+                            '<textarea id="prdScopeOut" rows="2" class="prd-form-field-sm" placeholder="Fitur yang ditunda">' + escapeHtml(prdSections.scopeOut) + '</textarea>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+
+                // Upload file option
+                '<div class="flex items-center gap-3 pt-2 border-t border-[var(--border-default)]">' +
+                    '<span class="font-mono text-[10px] text-[var(--text-muted)]">Atau timpa dengan file lokal:</span>' +
+                    '<input type="file" id="prdFileInput" class="hidden" accept=".md,.txt" onchange="handleFileUpload(this, \'prd\')">' +
+                    '<button onclick="document.getElementById(\'prdFileInput\').click()" class="px-3.5 py-1.5 bg-[var(--bg-primary)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] rounded-lg flex items-center gap-1.5 transition-colors text-xs font-bold text-gray-300"><i class="ph ph-upload-simple"></i> Upload File</button>' +
+                '</div>' +
+
+                '<div id="prdValidation" class="hidden"></div>' +
+            '</div>'
+        : '';
+
+        return '<div class="space-y-8">' +
+            '<div class="text-center max-w-xl mx-auto space-y-3">' +
+                '<div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-orange-500/10 border border-orange-500/30 mb-2 glow-orange">' +
+                    '<i class="ph ph-file-text text-4xl text-[var(--brand-primary)]"></i>' +
+                '</div>' +
+                '<h2 class="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight">Tahap 4 — PRD</h2>' +
+                '<p class="text-[var(--text-secondary)] text-sm leading-relaxed">' + (noRef ? 'Isi form 7 bagian di bawah. Pastikan semua bagian terisi sebelum klik Jalankan.' : 'Pilih mode: generate otomatis dari audit referensi, atau isi manual. Lalu klik Jalankan AI.') + '</p>' +
+                '<button onclick="copyPrdPrompt()" class="mt-2 px-4 py-2 bg-[var(--bg-card)] hover:bg-[var(--bg-hover)] border border-[var(--border-default)] hover:border-[var(--brand-primary)] rounded-xl text-xs font-bold text-[var(--text-primary)] transition-all inline-flex items-center gap-2 font-mono"><i class="ph ph-clipboard-text text-base text-[var(--brand-primary)]"></i> Copy Prompt AI</button>' +
             '</div>' +
 
-            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-4 glow-box-cyber">' +
-                '<div>' +
-                    '<h3 class="font-heading font-bold text-lg mb-1 flex items-center gap-2"><i class="ph ph-terminal-window text-[var(--brand-primary)] text-xl"></i> Eksekusi AI Assistant Terminal</h3>' +
-                    '<p class="text-xs text-[var(--text-muted)]">Seluruh file spesifikasi aplikasi Anda sudah disimpan. Klik tombol di bawah untuk membuka PowerShell secara otomatis.</p>' +
-                '</div>' +
-                '<button onclick="executeTerminal()" class="w-full py-4 bg-gradient-brand text-white font-mono font-bold text-xs rounded-xl hover:opacity-95 transition-all glow-orange flex items-center justify-center gap-2 shadow-2xl cursor-pointer">' +
-                    '<i class="ph ph-play-circle text-xl"></i> OPEN POWERSHELL & RUN CLAUDE CODE' +
-                '</button>' +
-            '</div>' +
+            '<div class="max-w-2xl mx-auto space-y-4">' +
 
-            '<div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 font-mono text-xs glow-box-cyber">' +
-                '<h3 class="font-bold text-gray-300 flex items-center gap-2"><i class="ph ph-clipboard text-[var(--brand-primary)] text-base"></i> Manual Prompt Command</h3>' +
-                '<div class="relative"><code class="block bg-black/80 border border-gray-800 rounded-xl p-4 font-mono text-xs text-orange-400 select-all">baca dan jalankan @docs/install.md</code>' +
-                '<button onclick="copyInstallCommand()" class="mt-3 w-full py-2.5 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl font-bold hover:border-[var(--brand-primary)] transition-colors flex items-center justify-center gap-2 text-xs"><i class="ph ph-copy"></i> Copy Prompt Command</button></div>' +
+                noRefBanner +
+                modeSelectorHtml +
+                autoContent +
+
+                // 7-bagian visual guide
+                '<div class="p-4 bg-[var(--bg-card)] rounded-xl border border-[var(--border-default)]">' +
+                    '<div class="flex items-center gap-3 mb-3">' +
+                        '<span class="font-mono text-[10px] font-bold text-[var(--brand-primary)] tracking-widest uppercase">// PRD 7-BAGIAN //</span>' +
+                    '</div>' +
+                    '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">' +
+                        '<div class="p-2 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)] text-center"><span class="font-mono text-[10px] font-bold text-emerald-400">1</span><p class="text-[10px] text-[var(--text-muted)]">Problem</p></div>' +
+                        '<div class="p-2 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)] text-center"><span class="font-mono text-[10px] font-bold text-emerald-400">2</span><p class="text-[10px] text-[var(--text-muted)]">Goals</p></div>' +
+                        '<div class="p-2 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)] text-center"><span class="font-mono text-[10px] font-bold text-emerald-400">3</span><p class="text-[10px] text-[var(--text-muted)]">Users</p></div>' +
+                        '<div class="p-2 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)] text-center"><span class="font-mono text-[10px] font-bold text-emerald-400">4</span><p class="text-[10px] text-[var(--text-muted)]">Stories</p></div>' +
+                        '<div class="p-2 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)] text-center"><span class="font-mono text-[10px] font-bold text-amber-400">5</span><p class="text-[10px] text-[var(--text-muted)]">FR</p></div>' +
+                        '<div class="p-2 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)] text-center"><span class="font-mono text-[10px] font-bold text-amber-400">6</span><p class="text-[10px] text-[var(--text-muted)]">NFR</p></div>' +
+                        '<div class="p-2 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-default)] text-center"><span class="font-mono text-[10px] font-bold text-orange-400">7</span><p class="text-[10px] text-[var(--text-muted)]">Scope</p></div>' +
+                        '<div class="p-2 bg-[var(--bg-primary)] rounded-lg border border-orange-500/20 text-center"><span class="font-mono text-[10px] font-bold text-[var(--brand-primary)]">✓</span><p class="text-[10px] text-[var(--brand-primary)]">Jalankan</p></div>' +
+                    '</div>' +
+                '</div>' +
+
+                manualEditorHtml +
+
             '</div>' +
         '</div>';
     }
 
-    function copyProjectPath() {
-        var drive = formData.drive || 'C';
-        var server = formData.serverType || 'laragon';
-        var basePath = drive + ':\\' + (server === 'laragon' ? 'laragon\\www' : 'xampp\\htdocs');
-        var projectPath = basePath + '\\vibeforge';
+    function setPrdMode(mode) {
+        prdMode = mode;
+        if (mode === 'manual' && (!formData.prd || formData.prd.trim() === '')) {
+            formData.prd = prdTemplate;
+        }
+        renderStep();
+    }
 
-        var successCallback = function() {
-            showToast('Tersalin!', 'Project Path disalin ke clipboard');
-        };
-        var fallbackCopy = function() {
-            var textarea = document.createElement('textarea');
-            textarea.value = projectPath;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            try { document.execCommand('copy'); successCallback(); }
-            catch (err) { showToast('Gagal!', 'Gagal menyalin path', true); }
-            document.body.removeChild(textarea);
+    // =====================================================
+    // PRD Form Helpers
+    // =====================================================
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function parsePrdToSections(md) {
+        var sections = { problem: '', goals: '', users: '', stories: '', fr: '', nfr: '', scopeIn: '', scopeOut: '' };
+        if (!md) return sections;
+
+        var headingMap = {
+            'Problem Statement': 'problem',
+            'Goals': 'goals',
+            'Target User': 'users',
+            'User Stories': 'stories',
+            'Functional Requirements': 'fr',
+            'Non-Functional Requirements': 'nfr',
+            'Scope': 'scope'
         };
 
+        var lines = md.split('\n');
+        var currentSection = null;
+        var scopePart = null;
+
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var headingMatch = line.match(/^##\s+(\d+\.?\s*)?(.+)/);
+            if (headingMatch) {
+                var headingText = headingMatch[2].trim();
+                currentSection = null;
+                scopePart = null;
+                for (var key in headingMap) {
+                    if (headingText.indexOf(key) !== -1) {
+                        currentSection = headingMap[key];
+                        break;
+                    }
+                }
+                continue;
+            }
+            if (currentSection === 'scope') {
+                if (line.match(/^IN\s/i) || line.match(/^\*?\*?IN/i)) {
+                    scopePart = 'in';
+                    continue;
+                }
+                if (line.match(/^OUT\s/i) || line.match(/^\*?\*?OUT/i)) {
+                    scopePart = 'out';
+                    continue;
+                }
+                if (scopePart === 'in') {
+                    sections.scopeIn += (sections.scopeIn ? '\n' : '') + line;
+                } else if (scopePart === 'out') {
+                    sections.scopeOut += (sections.scopeOut ? '\n' : '') + line;
+                }
+            } else if (currentSection) {
+                sections[currentSection] += (sections[currentSection] ? '\n' : '') + line;
+            }
+        }
+        for (var k in sections) { sections[k] = sections[k].trim(); }
+        return sections;
+    }
+
+    function collectPrdFromForm() {
+        var appName = envData.appName || 'Aplikasi';
+        var problem = (document.getElementById('prdProblem') || {}).value || '';
+        var goals = (document.getElementById('prdGoals') || {}).value || '';
+        var users = (document.getElementById('prdUsers') || {}).value || '';
+        var stories = (document.getElementById('prdStories') || {}).value || '';
+        var fr = (document.getElementById('prdFR') || {}).value || '';
+        var nfr = (document.getElementById('prdNFR') || {}).value || '';
+        var scopeIn = (document.getElementById('prdScopeIn') || {}).value || '';
+        var scopeOut = (document.getElementById('prdScopeOut') || {}).value || '';
+
+        return '# PRD: ' + appName + '\n' +
+            '\n' +
+            '## 1. Problem Statement\n' +
+            problem + '\n' +
+            '\n' +
+            '## 2. Goals\n' +
+            goals + '\n' +
+            '\n' +
+            '## 3. Target User\n' +
+            users + '\n' +
+            '\n' +
+            '## 4. User Stories\n' +
+            stories + '\n' +
+            '\n' +
+            '## 5. Functional Requirements\n' +
+            fr + '\n' +
+            '\n' +
+            '## 6. Non-Functional Requirements\n' +
+            nfr + '\n' +
+            '\n' +
+            '## 7. Scope\n' +
+            'IN (versi 1.0): ' + scopeIn + '\n' +
+            'OUT (nanti): ' + scopeOut + '\n';
+    }
+
+    // =====================================================
+    // Copy Prompt Helpers
+    // =====================================================
+    function copyBrandPrompt() {
+        var prompt = 'Baca CLAUDE.md dan docs/prd.md, lalu isi docs/branding.md secara lengkap.\n' +
+            'Isi semua bagian: Nama Aplikasi & Tagline, Deskripsi Singkat, Target Audience & Tone, Palet Warna (hex), Typography (Google Fonts), dan Logo Guidelines.\n' +
+            'Pastikan palet warna konsisten — gunakan warna yang relevan dengan aplikasi di PRD.\n' +
+            'Format: markdown dengan heading ## per bagian.';
+        copyToClipboard(prompt, 'Prompt Branding disalin!', 'Paste ke AI untuk mengisi form branding.');
+    }
+
+    function copyPrdPrompt() {
+        var prompt = 'Baca CLAUDE.md dan references/ (jika ada), lalu isi docs/prd.md secara lengkap.\n' +
+            'Isi semua 7 bagian: Problem Statement, Goals, Target User, User Stories, Functional Requirements, Non-Functional Requirements, dan Scope.\n' +
+            'Pastikan:\n' +
+            '- Target User konsisten dengan halaman yang aktif (lihat docs/install.md Section 2).\n' +
+            '- User Stories mencakup semua role yang ada.\n' +
+            '- Functional Requirements spesifik dan terukur.\n' +
+            '- Scope membedakan IN (versi 1.0) vs OUT (nanti) dengan jelas.\n' +
+            'Format: markdown dengan heading ## per bagian, gunakan bullet points.';
+        copyToClipboard(prompt, 'Prompt PRD disalin!', 'Paste ke AI untuk mengisi form PRD.');
+    }
+
+    async function copyToClipboard(text, successTitle, successMsg) {
+        var ok = false;
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(projectPath).then(successCallback).catch(fallbackCopy);
-        } else {
-            fallbackCopy();
+            try { await navigator.clipboard.writeText(text); ok = true; } catch(e) {}
         }
+        if (!ok) {
+            var ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); ok = true; } catch(e) {}
+            document.body.removeChild(ta);
+        }
+        if (ok) showToast(successTitle, successMsg);
+        else showToast('Gagal!', 'Tidak dapat menyalin ke clipboard', true);
     }
 
-    function updateInstallPath(val) {
-        formData.installPath = val;
-        var projectPath = val + '\\vibeforge';
-        var preview = document.getElementById('pathPreview');
-        if (preview) preview.textContent = projectPath;
-        triggerAutoSave('pathConfig', val);
+    function validatePrd() {
+        // Collect from form fields if manual mode
+        var content = '';
+        if (prdMode === 'manual' || hasReferences === false) {
+            content = collectPrdFromForm();
+            formData.prd = content;
+        } else {
+            content = formData.prd || '';
+        }
+
+        if (!content) return { valid: false, missing: ['Semua bagian kosong'] };
+
+        // Check each section has actual content (not just heading)
+        var requiredSections = [
+            { name: 'Problem Statement', field: 'prdProblem' },
+            { name: 'Goals', field: 'prdGoals' },
+            { name: 'Target User', field: 'prdUsers' },
+            { name: 'User Stories', field: 'prdStories' },
+            { name: 'Functional Requirements', field: 'prdFR' },
+            { name: 'Non-Functional Requirements', field: 'prdNFR' }
+        ];
+
+        var missing = [];
+        requiredSections.forEach(function(s) {
+            var field = document.getElementById(s.field);
+            var value = field ? field.value.trim() : '';
+            if (!value || value.indexOf('[') !== -1) {
+                missing.push(s.name);
+            }
+        });
+
+        // Check scope
+        var scopeIn = (document.getElementById('prdScopeIn') || {}).value || '';
+        var scopeOut = (document.getElementById('prdScopeOut') || {}).value || '';
+        if (!scopeIn.trim() && !scopeOut.trim()) {
+            missing.push('Scope');
+        }
+
+        return { valid: missing.length === 0, missing: missing, hasPlaceholder: false };
     }
 
+    // =====================================================
+    // Monaco Editor
+    // =====================================================
     var monacoThemesDefined = false;
+    var _pendingMonacoInit = null;
 
     function initMonacoEditor(language, dataKey) {
         var container = document.getElementById('monaco-editor-container');
@@ -895,16 +1604,11 @@ if (file_exists($configPath)) {
                 formData[dataKey] = currentVal;
                 triggerAutoSave(dataKey, currentVal);
             });
-
-            var copyBtn = document.getElementById('copyBtn');
-            if (copyBtn) copyBtn.onclick = function() { copyToClipboard(dataKey); };
         });
     }
 
     function initTextareaFallback(container, dataKey, language) {
         container.innerHTML = '<textarea id="fallbackEditor" class="w-full h-full p-4 font-mono text-xs resize-none border-0 focus:outline-none" style="min-height: 400px; background-color: #0B0F17; color: #F0F6FC; line-height: 1.6;" oninput="handleTextareaInput(\'' + dataKey + '\', this.value)">' + (formData[dataKey] || '') + '</textarea>';
-        var copyBtn = document.getElementById('copyBtn');
-        if (copyBtn) copyBtn.onclick = function() { copyToClipboard(dataKey); };
     }
 
     function handleTextareaInput(dataKey, value) {
@@ -912,12 +1616,14 @@ if (file_exists($configPath)) {
         triggerAutoSave(dataKey, value);
     }
 
+    // =====================================================
+    // Auto-Save
+    // =====================================================
     function triggerAutoSave(dataKey, value) {
-        var step = steps[currentStep - 1];
         var status = document.getElementById('saveStatus');
         var statusText = document.getElementById('saveStatusText');
 
-        if (!step.file && dataKey !== 'serverConfig' && dataKey !== 'pathConfig') {
+        if (dataKey !== 'prd' && dataKey !== 'branding') {
             if (status) status.classList.add('hidden');
             return;
         }
@@ -929,149 +1635,37 @@ if (file_exists($configPath)) {
 
         clearTimeout(autoSaveTimeout);
         autoSaveTimeout = setTimeout(async function() {
+            var targetFile = dataKey === 'prd' ? 'docs/prd.md' : 'docs/branding.md';
             try {
-                var bodyData;
-                if (dataKey === 'serverConfig' || dataKey === 'pathConfig') {
-                    bodyData = {
-                        module: 'install', action: 'save', actionType: 'config',
-                        serverType: formData.serverType, drive: formData.drive || 'C', installPath: formData.installPath, csrf_token: csrfToken
-                    };
-                } else {
-                    bodyData = {
-                        module: 'install', action: 'save', file: step.file,
-                        content: value, csrf_token: csrfToken
-                    };
-                    savedFiles.add(step.file);
-                }
-
-                var response = await fetch('/core/router.php', {
+                var res = await fetch('/core/router.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(bodyData)
+                    body: JSON.stringify({ module: 'install', action: 'save', file: targetFile, content: value, csrf_token: csrfToken })
                 });
-
-                if (response.ok) {
+                if (res.ok) {
+                    savedFiles.add(targetFile);
                     if (status) {
                         statusText.textContent = 'Auto-Saved';
-                        status.className = 'text-xs font-mono text-emerald-400 flex items-center gap-1.5';
-                    }
-                    if (step.file) triggerGraphifyUpdate(step.file);
-                } else {
-                    if (status) {
-                        statusText.textContent = 'Save Failed';
-                        status.className = 'text-xs font-mono text-rose-400 flex items-center gap-1.5';
+                        status.className = 'text-xs font-mono text-emerald-400 flex items-center gap-1.5 font-bold';
                     }
                 }
             } catch(e) {
                 if (status) {
-                    statusText.textContent = 'Network Error';
-                    status.className = 'text-xs font-mono text-rose-400 flex items-center gap-1.5';
+                    statusText.textContent = 'Save Failed';
+                    status.className = 'text-xs font-mono text-red-400 flex items-center gap-1.5';
                 }
             }
-        }, 800);
+        }, 1500);
     }
 
-    async function triggerGraphifyUpdate(changedFile) {
-        try {
-            await fetch('/core/router.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ module: 'install', action: 'graphify', file: changedFile, csrf_token: csrfToken })
-            });
-        } catch(e) {}
-    }
-
-    function copyToClipboard(dataKey) {
-        var text = formData[dataKey] || '';
-        try {
-            if (editor && typeof editor.getValue === 'function') text = editor.getValue();
-            else {
-                var textarea = document.getElementById('fallbackEditor');
-                if (textarea && textarea.value) text = textarea.value;
-            }
-        } catch(e) {}
-
-        if (!text) { showToast('Gagal!', 'Tidak ada konten untuk disalin', true); return; }
-        var fileName = steps[currentStep - 1].file;
-
-        var successCallback = function() {
-            showToast('Tersalin!', 'Isi ' + fileName + ' disalin ke clipboard');
-        };
-        var fallbackCopy = function() {
-            var textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                successCallback();
-            } catch (err) {
-                showToast('Gagal!', 'Tidak dapat menyalin ke clipboard', true);
-            }
-            document.body.removeChild(textarea);
-        };
-
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(text).then(successCallback).catch(fallbackCopy);
-        } else {
-            fallbackCopy();
-        }
-    }
-
-    function initUploadZones() {
-        var zones = document.querySelectorAll('.upload-zone');
-        zones.forEach(function(zone) {
-            zone.ondragover = function(e) { e.preventDefault(); zone.classList.add('dragover'); };
-            zone.ondragleave = function() { zone.classList.remove('dragover'); };
-            zone.ondrop = function(e) {
-                e.preventDefault(); zone.classList.remove('dragover');
-                var file = e.dataTransfer.files[0];
-                if (file) {
-                    var input = zone.querySelector('input[type="file"]');
-                    if (input) {
-                        var dt = new DataTransfer(); dt.items.add(file);
-                        input.files = dt.files;
-                        input.dispatchEvent(new Event('change'));
-                    }
-                }
-            };
-        });
-    }
-
-    function handleFileUpload(input, dataKey) {
-        var file = input.files[0];
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                formData[dataKey] = e.target.result;
-                if (editor) editor.setValue(e.target.result);
-                triggerAutoSave(dataKey, e.target.result);
-            };
-            reader.readAsText(file);
-        }
-    }
-
-    function handleLogoUpload(input) {
-        var file = input.files[0];
-        if (file && file.type === 'image/png') {
-            formData.logo = file;
-            var reader = new FileReader();
-            reader.onload = async function(e) {
-                document.getElementById('logoPreview').src = e.target.result;
-                document.getElementById('logoPreviewContainer').classList.remove('hidden');
-                document.getElementById('logoPlaceholder').classList.add('hidden');
-                await saveCurrentStep();
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
+    // =====================================================
+    // Save Current Step — always saves ALL docs on navigation
+    // =====================================================
     async function saveCurrentStep() {
         var step = steps[currentStep - 1];
 
-        if (step.name === 'Logo' && formData.logo) {
+        // Save logo
+        if (formData.logo) {
             var formDataObj = new FormData();
             formDataObj.append('module', 'install');
             formDataObj.append('action', 'save');
@@ -1079,245 +1673,268 @@ if (file_exists($configPath)) {
             formDataObj.append('csrf_token', csrfToken);
             var response = await fetch('/core/router.php', { method: 'POST', body: formDataObj });
             if (response.ok) savedFiles.add('docs/logo.png');
-            return response.ok;
         }
 
-        if (step.name === 'Server') {
+        // === Always save branding.md ===
+        if (hasReferences === false || brandingMode === 'manual') {
+            var brandAppName = document.getElementById('brandAppName');
+            var brandTagline = document.getElementById('brandTagline');
+            var brandDesc = document.getElementById('brandDesc');
+            var brandAudience = document.getElementById('brandAudience');
+            var brandTone = document.getElementById('brandTone');
+            var brandColorPrimaryHex = document.getElementById('brandColorPrimaryHex');
+            var brandColorSecondaryHex = document.getElementById('brandColorSecondaryHex');
+            var brandColorAccentHex = document.getElementById('brandColorAccentHex');
+            var brandFontHeading = document.getElementById('brandFontHeading');
+            var brandFontBody = document.getElementById('brandFontBody');
+
+            if (brandAppName) {
+                var brandingMd = '# Branding: ' + (brandAppName.value || envData.appName) + '\n' +
+                    '\n' +
+                    '## 1. Nama Aplikasi & Tagline\n' +
+                    '- Nama: ' + (brandAppName.value || envData.appName) + '\n' +
+                    '- Tagline: ' + (brandTagline ? brandTagline.value : '') + '\n' +
+                    '\n' +
+                    '## 2. Deskripsi Singkat / Value Proposition\n' +
+                    (brandDesc ? brandDesc.value : '') + '\n' +
+                    '\n' +
+                    '## 3. Target Audience & Tone of Voice\n' +
+                    '- Target: ' + (brandAudience ? brandAudience.value : '') + '\n' +
+                    '- Tone: ' + (brandTone ? brandTone.value : 'profesional') + '\n' +
+                    '\n' +
+                    '## 4. Palet Warna\n' +
+                    '- Primary: ' + (brandColorPrimaryHex ? brandColorPrimaryHex.value : '#F97316') + '\n' +
+                    '- Secondary: ' + (brandColorSecondaryHex ? brandColorSecondaryHex.value : '#1E293B') + '\n' +
+                    '- Accent: ' + (brandColorAccentHex ? brandColorAccentHex.value : '#10B981') + '\n' +
+                    '\n' +
+                    '## 5. Typography\n' +
+                    '- Heading: ' + (brandFontHeading ? brandFontHeading.value : 'Plus Jakarta Sans') + '\n' +
+                    '- Body: ' + (brandFontBody ? brandFontBody.value : 'Inter') + '\n' +
+                    '\n' +
+                    '## 6. Logo & Asset Guidelines\n' +
+                    '[Upload logo di atas. Format: PNG/SVG, rekomendasi 512x512px.]\n';
+
+                formData.branding = brandingMd;
+                var res = await fetch('/core/router.php', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ module: 'install', action: 'save', file: 'docs/branding.md', content: brandingMd, csrf_token: csrfToken })
+                });
+                if (res.ok) savedFiles.add('docs/branding.md');
+            }
+        } else if (brandingMode === 'auto' && hasReferences === true) {
+            var autoBrandingMd = '# Branding: ' + envData.appName + '\n\n## Mode: Otomatis\n\nBrand identity akan digenerate otomatis dari PRD final saat AI mengeksekusi.\n';
             var res = await fetch('/core/router.php', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    module: 'install', action: 'save', actionType: 'config',
-                    serverType: formData.serverType, drive: formData.drive || 'C', installPath: formData.installPath, csrf_token: csrfToken
-                })
+                body: JSON.stringify({ module: 'install', action: 'save', file: 'docs/branding.md', content: autoBrandingMd, csrf_token: csrfToken })
             });
-            return res.ok;
+            if (res.ok) savedFiles.add('docs/branding.md');
         }
 
-        if (!step.file) return true;
-
-        var dataKey = step.file === 'docs/prd.md' ? 'prd' : (step.file === 'docs/branding.md' ? 'branding' : null);
-        if (!dataKey) {
-            var stepMapHtml = {
-                'references/landingpage.html': 'landingPage',
-                'references/login.html': 'loginPage',
-                'references/register.html': 'registerPage',
-                'references/modul_manajemen.html': 'manajemenPage',
-                'references/modul_admin.html': 'adminPage',
-                'references/modul_client.html': 'clientPage'
-            };
-            dataKey = stepMapHtml[step.file];
-        }
-        var content = null;
-
-        if (editor && typeof editor.getValue === 'function') {
-            content = editor.getValue();
-            formData[dataKey] = content;
-        } else {
-            var textarea = document.getElementById('fallbackEditor');
-            if (textarea) { content = textarea.value; formData[dataKey] = content; }
-            else content = formData[dataKey];
-        }
-
-        if (content === null || content === undefined) return true;
-
-        var res = await fetch('/core/router.php', {
+        // === Always save page_structure.json ===
+        var structureJson = JSON.stringify(pageStructure);
+        await fetch('/core/router.php', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ module: 'install', action: 'save', file: step.file, content: content, csrf_token: csrfToken })
+            body: JSON.stringify({ module: 'install', action: 'save', file: 'docs/page_structure.json', content: structureJson, csrf_token: csrfToken })
         });
-        if (res.ok) savedFiles.add(step.file);
-        return res.ok;
+
+        // === Always save prd.md ===
+        var prdContent = '';
+        if (prdMode === 'manual' || hasReferences === false) {
+            prdContent = collectPrdFromForm();
+            formData.prd = prdContent;
+        } else {
+            prdContent = formData.prd || '';
+        }
+        if (prdContent) {
+            var res = await fetch('/core/router.php', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ module: 'install', action: 'save', file: 'docs/prd.md', content: prdContent, csrf_token: csrfToken })
+            });
+            if (res.ok) savedFiles.add('docs/prd.md');
+        }
+
+        // Save PRD mode marker
+        if (prdMode === 'auto' && hasReferences === true) {
+            var autoPrdMarker = JSON.stringify({ mode: 'auto', hasReferences: true });
+            await fetch('/core/router.php', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ module: 'install', action: 'save', file: 'docs/prd_mode.json', content: autoPrdMarker, csrf_token: csrfToken })
+            });
+            savedFiles.add('docs/prd_mode.json');
+        }
+
+        // === Always regenerate install.md ===
+        await fetch('/core/router.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                module: 'install',
+                action: 'generate_install_md',
+                serverType: envData.serverType,
+                drive: envData.projectPath.charAt(0),
+                installPath: envData.projectPath,
+                appMode: 'unified',
+                projectName: envData.appName,
+                pageStructure: pageStructure,
+                brandingMode: brandingMode,
+                prdMode: prdMode,
+                csrf_token: csrfToken
+            })
+        });
+        savedFiles.add('docs/install.md');
     }
 
-    function startEditor() { currentStep = 2; renderStep(); }
+    // =====================================================
+    // Execute Terminal — Launch AI
+    // =====================================================
+    async function executeTerminal() {
+        // Validate PRD if manual mode
+        if (prdMode === 'manual' || hasReferences === false) {
+            var validation = validatePrd();
+            if (!validation.valid) {
+                var proceed = confirm('PRD belum lengkap — bagian berikut belum ditemukan:\n\n' + validation.missing.join('\n') + '\n\nLanjutkan juga? (Risiko: AI mungkin mengarang bagian yang kosong)');
+                if (!proceed) return;
+            }
+        }
 
-    function showSavingOverlay() {
-        var overlay = document.getElementById('savingOverlay');
-        if (overlay) overlay.classList.remove('hidden');
-    }
-
-    function hideSavingOverlay() {
-        var overlay = document.getElementById('savingOverlay');
-        if (overlay) overlay.classList.add('hidden');
-    }
-
-    async function nextStep() {
-        if (isNavigating) return;
-        isNavigating = true;
-        setButtonsDisabled(true);
-        showSavingOverlay();
+        var btn = document.getElementById('executeBtn');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph ph-circle-notch text-base animate-spin"></i> MEMPROSES...'; }
 
         try {
             await saveCurrentStep();
-            if (currentStep < totalSteps) { currentStep++; renderStep(); }
-        } finally {
-            isNavigating = false;
-            setButtonsDisabled(false);
-            hideSavingOverlay();
-        }
-    }
 
-    function prevStep() {
-        if (isNavigating) return;
-        if (currentStep > 1) {
-            isNavigating = true;
-            setButtonsDisabled(true);
-            showSavingOverlay();
-            saveCurrentStep().then(function() {
-                currentStep--;
-                renderStep();
-            }).finally(function() {
-                isNavigating = false;
-                setButtonsDisabled(false);
-                hideSavingOverlay();
-            });
-        }
-    }
-
-    function jumpToStep(stepId) {
-        if (isNavigating) return;
-        if (stepId < 1 || stepId > totalSteps) {
-            showToast('Warning', 'Langkah tidak valid', true);
-            return;
-        }
-        isNavigating = true;
-        setButtonsDisabled(true);
-        showSavingOverlay();
-
-        saveCurrentStep().then(function() {
-            currentStep = stepId;
-            renderStep();
-        }).finally(function() {
-            isNavigating = false;
-            setButtonsDisabled(false);
-            hideSavingOverlay();
-        });
-    }
-
-    function finishWizard() {
-        if (isNavigating) return;
-        isNavigating = true;
-        setButtonsDisabled(true);
-        showSavingOverlay();
-
-        saveCurrentStep().then(async function() {
-            try {
-                var res = await fetch('/core/router.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        module: 'install',
-                        action: 'generate_install_md',
-                        serverType: formData.serverType,
-                        drive: formData.drive,
-                        installPath: formData.installPath,
-                        appMode: appMode,
-                        projectName: 'vibeforge',
-                        csrf_token: csrfToken
-                    })
-                });
-                var data = await res.json();
-                if (data.success) {
-                    savedFiles.add('docs/install.md');
-                    showToast('install.md Generated', 'File dokumentasi berhasil dibuat');
-                }
-            } catch(e) {
-                console.log('Install md generation failed:', e);
-            }
-
-            currentStep = totalSteps;
-            renderStep();
-        }).finally(function() {
-            isNavigating = false;
-            setButtonsDisabled(false);
-            hideSavingOverlay();
-        });
-    }
-
-    function setButtonsDisabled(disabled) {
-        ['nextBtn', 'prevBtn', 'finishBtn', 'executeBtn'].forEach(function(id) {
-            var btn = document.getElementById(id);
-            if (btn) btn.disabled = disabled;
-        });
-    }
-
-    async function executeTerminal() {
-        var btn = document.getElementById('executeBtn');
-        if (btn) btn.disabled = true;
-
-        var drive = formData.drive || 'C';
-        var server = formData.serverType || 'laragon';
-        var basePath = drive + ':\\' + (server === 'laragon' ? 'laragon\\www' : 'xampp\\htdocs');
-        var projectPath = basePath + '\\vibeforge';
-
-        try {
-            await fetch('/core/router.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    module: 'install',
-                    action: 'save',
-                    actionType: 'config',
-                    serverType: formData.serverType,
-                    drive: drive,
-                    installPath: basePath,
-                    csrf_token: csrfToken
-                })
-            });
-
+            // Generate install.md
             await fetch('/core/router.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     module: 'install',
                     action: 'generate_install_md',
-                    serverType: formData.serverType,
-                    drive: drive,
-                    installPath: basePath,
-                    appMode: appMode,
-                    projectName: 'vibeforge',
+                    serverType: envData.serverType,
+                    drive: envData.projectPath.charAt(0),
+                    installPath: envData.projectPath,
+                    appMode: 'unified',
+                    projectName: envData.appName,
+                    pageStructure: pageStructure,
+                    brandingMode: brandingMode,
+                    prdMode: prdMode,
                     csrf_token: csrfToken
                 })
             });
-            savedFiles.add('docs/install.md');
+            savedFiles.add('data/install_config.json');
+            savedFiles.add('docs/install.md (static template)');
 
-            showSuccessModal();
+            // Tandai file yang akan di-generate otomatis berdasarkan mode
+            var autoGenerated = [];
+            if (brandingMode === 'auto' && hasReferences === true) {
+                autoGenerated.push('docs/branding.md (auto-generate oleh AI saat TAHAP 2)');
+            }
+            if (prdMode === 'auto' && hasReferences === true) {
+                autoGenerated.push('docs/prd.md (auto-generate oleh AI saat TAHAP 2)');
+            }
+            if (hasReferences === false) {
+                autoGenerated.push('references/*.html (auto-generate oleh AI saat TAHAP 2)');
+            }
 
-            setTimeout(function() {
-                fetch('/core/router.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        module: 'install',
-                        action: 'execute',
-                        drive: drive,
-                        serverType: formData.serverType,
-                        projectPath: projectPath,
-                        csrf_token: csrfToken
-                    })
-                }).catch(function(err) { console.error('Delayed launch error:', err); });
-            }, 3000);
+            // Tampilkan modal sukses dengan info auto-generated
+            showSuccessModal(autoGenerated);
 
         } catch(e) {
             console.error('Execute terminal error:', e);
-            showSuccessModal();
+            showSuccessModal([]);
         } finally {
-            if (btn) btn.disabled = false;
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph ph-terminal-window text-base"></i> JALANKAN AI'; }
         }
     }
 
-    function showSuccessModal() {
+    // =====================================================
+    // Copy & Launch Claude
+    // =====================================================
+    async function copyAndLaunchClaude() {
+        var commandText = 'baca dan jalankan @docs/install.md';
+
+        // Copy to clipboard
+        var copySuccess = false;
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(commandText);
+                copySuccess = true;
+            } catch(e) { /* fallback */ }
+        }
+        if (!copySuccess) {
+            var textarea = document.createElement('textarea');
+            textarea.value = commandText;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try { document.execCommand('copy'); copySuccess = true; } catch(e) {}
+            document.body.removeChild(textarea);
+        }
+
+        if (copySuccess) {
+            showToast('Disalin!', 'Command disalin ke clipboard');
+        }
+
+        // Launch PowerShell with claude in project directory
+        try {
+            await fetch('/core/router.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    module: 'install',
+                    action: 'execute',
+                    drive: envData.projectPath.charAt(0),
+                    serverType: envData.serverType,
+                    projectPath: envData.projectPath,
+                    csrf_token: csrfToken
+                })
+            });
+        } catch(err) {
+            console.error('Launch terminal error:', err);
+        }
+
+        closeSuccessModal();
+    }
+
+    // =====================================================
+    // UI Helpers
+    // =====================================================
+    function showSavingOverlay() {
+        document.getElementById('savingOverlay').classList.remove('hidden');
+    }
+    function hideSavingOverlay() {
+        document.getElementById('savingOverlay').classList.add('hidden');
+    }
+
+    function showSuccessModal(autoGenerated) {
+        autoGenerated = autoGenerated || [];
         var list = document.getElementById('savedFilesList');
         if (list) {
             list.innerHTML = '';
-            if (savedFiles.size === 0) {
+            if (savedFiles.size === 0 && autoGenerated.length === 0) {
                 list.innerHTML = '<li class="flex items-center gap-2 text-gray-400 font-mono"><i class="ph ph-info"></i> Belum ada file yang diubah</li>';
             } else {
+                // Display saved files
                 savedFiles.forEach(function(f) {
                     var li = document.createElement('li');
                     li.className = 'flex items-center gap-2 text-emerald-400 font-mono';
                     li.innerHTML = '<i class="ph ph-check-circle"></i> ' + f;
                     list.appendChild(li);
                 });
+                // Display auto-generated files
+                if (autoGenerated.length > 0) {
+                    var divider = document.createElement('li');
+                    divider.className = 'flex items-center gap-2 text-amber-400 font-mono mt-2 pt-2 border-t border-gray-800';
+                    divider.innerHTML = '<i class="ph ph-sparkle"></i> <strong>File yang akan di-generate otomatis:</strong>';
+                    list.appendChild(divider);
+                    autoGenerated.forEach(function(f) {
+                        var li = document.createElement('li');
+                        li.className = 'flex items-center gap-2 text-amber-400/80 font-mono';
+                        li.innerHTML = '<i class="ph ph-arrow-right text-xs"></i> ' + f;
+                        list.appendChild(li);
+                    });
+                }
             }
         }
         document.getElementById('successModal').classList.remove('hidden');
@@ -1337,54 +1954,25 @@ if (file_exists($configPath)) {
         var toastMessage = document.getElementById('toastMessage');
         var toastIcon = document.getElementById('toastIcon');
 
-        if (toastTitle) toastTitle.textContent = title;
-        if (toastMessage) toastMessage.textContent = message;
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
 
-        if (toastIcon) {
-            toastIcon.className = isError ? 'ph ph-warning-circle text-lg text-rose-400' : 'ph ph-check-circle text-lg text-emerald-400';
+        if (isError) {
+            toastIcon.className = 'ph ph-warning-circle text-lg text-red-400';
+            toastIcon.parentElement.className = 'w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center shrink-0';
+        } else {
+            toastIcon.className = 'ph ph-check-circle text-lg text-emerald-400';
+            toastIcon.parentElement.className = 'w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0';
         }
 
-        toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-        toast.classList.add('opacity-100', 'translate-y-0');
+        toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-950 border border-gray-800 rounded-xl px-5 py-3.5 shadow-2xl flex items-center gap-3 z-50 transition-all duration-300 opacity-100 translate-y-0 font-mono';
 
         setTimeout(function() {
-            toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-            toast.classList.remove('opacity-100', 'translate-y-0');
+            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-950 border border-gray-800 rounded-xl px-5 py-3.5 shadow-2xl flex items-center gap-3 z-50 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none font-mono';
         }, 3000);
     }
 
-    function copyInstallCommand() {
-        var commandText = 'baca dan jalankan @docs/install.md';
-        var successCallback = function() {
-            showToast('Tersalin!', 'Command disalin ke clipboard');
-        };
-        var fallbackCopy = function() {
-            var textarea = document.createElement('textarea');
-            textarea.value = commandText;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                successCallback();
-            } catch (err) {
-                showToast('Gagal!', 'Tidak dapat menyalin command', true);
-            }
-            document.body.removeChild(textarea);
-        };
-
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(commandText).then(successCallback).catch(fallbackCopy);
-        } else {
-            fallbackCopy();
-        }
-    }
-
-    function copyModalInstallCommand() {
-        copyInstallCommand();
-    }
-
+    // Theme toggle
     var htmlTheme = document.documentElement;
     document.getElementById('themeToggle')?.addEventListener('click', function() {
         var isDark = htmlTheme.classList.toggle('dark');
@@ -1396,8 +1984,30 @@ if (file_exists($configPath)) {
         if (_pendingMonacoInit) initMonacoEditor(_pendingMonacoInit.language, _pendingMonacoInit.dataKey);
     };
 
+    // =====================================================
+    // Initialize
+    // =====================================================
     initSteps();
     renderStep();
+    // Detect existing references on page load
+    detectExistingReferences();
+
+    function detectExistingReferences() {
+        fetch('/core/router.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ module: 'install', action: 'ref_list', csrf_token: csrfToken })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            refFiles = data.files || [];
+            if (refFiles.length > 0) {
+                hasReferences = true;
+                updateStepUI();
+            }
+        })
+        .catch(function() {});
+    }
     </script>
 </body>
 </html>

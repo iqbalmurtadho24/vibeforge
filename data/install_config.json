@@ -1,0 +1,18 @@
+{
+    "serverType": "laragon",
+    "drive": "D",
+    "installPath": "D:/laragon/www/vibeforge",
+    "projectName": "vibeforge",
+    "pageStructure": {
+        "landing": true,
+        "login": true,
+        "register": true,
+        "manajemen": true,
+        "admin": true,
+        "client": true
+    },
+    "brandingMode": "manual",
+    "prdMode": "auto",
+    "referencesCount": 6,
+    "updated_at": "2026-07-30 13:04:58"
+}

@@ -1,24 +1,24 @@
-# Branding — Bengkel Vibeforge
+# Branding: vibeforge
 
-## Nama Brand
-Bengkel Vibeforge
+## 1. Nama Aplikasi & Tagline
+- Nama: vibeforge
+- Tagline: [Tagline aplikasi Anda]
 
-## Tagline
-Dari dokumen ke kode jadi.
+## 2. Deskripsi Singkat / Value Proposition
+[Apa yang membuat aplikasi ini berbeda dan bernilai bagi pengguna?]
 
-## Palet Warna
-- Primary (ember/api): #F97316 (orange-500)
-- Primary dark: #C2410C (orange-700)
-- Background dark mode: #18181B (zinc-900)
-- Background light mode: #FAFAFA (zinc-50)
-- Accent/text: #27272A (zinc-800)
-- Success: #22C55E · Warning: #EAB308 · Danger: #EF4444
+## 3. Target Audience & Tone of Voice
+- Target: [Siapa pengguna utama?]
+- Tone: profesional
 
-## Font
-- Heading: Space Grotesk / Sora (tegas, teknikal)
+## 4. Palet Warna
+- Primary: #F97316
+- Secondary: #1E293B
+- Accent: #10B981
+
+## 5. Typography
+- Heading: Plus Jakarta Sans
 - Body: Inter
 
-## Logo / Konsep Visual
-Ikon palu + percikan api sederhana (line-art), selaras dengan emoji 🔥 yang
-sudah dipakai di README. Mendukung dark/light mode (repo sudah set
-`color-scheme: light dark`).
+## 6. Logo & Asset Guidelines
+[Upload logo di atas. Format: PNG/SVG, rekomendasi 512x512px.]

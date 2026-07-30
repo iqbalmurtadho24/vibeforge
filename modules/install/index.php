@@ -30,8 +30,8 @@ if (defined('APP_ENV') && APP_ENV === 'production') {
     exit;
 }
 
-$action = $_POST['action'] ?? '';
 $input  = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
+$action = $input['action'] ?? '';
 
 switch ($action) {
     // -----------------------------------------------------------------------
@@ -91,10 +91,31 @@ switch ($action) {
         break;
 
     // -----------------------------------------------------------------------
+    // rename_app — rename application folder, .env, .env.example, and Laragon vhost
+    // -----------------------------------------------------------------------
+    case 'rename_app':
+        handleRenameApp($input);
+        break;
+
+    // -----------------------------------------------------------------------
     // check_folder — check if target app folder exists on disk
     // -----------------------------------------------------------------------
     case 'check_folder':
         handleCheckFolder($input);
+        break;
+
+    // -----------------------------------------------------------------------
+    // ref_list — list files in references/ folder
+    // -----------------------------------------------------------------------
+    case 'ref_list':
+        handleListReferences();
+        break;
+
+    // -----------------------------------------------------------------------
+    // delete_ref — delete a file from references/ folder
+    // -----------------------------------------------------------------------
+    case 'delete_ref':
+        handleDeleteRef($input);
         break;
 
     default:
@@ -252,44 +273,25 @@ function handleExecute(array $input): void
     $drive = $input['drive'] ?? 'C';
     $serverType = $input['serverType'] ?? 'laragon';
     $projectName = trim($input['projectName'] ?? '');
-    $commandToRun = trim($input['command'] ?? '');
 
     $subPath = $serverType === 'laragon' ? 'laragon/www' : 'xampp/htdocs';
     $targetDir = $drive . ':/' . $subPath . ($projectName !== '' ? '/' . $projectName : '');
 
-    // Target parent directory (where download/degit runs)
-    $parentDir = $drive . ':/' . $subPath;
+    $winTargetDir = str_replace('/', '\\', ROOT_PATH);
 
-    if (!is_dir($parentDir)) {
-        mkdir($parentDir, 0755, true);
-    }
+    // Open PowerShell with claude ready — user pastes prompt from clipboard
+    $innerCommand = "Set-Location -Path '$winTargetDir'; claude";
 
-    $winTargetDir = str_replace('/', '\\', is_dir($targetDir) ? $targetDir : $parentDir);
+    // UTF-16LE + Base64 encode for PowerShell compatibility
+    $encodedCommand = base64_encode(iconv('UTF-8', 'UTF-16LE', $innerCommand));
 
-    if ($commandToRun !== '') {
-        // Ganti operator ' && ' menjadi '; if ($?) { ' untuk kompatibilitas PS 5.1 jika input lama terkirim
-        $commandToRun = str_replace(' && ', '; if ($?) { ', $commandToRun);
-        if (str_contains($commandToRun, '; if ($?) { ') && !str_ends_with($commandToRun, ' }')) {
-            $commandToRun .= ' }';
-        }
-
-        // Susun script utuh
-        $innerCommand = "Set-Location -Path '$winTargetDir'; $commandToRun";
-
-        // UTF-16LE + Base64 encode agar terhindar dari parser error tanda petik di level OS command line
-        $encodedCommand = base64_encode(iconv('UTF-8', 'UTF-16LE', $innerCommand));
-
-        // Tanpa -NoExit agar terminal menutup otomatis setelah script selesai
-        $cmd = 'powershell.exe -WindowStyle Hidden -Command "Start-Process powershell.exe -ArgumentList \'-EncodedCommand\', \'' . $encodedCommand . '\'"';
-    } else {
-        $cmd = 'powershell.exe -WindowStyle Hidden -Command "Start-Process powershell.exe -ArgumentList \'-NoExit\', \'-Command\', \'Set-Location -Path ' . $winTargetDir . '\'"';
-    }
+    $cmd = 'powershell.exe -WindowStyle Hidden -Command "Start-Process powershell.exe -ArgumentList \'-NoExit\', \'-EncodedCommand\', \'' . $encodedCommand . '\'"';
 
     pclose(popen("start /B " . $cmd, "r"));
 
     echo json_encode([
         'success' => true,
-        'message' => 'PowerShell terminal opened successfully',
+        'message' => 'PowerShell terminal opened with claude ready',
         'path'    => $winTargetDir,
     ]);
 }
@@ -422,14 +424,103 @@ function handleListReferences(): void
     ]);
 }
 
+function handleDeleteRef(array $input): void
+{
+    $fileName = $input['file'] ?? '';
+
+    if (empty($fileName)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'File name is required']);
+        return;
+    }
+
+    // Sanitize: no path traversal
+    $baseName = basename($fileName);
+    if ($baseName !== $fileName || str_contains($fileName, '..')) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Invalid file name']);
+        return;
+    }
+
+    $filePath = ROOT_PATH . '/references/' . $baseName;
+
+    if (!file_exists($filePath)) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'File not found']);
+        return;
+    }
+
+    if (@unlink($filePath)) {
+        echo json_encode(['success' => true, 'message' => 'File deleted']);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Failed to delete file']);
+    }
+}
+
 function handleGenerateInstallMd(array $input): void
 {
     $installPath = $input['installPath'] ?? '';
     $serverType = $input['serverType'] ?? 'laragon';
     $drive = $input['drive'] ?? 'C';
-    $appMode = $input['appMode'] ?? 'new';
     $projectName = $input['projectName'] ?? 'vibeforge';
-    $modeTitle = $appMode === 'redesign' ? 'Redesain Aplikasi' : 'Membuat Aplikasi Baru';
+    $pageStructure = $input['pageStructure'] ?? ['landing' => true, 'login' => true, 'register' => true, 'manajemen' => true, 'admin' => true, 'client' => true];
+    $brandingMode = $input['brandingMode'] ?? 'manual';
+    $prdMode = $input['prdMode'] ?? 'manual';
+
+    // Normalize page structure to booleans
+    $pages = [
+        'landing'    => !empty($pageStructure['landing']),
+        'login'      => !empty($pageStructure['login']),
+        'register'   => !empty($pageStructure['register']),
+        'manajemen'  => !empty($pageStructure['manajemen']),
+        'admin'      => !empty($pageStructure['admin']),
+        'client'     => !empty($pageStructure['client']),
+    ];
+
+    // Build active pages list
+    $activePages = array_keys(array_filter($pages));
+    $activePagesStr = implode(', ', $activePages);
+    $inactivePages = array_keys(array_filter($pages, function($v) { return !$v; }));
+    $inactivePagesStr = !empty($inactivePages) ? implode(', ', $inactivePages) : '—';
+
+    // Build shell list for Tahap 2
+    $shellList = [];
+    if ($pages['landing'])   $shellList[] = '`public/index.php` (landing page)';
+    if ($pages['login'])     $shellList[] = '`public/login/index.php`';
+    if ($pages['register'])  $shellList[] = '`public/register/index.php`';
+    if ($pages['manajemen']) $shellList[] = '`public/manajemen/index.php`';
+    if ($pages['admin'])     $shellList[] = '`public/admin/index.php`';
+    if ($pages['client'])    $shellList[] = '`public/client/index.php`';
+    $shellListStr = implode("\n   - ", $shellList);
+
+    // Build validation criteria per page
+    $validationCriteria = "";
+    if ($pages['landing']) {
+        $validationCriteria .= "- Landing page sudah berganti mengikuti hasil branding/referensi, bukan landing page bawaan template lama.\n";
+    } else {
+        $validationCriteria .= "- Landing Page TIDAK dicentang → verifikasi domain root langsung redirect ke Login, bukan 404 atau halaman kosong.\n";
+    }
+    if ($pages['login']) {
+        $validationCriteria .= "- Halaman Login sudah disesuaikan (bukan placeholder generik) sesuai referensi/branding.\n";
+    }
+    if ($pages['register']) {
+        $validationCriteria .= "- Halaman Register sudah disesuaikan dan berfungsi.\n";
+    } else {
+        $validationCriteria .= "- Register TIDAK dicentang → verifikasi tidak ada route/halaman register yang bocor ke publik, dan fitur \"buat user baru\" di Halaman Manajemen benar-benar berfungsi CRUD.\n";
+    }
+    if ($pages['manajemen']) {
+        $validationCriteria .= "- Halaman Manajemen benar-benar bisa diakses setelah login, bukan cuma shell kosong.\n";
+    }
+    if ($pages['admin']) {
+        $validationCriteria .= "- Halaman Admin benar-benar bisa diakses setelah login, bukan cuma shell kosong.\n";
+    } else {
+        $validationCriteria .= "- Halaman Admin TIDAK dicentang → verifikasi tidak ada folder/route admin biasa yang ke-generate, hanya Manajemen (Super Admin).\n";
+    }
+    if ($pages['client']) {
+        $validationCriteria .= "- Halaman Client benar-benar bisa diakses setelah login, bukan cuma shell kosong.\n";
+    }
+    $validationCriteria .= "- CRUD di tiap modul yang relevan **harus berfungsi nyata** (create/read/update/delete tidak boleh cuma UI tanpa backend), diuji baik untuk skenario storage SQL maupun JSON sesuai hasil deteksi `DB_MODE`.\n";
 
     // Get references files list
     $refDir = ROOT_PATH . '/references';
@@ -447,40 +538,73 @@ function handleGenerateInstallMd(array $input): void
         }
     }
 
-    // Build references section based on mode
-    if ($appMode === 'redesign') {
-        $referencesSection = "## 3. Referensi Aplikasi Redesain (`references/`)\n\n" .
-            "Pada **Mode Redesain**, AI akan menganalisa seluruh isi folder `references/` (termasuk file HTML, PHP, JS, CSS, maupun subfolder dari codebase lama).\n\n" .
-            "**Daftar File Referensi Saat Ini:**\n\n";
+    // Build references section
+    $referencesSection = "## 3. Referensi Aplikasi (`references/`)\n\n";
+    if (!empty($refFiles)) {
+        $referencesSection .= "File referensi berikut di-upload melalui Tahap 2 wizard. AI akan menganalisa seluruh isi folder `references/` sebagai acuan.\n\n";
+        $referencesSection .= "**Daftar File Referensi:**\n\n";
         foreach ($refFiles as $file) {
             $referencesSection .= "- `{$file}`\n";
         }
-        if (empty($refFiles)) {
-            $referencesSection .= "- *(folder references/ kosong - silakan masukkan file/folder referensi aplikasi lama)*\n";
-        }
-        $referencesSection .= "\n> **Instruksi Khusus AI (Mode Redesain)**:\n" .
-            "> 1. AI WAJIB membaca SELURUH file/folder di `references/` terlebih dahulu.\n" .
-            "> 2. Susun & tulis ulang `docs/prd.md` dan `docs/branding.md` secara utuh berdasarkan analisa dari `references/`.\n" .
-            "> 3. Konsolidasikan referensi menjadi 6 file HTML standar di `references/*.html` (`landingpage.html`, `login.html`, `register.html`, `modul_manajemen.html`, `modul_admin.html`, `modul_client.html`).\n";
+        $referencesSection .= "\n> **Instruksi AI (Referensi)**:\n" .
+            "> 1. Baca SELURUH file/folder di `references/` terlebih dahulu.\n" .
+            "> 2. Gunakan sebagai acuan untuk menyusun `docs/prd.md` dan `docs/branding.md`.\n" .
+            "> 3. Konsolidasikan `references/*.html` ke template shell yang sesuai (lihat CLAUDE.md §12c).\n\n";
     } else {
-        // New app mode - use template references
-        $referencesSection = "## 3. Referensi HTML Templates (`references/`)\n\n" .
-            "Template HTML referensi struktur visual shell:\n\n" .
-            "| Step | File | Fungsi |\n" .
-            "|------|------|--------|\n" .
-            "| 5 | `references/landingpage.html` | Landing page publik |\n" .
-            "| 6 | `references/login.html` | Halaman login |\n" .
-            "| 7 | `references/register.html` | Halaman registrasi |\n" .
-            "| 8 | `references/modul_manajemen.html` | Dashboard Super Admin |\n" .
-            "| 9 | `references/modul_admin.html` | Dashboard Creator |\n" .
-            "| 10 | `references/modul_client.html` | Dashboard Pendengar |\n\n" .
-            "> **Instruksi Khusus AI (Mode Baru)**:\n" .
-            "> AI menggunakan `docs/prd.md`, `docs/branding.md`, dan `references/*.html` sebagai acuan untuk membangun shell dan fitur aplikasi secara presisi.\n";
+        $referencesSection .= "Tidak ada file referensi di-upload. Aplikasi akan dibangun sepenuhnya dari PRD.\n\n";
     }
 
-    // Build install.md content following docs/document.md BUILD PROTOCOL
+    // Build auto-generated files section
+    $autoGenSection = "## 4. File yang Akan Di-Generate Otomatis\n\n";
+    $hasAutoFiles = false;
+
+    // Branding auto
+    if ($brandingMode === 'auto' && !empty($refFiles)) {
+        $hasAutoFiles = true;
+        $autoGenSection .= "### 4.1 Branding (`docs/branding.md`)\n";
+        $autoGenSection .= "- `docs/branding.md` — **akan di-generate otomatis** oleh AI saat TAHAP 2\n";
+        $autoGenSection .= "  - Generate brand identity lengkap: Nama, Tagline, Value Proposition, Target Audience, Tone of Voice\n";
+        $autoGenSection .= "  - Generate palet warna otomatis dari hasil audit referensi\n";
+        $autoGenSection .= "  - Generate typography guidelines dari hasil audit referensi\n\n";
+    }
+
+    // PRD auto
+    if ($prdMode === 'auto' && !empty($refFiles)) {
+        $hasAutoFiles = true;
+        $autoGenSection .= "### 4.2 PRD (`docs/prd.md`)\n";
+        $autoGenSection .= "- `docs/prd.md` — **akan di-generate otomatis** oleh AI saat TAHAP 2\n";
+        $autoGenSection .= "  - Generate 7 bagian PRD lengkap dari hasil audit referensi\n";
+        $autoGenSection .= "  - Problem Statement, Goals, Target User, User Stories, Functional Requirements, Non-Functional Requirements, Scope\n";
+        $autoGenSection .= "  - Self-review 4 pertanyaan sebelum PRD dianggap final\n\n";
+    }
+
+    // References auto (generate from PRD if no files uploaded but mode = auto)
+    if (empty($refFiles)) {
+        $hasAutoFiles = true;
+        $autoGenSection .= "### 4.3 References HTML (`references/`)\n";
+        $autoGenSection .= "- `references/` — **akan di-generate otomatis** oleh AI saat TAHAP 2\n";
+        $autoGenSection .= "  - Generate `references/landingpage.html` — struktur landing page\n";
+        $autoGenSection .= "  - Generate `references/login.html` — halaman login\n";
+        $autoGenSection .= "  - Generate `references/register.html` — halaman register\n";
+        if ($pages['manajemen']) {
+            $autoGenSection .= "  - Generate `references/modul_manajemen.html` — halaman Super Admin\n";
+        }
+        if ($pages['admin']) {
+            $autoGenSection .= "  - Generate `references/modul_admin.html` — halaman Admin/Creator\n";
+        }
+        if ($pages['client']) {
+            $autoGenSection .= "  - Generate `references/modul_client.html` — halaman Client/Pendengar\n";
+        }
+        $autoGenSection .= "  - Referensi HTML ini akan dipakai sebagai golden template saat membangun aplikasi\n\n";
+    }
+
+    if (!$hasAutoFiles) {
+        $autoGenSection = ""; // No auto-gen section if no auto files
+    }
+
+    // Build install.md content
     $installMd = <<<MD
-# Dokumentasi Instalasi & Protocol Eksekusi AI - Vibeforge Template
+# Dokumentasi Instalasi & Protocol Eksekusi AI - {$projectName}
 
 Dokumen ini adalah panduan utama instalasi dan **Build Protocol** untuk mengkonfigurasi serta memproses pembuatan aplikasi berbasis **Vibeforge Template** (PHP Single Page Application Framework).
 
@@ -488,58 +612,123 @@ Dokumen ini adalah panduan utama instalasi dan **Build Protocol** untuk mengkonf
 
 ## 1. Konfigurasi Server & Workspace
 
-- **Mode Aplikasi**: `{$appMode}` (**{$modeTitle}**)
+- **Mode Aplikasi**: `unified`
 - **Local Disk**: `{$drive}:`
 - **Jenis Web Server**: `{$serverType}`
-- **Folder Kerja Target**: `{$installPath}\\{$projectName}`
+- **Folder Kerja Target**: `{$installPath}`
+- **Branding Mode**: `{$brandingMode}`
+- **PRD Mode**: `{$prdMode}`
 
 ---
 
-## 2. Alur Kerja Setup Wizard
+## 2. Struktur Halaman Aktif
 
-### Mode Aplikasi Baru (12 Langkah)
-1. Overview -> 2. PRD -> 3. Branding -> 4. Logo -> 5-10. Templates HTML -> 11. Server -> 12. Path
+Halaman yang dicentang di Tahap 3B wizard (hanya ini yang dibangun):
 
-### Mode Redesain (5 Langkah)
-1. Overview -> 2. References Folder -> 3. Logo -> 4. Server -> 5. Path
+| Halaman | Aktif | Shell File |
+|---------|-------|------------|
+| Landing Page | **{$pages['landing']}** | `public/index.php` |
+| Login | **{$pages['login']}** | `public/login/index.php` |
+| Register | **{$pages['register']}** | `public/register/index.php` |
+| Manajemen | **{$pages['manajemen']}** | `public/manajemen/index.php` |
+| Admin | **{$pages['admin']}** | `public/admin/index.php` |
+| Client | **{$pages['client']}** | `public/client/index.php` |
+
+**Halaman aktif**: {$activePagesStr}
+**Halaman non-aktif**: {$inactivePagesStr}
 
 ---
 
 {$referencesSection}
 
+{$autoGenSection}
+
 ---
 
-## 4. Protokol Pembangunan AI (Build Protocol - `docs/document.md`)
+## 5. Protokol Pembangunan AI (Build Protocol)
 
 Setiap AI Coding Assistant (Claude Code CLI) WAJIB mengikuti urutan 3 Tahap Eksekusi di bawah ini secara linear:
 
 ### TAHAP 1 — AUDIT & RENCANA (Read-Only)
 1. Baca `CLAUDE.md`, `docs/prd.md`, dan `docs/branding.md`.
-2. Jika **Mode Redesain**: Baca seluruh folder `references/` -> tulis `docs/prd.md` & `docs/branding.md` -> konsolidasikan `references/*.html`.
-3. Audit struktur file core (`include/config.php`, `core/router.php`, `public/core/router.php`, `core/session.php`, `core/csrf.php`, `core/Repo.php`, `modules/auth/`, `.env`, `data/users.json`).
-4. Buat file `docs/build_plan.md` yang memuat mapping shell, file yang belum ada, dan daftar variabel environment.
-5. **BERHENTI & TUNGGU APPROVAL OWNER** sebelum lanjut ke Tahap 2.
-
-### TAHAP 2 — EKSEKUSI ONE-SHOT
-1. Salin `.env.example` ke `.env` dan sesuaikan `APP_DISPLAY_NAME` serta `APP_TAGLINE`.
-2. Update CSS variables di `public/assets/css/branding.css` sesuai `docs/branding.md`.
-3. Buat hash Argon2ID valid untuk demo users di `data/users.json`.
-4. Untuk setiap shell (`public/index.php`, `login/`, `register/`, `manajemen/`, `admin/`, `client/`):
-   - Terapkan require header 4 file: `config.php`, `helper.php`, `session.php`, `csrf.php`.
-   - Ekstrak seluruh teks statis menjadi key terjemahan di `locales/id.json`, `en.json`, dan `ar.json`.
-   - Ganti nama aplikasi dengan `<?= APP_DISPLAY_NAME ?>`.
-5. Validasi syntax PHP dengan `php -l` pada seluruh file `.php`.
-6. Validasi fungsional dengan menjalankan server lokal sementara (`php -S localhost:8099 -t public`) dan tes HTTP 200 via `curl`.
-7. **BERHENTI & TUNGGU APPROVAL OWNER** sebelum lanjut ke Tahap 3.
-
-### TAHAP 3 — PREVIEW & VERIFIKASI
-1. Pastikan document root webserver mengarah ke folder `public/`.
-2. Akses `http://{$projectName}.test/` atau `http://localhost/{$projectName}/public/`.
-3. Verifikasi auth flow, tombol quick-login demo, perantian bahasa i18n, dan fungsi logout.
+2. Jika ada file di `references/`: Baca seluruh folder `references/` -> gunakan sebagai acuan untuk `docs/prd.md` & `docs/branding.md` -> konsolidasikan `references/*.html`.
+3. Audit struktur file core:
+   - `include/config.php`, `include/helper.php`
+   - `core/router.php`, `core/session.php`, `core/csrf.php`, `core/Repo.php`
+   - `public/core/router.php` (router proxy - WAJIB)
+   - `modules/auth/`
+   - `.env`, `.env.example`
+   - `data/users.json`
+4. Jalankan **Audit Protocol** sesuai `docs/audit_protocol.md`:
+   - Output: `docs/AUDIT_BASIC.md`
+   - Jika proyek memiliki multi-mode storage atau governance kompleks, lanjut dengan `docs/audit_conformance_addendum.md`
+5. Buat file `docs/build_plan.md` yang memuat:
+   - Mapping shell vs file yang sudah ada
+   - Daftar file yang belum ada
+   - Daftar variabel environment dari `.env.example`
+6. **BERHENTI dan TUNGGU persetujuan project owner** sebelum lanjut ke TAHAP 2.
 
 ---
 
-## 5. Keamanan & User Demo Default
+### TAHAP 2 — BUILD (Eksekusi)
+
+1. Buat file yang belum ada sesuai `build_plan.md`:
+   - Shell files: `public/*/index.php`
+   - Router proxy: `public/core/router.php`
+   - Core modules: `core/*.php`, `include/*.php`
+   - Auth modules: `modules/auth/*.php`
+2. Ikuti struktur arsitektur di CLAUDE.md:
+   - Entry Guard Pattern (CLAUDE.md §8)
+   - Router Proxy Pattern (CLAUDE.md §3f)
+   - Repo Pattern Dual-Mode (CLAUDE.md §3g)
+   - SPA Shell Architecture (CLAUDE.md §3a)
+3. Generate demo users di `data/users.json`:
+   - Lihat CLAUDE.md Section 6b untuk format dan password hash
+   - Gunakan Argon2ID hash (jangan plain text)
+4. Setup i18n files:
+   - `locales/languages.json` (manifest)
+   - `locales/id.json`, `locales/en.json`, `locales/ar.json`
+   - Flag assets di `public/assets/flags/`
+5. **SETIAP MODUL yang relevan harus berfungsi nyata**:
+   - Create/Read/Update/Delete tidak boleh cuma UI tanpa backend
+   - Diuji untuk skenario storage SQL maupun JSON sesuai deteksi `DB_MODE`
+
+---
+
+### TAHAP 3 — VERIFY & PREVIEW
+
+1. Jalankan validasi syntax PHP untuk SEMUA file `.php`:
+   ```bash
+   php -l public/index.php
+   php -l public/login/index.php
+   # ... semua file .php
+   ```
+2. Pastikan 0 parse error (CLAUDE.md §12h - Zero Tolerance).
+3. Konfigurasi virtual host (Laragon):
+   - Menu Laragon -> Apache -> httpd-vhosts.conf
+   - Ubah `root`/`DocumentRoot` ke path `.../public`
+   - **JANGAN klaim langkah ini otomatis selesai** tanpa konfirmasi eksplisit dari project owner
+4. Informasikan URL preview: `http://<nama-folder-project>.test/`
+5. Laporkan checklist manual berikut - **WAJIB diverifikasi project owner di browser**:
+
+**Checklist Manual Preview:**
+- [ ] Landing page tampil sesuai struktur `references/landingpage.html`
+- [ ] Tombol quick-login demo (dev-only) berhasil masuk ke masing-masing role (manajemen/admin/client)
+- [ ] Ganti bahasa (id/en/ar) mengubah SEMUA teks, termasuk konten yang di-inject via JavaScript (lihat CLAUDE.md §12d)
+- [ ] Logout mengarah balik ke landing page tanpa render HTML apapun (CLAUDE.md §12f)
+- [ ] Auth state konsisten di desktop header dan mobile bottom nav (CLAUDE.md §12i)
+
+---
+
+## 6. Keamanan & User Demo Default
+
+**Security Baseline (Lihat CLAUDE.md §8 untuk detail lengkap):**
+- Password: Argon2ID
+- CSRF Token Validation
+- IP+Username Rate Limiting
+- Prepared Statements (PDO Dual-Mode Repo)
+
+**Demo Users (Lihat CLAUDE.md §6b untuk format lengkap):**
 
 | Role | Email Demo | Password Demo |
 |------|------------|---------------|
@@ -547,31 +736,62 @@ Setiap AI Coding Assistant (Claude Code CLI) WAJIB mengikuti urutan 3 Tahap Ekse
 | Creator (Admin) | `admin@{$projectName}.id` | `password123` |
 | Client (Pendengar) | `client@{$projectName}.com` | `password123` |
 
-- Security Baseline: Password Argon2ID, CSRF Token Validation, IP+Username Rate Limiting, Prepared Statements (PDO Dual-Mode Repo).
+---
+
+## 7. Referensi Dokumen Terkait
+
+| File | Scope | Kapan Dibaca |
+|------|-------|--------------|
+| `CLAUDE.md` | Konstitusi teknis, arsitektur, keamanan | Selalu (utama) |
+| `docs/document.md` | Decision guide: new vs redesign | Sebelum mulai build |
+| `docs/prd.md` | Definisi produk, fitur, target user | Saat isi konsep aplikasi |
+| `docs/branding.md` | Warna, font, logo, visual identity | Saat isi identitas visual |
+| `docs/audit_protocol.md` | Audit teknis dasar | TAHAP 1 audit |
+| `docs/audit_conformance_addendum.md` | Audit lanjutan multi-mode | Jika diperlukan |
+
+---
+
+## CONSTRAINT GLOBAL
+
+- Backward compatible dengan struktur modular yang sudah ada.
+- JANGAN sentuh/push data user nyata (`users.json`, `remember_tokens.json`, `audit_trail.json`) dan `.env`.
+- Ikuti ATURAN WAJIB di atas (riset→analisa→eksekusi→uji→analisa di SETIAP stage, tanpa kecuali, termasuk wajib tanya ulang setelah revisi).
 
 ---
 
 **Dibuat otomatis oleh Vibeforge Setup Wizard**
 MD;
 
-    $installMdPath = ROOT_PATH . '/docs/install.md';
+    // SIMPAN KONFIGURASI ke data/install_config.json (bukan overwrite install.md)
+    $configData = [
+        'serverType' => $serverType,
+        'drive' => $drive,
+        'installPath' => $installPath,
+        'projectName' => $projectName,
+        'pageStructure' => $pages,
+        'brandingMode' => $brandingMode,
+        'prdMode' => $prdMode,
+        'referencesCount' => count($refFiles),
+        'updated_at' => date('Y-m-d H:i:s'),
+    ];
 
-    // Remove existing install.md file first to force full recreation
-    if (file_exists($installMdPath)) {
-        @unlink($installMdPath);
+    $configPath = ROOT_PATH . '/data/install_config.json';
+    $dataDir = dirname($configPath);
+    if (!is_dir($dataDir)) {
+        mkdir($dataDir, 0755, true);
     }
 
-    if (@file_put_contents($installMdPath, $installMd)) {
+    if (@file_put_contents($configPath, json_encode($configData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))) {
         echo json_encode([
             'success' => true,
-            'path' => $installMdPath,
-            'message' => 'install.md berhasil di-generate'
+            'config_path' => $configPath,
+            'message' => 'Konfigurasi tersimpan. File install.md adalah template static - edit manual jika perlu.'
         ]);
     } else {
         http_response_code(500);
         echo json_encode([
             'success' => false,
-            'error' => 'Gagal menulis install.md'
+            'error' => 'Gagal menulis konfigurasi'
         ]);
     }
 }
@@ -594,6 +814,127 @@ function handleOpenFolder(array $input): void
         'success' => true,
         'message' => 'Folder opened in File Explorer',
         'path' => $winPath
+    ]);
+}
+
+function handleRenameApp(array $input): void
+{
+    $newName = trim($input['newName'] ?? '');
+    $oldName = trim($input['oldName'] ?? '');
+
+    if (empty($newName) || empty($oldName)) {
+        echo json_encode(['success' => false, 'error' => 'Nama aplikasi tidak boleh kosong']);
+        return;
+    }
+
+    // Sanitize: only lowercase alphanumeric, dashes, underscores
+    if (!preg_match('/^[a-z][a-z0-9_-]*$/', $newName)) {
+        echo json_encode(['success' => false, 'error' => 'Nama hanya boleh huruf kecil, angka, strip, dan underscore. Harus diawali huruf.']);
+        return;
+    }
+
+    if ($newName === $oldName) {
+        echo json_encode(['success' => false, 'error' => 'Nama baru sama dengan nama saat ini']);
+        return;
+    }
+
+    $projectRoot = ROOT_PATH;
+    $parentDir = dirname($projectRoot);
+    $newPath = $parentDir . '/' . $newName;
+
+    // Check target folder doesn't already exist
+    if (is_dir($newPath)) {
+        echo json_encode(['success' => false, 'error' => 'Folder "' . $newName . '" sudah ada di ' . str_replace('/', '\\', $parentDir)]);
+        return;
+    }
+
+    // 1. Update .env — APP_DISPLAY_NAME
+    $envPath = $projectRoot . '/.env';
+    if (file_exists($envPath)) {
+        $envContent = file_get_contents($envPath);
+        $envContent = preg_replace(
+            '/^APP_DISPLAY_NAME=.*$/m',
+            'APP_DISPLAY_NAME="' . $newName . '"',
+            $envContent
+        );
+        file_put_contents($envPath, $envContent);
+    }
+
+    // 2. Update .env.example — APP_DISPLAY_NAME
+    $envExamplePath = $projectRoot . '/.env.example';
+    if (file_exists($envExamplePath)) {
+        $envExampleContent = file_get_contents($envExamplePath);
+        $envExampleContent = preg_replace(
+            '/^APP_DISPLAY_NAME=.*$/m',
+            'APP_DISPLAY_NAME="' . $newName . '"',
+            $envExampleContent
+        );
+        file_put_contents($envExamplePath, $envExampleContent);
+    }
+
+    // 3. Build a PowerShell script to run in background:
+    //    - Rename folder
+    //    - Update Laragon vhost
+    //    - Reload Apache
+    $isLaragon = stripos($projectRoot, 'laragon') !== false;
+    $drive = strtoupper(substr($projectRoot, 0, 1));
+
+    $psScript = "Start-Sleep -Seconds 3\n";
+
+    if ($isLaragon) {
+        $oldDomain = $oldName . '.test';
+        $newDomain = $newName . '.test';
+        $laragonBase = $drive . ':/laragon';
+        $vhostDir = $laragonBase . '/etc/apache2/sites-enabled';
+        $oldVhostFile = $vhostDir . '/auto.' . $oldDomain . '.conf';
+        $newVhostFile = $vhostDir . '/auto.' . $newDomain . '.conf';
+        $newDocRoot = $laragonBase . '/www/' . $newName . '/public';
+
+        // Rename folder
+        $psScript .= "Rename-Item -Path '" . str_replace('/', '\\', $projectRoot) . "' -NewName '" . $newName . "'\n";
+
+        // Update vhost: remove old, create new
+        $psScript .= "if (Test-Path '" . str_replace('/', '\\', $oldVhostFile) . "') {\n";
+        $psScript .= "  Remove-Item '" . str_replace('/', '\\', $oldVhostFile) . "' -Force\n";
+        $psScript .= "  \$vhostContent = @\"\n";
+        $psScript .= "<VirtualHost *:80>\n";
+        $psScript .= "    DocumentRoot \"" . str_replace('/', '\\', $newDocRoot) . "\"\n";
+        $psScript .= "    ServerName " . $newDomain . "\n";
+        $psScript .= "    <Directory \"" . str_replace('/', '\\', $newDocRoot) . "\">\n";
+        $psScript .= "        AllowOverride All\n";
+        $psScript .= "        Require all granted\n";
+        $psScript .= "    </Directory>\n";
+        $psScript .= "</VirtualHost>\n";
+        $psScript .= "\"@\n";
+        $psScript .= "  Set-Content -Path '" . str_replace('/', '\\', $newVhostFile) . "' -Value \$vhostContent -Encoding UTF8\n";
+        $psScript .= "}\n";
+
+        // Reload Apache
+        $psScript .= "Start-Process -FilePath '" . str_replace('/', '\\', $laragonBase) . "\\bin\\apache\\httpd-2.4*/bin/httpd.exe' -ArgumentList '-k','restart' -NoNewWindow -ErrorAction SilentlyContinue 2>`$null\n";
+        $psScript .= "Start-Sleep -Seconds 2\n";
+    } else {
+        // Just rename folder for non-Laragon
+        $psScript .= "Rename-Item -Path '" . str_replace('/', '\\', $projectRoot) . "' -NewName '" . $newName . "'\n";
+    }
+
+    // Write the script to a temp file
+    $scriptPath = $projectRoot . '/cache/_rename_app.ps1';
+    @mkdir(dirname($scriptPath), 0755, true);
+    file_put_contents($scriptPath, $psScript);
+
+    // Execute the script in background via PowerShell
+    $winScriptPath = str_replace('/', '\\', $scriptPath);
+    $cmd = "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File \"{$winScriptPath}\"";
+    pclose(popen("start /B " . $cmd, "r"));
+
+    $newDomain = $newName . '.test';
+    $newUrl = 'http://' . $newDomain . '/install/';
+
+    echo json_encode([
+        'success' => true,
+        'newName' => $newName,
+        'newUrl'  => $newUrl,
+        'message' => 'Aplikasi di-rename. Halaman akan dialihkan otomatis.'
     ]);
 }
 

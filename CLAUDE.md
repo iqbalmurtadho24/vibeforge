@@ -7,6 +7,11 @@ ini. Baca lengkap sebelum audit atau eksekusi kode apapun.
 > aplikasi website apapun. Branding, warna, dan fitur spesifik aplikasi didefinisikan
 > di `docs/prd.md` dan `docs/branding.md`. Semua kode harus mendukung
 > konfigurasi ulang tanpa harus rewrite.
+>
+> **SETUP WIZARD**: Gunakan `public/install/` untuk konfigurasi awal project.
+> Wizard menghasilkan `docs/install.md` yang berisi protokol eksekusi spesifik
+> project ini. AI assistant sebaiknya membaca `docs/install.md` terlebih dahulu
+> untuk memahami halaman mana yang aktif dan file apa yang perlu di-generate.
 
 ---
 
@@ -34,6 +39,8 @@ Pilih audit prompt yang sesuai dengan fase project:
 - Native PHP (tanpa framework), Tailwind CSS (CDN atau build lokal),
   Alpine.js untuk interaktivitas ringan, vanilla JS untuk sisanya.
 - Laragon untuk development lokal, FTP untuk deploy production.
+- Setup Wizard: `public/install/` untuk konfigurasi awal project, menghasilkan
+  `docs/install.md` sebagai protokol eksekusi spesifik project.
 - Database dual-mode: JSON (`data/*.json`) atau MySQL, diakses HANYA lewat
   data access layer terpusat `core/Repo.php` (auto-switch per entitas,
   lihat Section 3g).
@@ -64,6 +71,11 @@ Reload penuh hanya terjadi saat pindah ANTAR shell (misal login -> client).
 **Konsep Aplikasi**: Tipe aplikasi (e-commerce, dashboard, media player, dll)
 ditentukan di `docs/prd.md`. Struktur modul dan fitur menyesuaikan.
 
+> **Catatan Auto-Generation**: Jika `prdMode=auto` di `.env`/`docs/install.md`,
+> AI WAJIB men-generate `docs/prd.md` secara otomatis dari hasil audit referensi
+> dengan self-review 4 pertanyaan sebelum dianggap final. Jika `prdMode=manual`,
+> file sudah diisi manual oleh project owner lewat Setup Wizard.
+
 `login.php`/`register.php`/`logout.php` BUKAN file mandiri, melainkan
 module AJAX di bawah `modules/auth/`, dipanggil dari dalam shell
 `login/index.php` melalui `core/router.php`.
@@ -89,8 +101,13 @@ module AJAX di bawah `modules/auth/`, dipanggil dari dalam shell
 - Role `admin` = Creator / Admin Biasa (upload karya, analitik performa, manajemen royalti & penarikan dana — untuk Artis/Pendakwah/Podcaster/Munsyid terverifikasi, lihat `docs/prd.md` Section C). Nama role tetap `admin` secara teknis (folder shell, kolom `role` di `data/users.json`, dst).
 
 ### 3d. Branding Dinamis
-Nama aplikasi, logo, warna diambil dari `docs/prd.md`
+Nama aplikasi, logo, warna diambil dari `docs/branding.md`
 dan dikonfigurasi di `.env`. Tidak ada hardcode nama aplikasi di kode.
+
+> **Catatan Auto-Generation**: Jika `brandingMode=auto` di `.env`/`docs/install.md`,
+> AI WAJIB men-generate `docs/branding.md` secara otomatis dari hasil audit
+> referensi atau PRD. Jika `brandingMode=manual`, file sudah diisi manual oleh
+> project owner lewat Setup Wizard.
 
 ### 3e. File Reference Template
 
@@ -105,6 +122,11 @@ SAMA PERSIS yang ditulis di `references/*.html` yang sesuai:
 | `public/manajemen/index.php`           | `references/modul_manajemen.html`     |
 | `public/admin/index.php`                | `references/modul_admin.html`         |
 | `public/client/index.php`               | `references/modul_client.html`        |
+
+> **Catatan Auto-Generation**: Jika folder `references/` kosong (project baru tanpa
+> referensi), AI WAJIB men-generate file `references/*.html` secara otomatis sebelum
+> membangun shell. File-file ini menjadi golden template untuk styling dan struktur.
+> Lihat `docs/install.md` Section 4 untuk daftar file yang harus di-generate.
 
 ## 3f. Router Proxy Pattern (Document Root Architecture)
 

@@ -1,6 +1,7 @@
 # Addendum Audit: Kesesuaian Konsep & Paritas Keamanan Multi-Mode - Vibeforge
+
 Versi: 2.0 (Generik & Terintegrasi Vibeforge Framework)
-Status: Modul audit lanjutan opsional, dijalankan setelah Audit Dasar (`docs/audit_protocol.md`) jika kondisi di Bagian 0 terpenuhi.
+Status: Modul audit lanjutan opsional, dijalankan setelah Audit Dasar (`docs/audit_protocol.md`)
 
 ---
 
@@ -43,44 +44,67 @@ Jika kedua kondisi di atas tidak berlaku, HENTIKAN audit addendum ini. Cukup gun
 *(Jalankan hanya jika Parameter 0.1 mengonfirmasi Bagian A berlaku)*
 
 ### Langkah 1: Ekstraksi Aturan
+
 Sebelum membandingkan kode, baca seluruh isi `CLAUDE.md`, `docs/prd.md`, `docs/branding.md`, dan `docs/document.md`. Buat daftar Aturan Eksplisit yang mencakup:
+
 1. Definisi Role & Shell Mapping (`manajemen` -> `/manajemen/`, `admin` -> `/admin/`, `client` -> `/client/`).
 2. Aturan arsitektur SPA Shell, Router Proxy Pattern (`public/core/router.php`), dan Entry Guard dua pola.
 3. Ketentuan dual-mode Repo (`core/Repo.php`), i18n multi-bahasa, dan variabel CSS branding.
 
 ### Langkah 2: Verifikasi Kesesuaian Kode
-Cocokkan setiap Aturan Eksplisit dengan kode aktual. Buat tabel:
-`Aturan | Status (Sesuai/Sebagian/Tidak Sesuai/Tidak Dapat Diverifikasi) | Bukti (file:baris) | Catatan`
+
+Cocokkan setiap Aturan Eksplisit dengan implementasi aktual di kode. Tandai status untuk setiap aturan:
+- ✅ SESUAI: Implementasi mengikuti aturan
+- ❌ TIDAK SESUAI: Implementasi menyimpang dari aturan
+- ⚠️ PERLU VERIFIKASI: Tidak dapat diverifikasi secara statis
+
+### Langkah 3: Dokumentasikan Temuan
+
+Untuk setiap ketidaksesuaian, dokumentasikan:
+- File dan lokasi (path:line)
+- Aturan yang dilanggar (referensi ke section CLAUDE.md)
+- Kondisi aktual vs kondisi yang diharapkan
+- Dampak dan risiko
 
 ---
 
-## 3. Bagian B: Paritas Keamanan Antar Mode Penyimpanan (JSON vs MySQL)
+## 3. Bagian B: Paritas Keamanan Dual-Mode Storage
 
-*(Jalankan jika Mode Dual-Mode JSON & MySQL aktif)*
+*(Jalankan hanya jika Parameter 0.1 mengonfirmasi Bagian B berlaku)*
 
-Periksa setara/tidaknya kontrol keamanan berikut di `core/Repo.php` dan modul pemanggil:
+### B.1 Paritas Fungsi Keamanan
 
-1. **Tenant / Scope Enforcement**: Apakah pembatasan akses data user/role konsisten baik saat data dibaca dari file JSON maupun tabel MySQL?
-2. **Input Sanitization & Injection Protection**:
-   - Mode SQL: Apakah selalu menggunakan PDO Prepared Statements?
-   - Mode JSON: Apakah input tervalidasi tipe & kondisinya sebelum disimpan ke file JSON?
-3. **Atomic Write & Concurrency Locking**:
-   - Mode JSON: Apakah penulisan data menggunakan file lock terpisah (`{entitas}.json.lock`) dengan `flock(LOCK_EX)` serta atomic rename via temporary file untuk mencegah corrupt data?
-   - Mode SQL: Apakah operasi multi-step menggunakan transaksi PDO?
-4. **Rate Limiting & Counters**: Apakah counter percobaan login / rate limit disimpan dengan race-condition-safe di kedua mode?
-5. **Lokasi File JSON**: Pastikan file `data/*.json` TIDAK dapat diakses langsung via browser HTTP GET (terlindung oleh `.htaccess` dan diluar webroot jika memungkinkan).
-6. **Logging & Audit Trail**: Apakah audit trail (`data/audit_trail.json` atau tabel `audit_log`) mencatat transaksi POST secara konsisten tanpa peduli mode DB yang aktif?
+- [ ] Apakah hash password (Argon2ID) konsisten di mode JSON dan SQL?
+- [ ] Apakah validasi CSRF token sama kuat di kedua mode?
+- [ ] Apakah rate limiting berfungsi identik untuk kedua mode?
+- [ ] Apakah prepared statements wajib di mode SQL (tanpa fallback ke query mentah)?
+
+### B.2 Paritas Audit Trail
+
+- [ ] Apakah setiap aksi sensitif (login, ubah data, hapus) dicatat ke audit trail di kedua mode?
+- [ ] Apakah format log konsisten (timestamp, user_id, action, detail)?
+- [ ] Apakah audit trail APPEND-ONLY di kedua mode?
+
+### B.3 Paritas Data Integrity
+
+- [ ] Apakah validasi input sama ketatnya untuk kedua mode?
+- [ ] Apakah error handling konsisten (tidak membocorkan informasi sensitif)?
+- [ ] Apakah transaksi atomic dijamin di kedua mode (file lock untuk JSON, transaction untuk SQL)?
 
 ---
 
 ## 4. Bagian C: Integrasi Pihak Ketiga (Opsional)
 
+*(Jalankan hanya jika Parameter 0.1 mengonfirmasi integrasi pihak ketiga berlaku)*
+
 ### C.1 Median.co (WebView App)
+
 - [ ] Pilihan plugin audio background sesuai spesifikasi (Native Media Player `median.backgroundMedia`).
 - [ ] Bebas dari full-page reload pada flow utama agar media player tidak terputus.
 - [ ] Pull-to-refresh dikonfigurasi / disabled.
 
 ### C.2 Push Notifications (OneSignal / FCM)
+
 - [ ] Credentials & API Key disimpan di `.env` server-side, bukan hardcoded di client.
 - [ ] User identifier (External ID) aman dan tidak membocorkan data sensitif.
 
@@ -89,12 +113,22 @@ Periksa setara/tidaknya kontrol keamanan berikut di `core/Repo.php` dan modul pe
 ## 5. Output Wajib Laporan Audit
 
 Hasil audit addendum ini ditulis ke file laporan baru:
-`docs/AUDIT_CONFORMANCE.md`
+**`docs/AUDIT_CONFORMANCE.md`**
 
 Struktur Laporan:
-1. Konfirmasi Parameter Konteks (dari Section 0.1)
-2. Ringkasan Eksekutif Paritas Keamanan & Governance
-3. Tabel Audit Kesesuaian Governance (Bagian A)
-4. Tabel Paritas Keamanan Dual-Mode Storage (Bagian B)
-5. Tabel Integrasi Pihak Ketiga (Bagian C, jika ada)
-6. Daftar Temuan Kritis (Blocker) & Rekomendasi Prioritas
+
+1. **Konfirmasi Parameter Konteks** (dari Section 0.1)
+2. **Ringkasan Eksekutif Paritas Keamanan & Governance**
+3. **Tabel Audit Kesesuaian Governance** (Bagian A)
+4. **Tabel Paritas Keamanan Dual-Mode Storage** (Bagian B)
+5. **Tabel Integrasi Pihak Ketiga** (Bagian C, jika ada)
+6. **Daftar Temuan Kritis (Blocker) & Rekomendasi Prioritas**
+
+---
+
+## 6. Referensi
+
+- Audit Dasar: `docs/audit_protocol.md`
+- Konstitusi Teknis: `CLAUDE.md`
+- Definisi Produk: `docs/prd.md`
+- Identitas Visual: `docs/branding.md`

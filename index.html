@@ -309,11 +309,18 @@
                                 <span class="text-gray-500 select-none font-bold">&gt;</span>
                                 <span class="truncate sm:whitespace-normal font-mono text-emerald-400 font-medium tracking-tight">irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex</span>
                             </div>
-                            <button @click="navigator.clipboard.writeText('irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex'); copied = true; setTimeout(() => copied = false, 2500)"
-                                    class="self-end sm:self-auto px-4 py-2 bg-gradient-brand hover:opacity-90 text-white rounded-lg text-xs font-sans font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-md glow-orange-sm cursor-pointer">
-                                <i class="ph text-sm" :class="copied ? 'ph-check text-white' : 'ph-copy'"></i>
-                                <span x-text="copied ? t('hero_copied') : t('hero_copy_cmd')">Copy Command</span>
-                            </button>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button onclick="downloadSetupScript()"
+                                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-sans font-bold transition-all flex items-center gap-1.5 shadow-md cursor-pointer">
+                                    <i class="ph ph-download-simple text-sm"></i>
+                                    <span x-text="t('hero_download')">Download</span>
+                                </button>
+                                <button @click="navigator.clipboard.writeText('irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex'); copied = true; setTimeout(() => copied = false, 2500)"
+                                        class="px-4 py-2 bg-gradient-brand hover:opacity-90 text-white rounded-lg text-xs font-sans font-bold transition-all flex items-center gap-1.5 shadow-md glow-orange-sm cursor-pointer">
+                                    <i class="ph text-sm" :class="copied ? 'ph-check text-white' : 'ph-copy'"></i>
+                                    <span x-text="copied ? t('hero_copied') : t('hero_copy_cmd')">Copy Command</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -463,6 +470,18 @@
                             <span class="text-orange-400 select-none font-bold">PS &gt;</span>
                             <code class="text-emerald-400 leading-relaxed break-all">irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex</code>
                         </div>
+                        <div class="flex items-center gap-3 pt-1">
+                            <button onclick="downloadSetupScript()"
+                                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-sans font-bold transition-all flex items-center gap-1.5 shadow-md cursor-pointer">
+                                <i class="ph ph-download-simple text-sm"></i>
+                                <span x-text="t('hero_download')">Download</span>
+                            </button>
+                            <button onclick="copyInstallCommand()"
+                                    class="px-4 py-2 bg-gradient-brand hover:opacity-90 text-white rounded-lg text-xs font-sans font-bold transition-all flex items-center gap-1.5 shadow-md glow-orange-sm cursor-pointer">
+                                <i class="ph ph-copy text-sm"></i>
+                                <span x-text="t('hero_copy_cmd')">Copy Command</span>
+                            </button>
+                        </div>
                         <div class="text-gray-400 pt-2 space-y-1.5 leading-relaxed">
                             <p class="text-white font-bold" x-text="t('term_bold')">Skrip otomatis ini akan melakukan:</p>
                             <p x-text="t('term_s1')">✓ Mengunduh versi terbaru template Vibeforge</p>
@@ -472,160 +491,57 @@
                         </div>
                     </div>
                 </div>
+                <!-- Workflow Step Cards -->
+                <div id="alur-aplikasi" class="space-y-8">
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6">
+                        <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
+                            <h3 class="font-heading font-extrabold text-xl" x-text="t('wizard_title')">4 Tahap Setup Wizard</h3>
+                            <span class="px-3 py-1 bg-orange-500/10 border border-orange-500/30 text-[var(--brand-primary)] font-mono text-xs rounded-full" x-text="t('wizard_mode')">UNIFIED FLOW</span>
+                        </div>
 
-                <!-- Workflow Step Tabs -->
-                <div id="alur-aplikasi" class="space-y-8" x-data="{ mode: 'new' }">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
-                    <div class="flex justify-center border-b border-[var(--border-default)] max-w-md mx-auto">
-                        <button @click="mode = 'new'" :class="mode === 'new' ? 'border-[var(--brand-primary)] text-[var(--brand-primary)] border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-xs font-mono uppercase tracking-wider transition-colors focus:outline-none cursor-pointer" x-text="t('tab_new')">Alur Aplikasi Baru (12 Steps)</button>
-                        <button @click="mode = 'redesign'" :class="mode === 'redesign' ? 'border-purple-500 text-purple-400 border-b-2 font-bold' : 'text-[var(--text-muted)]'" class="flex-1 py-3 text-xs font-mono uppercase tracking-wider transition-colors focus:outline-none cursor-pointer" x-text="t('tab_redesign')">Alur Redesain (5 Steps)</button>
-                    </div>
-
-                    <!-- NEW MODE TUTORIAL (12 Steps) -->
-                    <div x-show="mode === 'new'" class="space-y-6" x-transition>
-                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6">
-                            <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
-                                <h3 class="font-heading font-extrabold text-xl" x-text="t('new_title')">12 Langkah Setup Wizard — Greenfield App</h3>
-                                <span class="px-3 py-1 bg-orange-500/10 border border-orange-500/30 text-[var(--brand-primary)] font-mono text-xs rounded-full" x-text="t('mode_greenfield')">MODE: GREENFIELD</span>
+                            <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">TAHAP 1</span>
+                                    <i class="ph ph-compass text-lg text-[var(--text-muted)]"></i>
+                                </div>
+                                <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('wizard_t1_t')">Install</h4>
+                                <p class="text-xs text-[var(--text-secondary)]" x-text="t('wizard_t1_d')">Deteksi otomatis: nama aplikasi, path folder, domain lokal, & PHP version. Tidak ada input manual.</p>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_01</span>
-                                        <i class="ph ph-compass text-lg text-[var(--text-muted)]"></i>
-                                    </div>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s1_t')">Overview Mode</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-text="t('new_s1_d')">Pemilihan mode instalasi & penjelasan arsitektur Vibeforge.</p>
+                            <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">TAHAP 2</span>
+                                    <i class="ph ph-upload-simple text-lg text-[var(--text-muted)]"></i>
                                 </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_02</span>
-                                        <i class="ph ph-file-text text-lg text-[var(--text-muted)]"></i>
-                                    </div>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s2_t')">Definisi PRD</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s2_d')"></p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_03</span>
-                                        <i class="ph ph-palette text-lg text-[var(--text-muted)]"></i>
-                                    </div>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s3_t')">Branding Tokens</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s3_d')"></p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_04</span>
-                                        <i class="ph ph-image text-lg text-[var(--text-muted)]"></i>
-                                    </div>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s4_t')">Logo Assets</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s4_d')"></p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_05</span>
-                                        <i class="ph ph-browsers text-lg text-[var(--text-muted)]"></i>
-                                    </div>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s5_t')">Template Landing</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s5_d')"></p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_06-07</span>
-                                        <i class="ph ph-lock-key text-lg text-[var(--text-muted)]"></i>
-                                    </div>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s6_t')">Auth Forms</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s6_d')"></p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_08-10</span>
-                                        <i class="ph ph-squares-four text-lg text-[var(--text-muted)]"></i>
-                                    </div>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s8_t')">Role Modules</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-text="t('new_s8_d')">Dashboard Manajemen, Admin/Creator Studio, & Client Player.</p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_11</span>
-                                        <i class="ph ph-gear text-lg text-[var(--text-muted)]"></i>
-                                    </div>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s11_t')">Config & Environment</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s11_d')"></p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">STEP_12</span>
-                                        <i class="ph ph-terminal text-lg text-[var(--text-muted)]"></i>
-                                    </div>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('new_s12_t')">AI Execution</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('new_s12_d')"></p>
-                                </div>
-
+                                <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('wizard_t2_t')">Referensi</h4>
+                                <p class="text-xs text-[var(--text-secondary)]" x-text="t('wizard_t2_d')">Upload referensi HTML/CSS/JS atau source aplikasi lama (opsional). Skip jika memulai dari nol.</p>
                             </div>
+
+                            <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">TAHAP 3</span>
+                                    <i class="ph ph-palette text-lg text-[var(--text-muted)]"></i>
+                                </div>
+                                <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('wizard_t3_t')">Branding & Logo</h4>
+                                <p class="text-xs text-[var(--text-secondary)]" x-text="t('wizard_t3_d')">Identitas brand: nama app, tagline, warna, deskripsi, & upload logo.</p>
+                            </div>
+
+                            <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-mono text-xs text-[var(--brand-primary)] font-bold">TAHAP 4</span>
+                                    <i class="ph ph-file-text text-lg text-[var(--text-muted)]"></i>
+                                </div>
+                                <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('wizard_t4_t')">PRD</h4>
+                                <p class="text-xs text-[var(--text-secondary)]" x-text="t('wizard_t4_d')">Generate PRD otomatis oleh AI atau paste PRD sendiri. Lalu jalankan AI execution.</p>
+                            </div>
+
                         </div>
                     </div>
-
-                    <!-- REDESIGN MODE TUTORIAL (5 Steps) -->
-                    <div x-show="mode === 'redesign'" class="space-y-6" x-transition>
-                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6">
-                            <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-4">
-                                <h3 class="font-heading font-extrabold text-xl" x-text="t('redesign_title')">5 Langkah Setup Wizard — Redesain Aplikasi</h3>
-                                <span class="px-3 py-1 bg-purple-500/10 border border-purple-500/30 text-purple-400 font-mono text-xs rounded-full" x-text="t('mode_refit')">MODE: REFIT</span>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <span class="font-mono text-xs text-purple-400 font-bold">STEP_01</span>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('redesign_s1_t')">Overview</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-text="t('redesign_s1_d')">Pilih Mode Redesain pada Wizard UI.</p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <span class="font-mono text-xs text-purple-400 font-bold">STEP_02</span>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('redesign_s2_t')">Upload References</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('redesign_s2_d')"></p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <span class="font-mono text-xs text-purple-400 font-bold">STEP_03</span>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('redesign_s3_t')">Logo Assets</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-html="t('redesign_s3_d')"></p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <span class="font-mono text-xs text-purple-400 font-bold">STEP_04</span>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('redesign_s4_t')">Target Host</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-text="t('redesign_s4_d')">Tentukan jenis web server lokal (Laragon/XAMPP).</p>
-                                </div>
-
-                                <div class="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] space-y-2">
-                                    <span class="font-mono text-xs text-purple-400 font-bold">STEP_05</span>
-                                    <h4 class="font-bold text-sm text-[var(--text-primary)]" x-text="t('redesign_s5_t')">AI Re-architecting</h4>
-                                    <p class="text-xs text-[var(--text-secondary)]" x-text="t('redesign_s5_d')">Jalankan AI CLI untuk auto-generate PRD & menyerap struktur lama.</p>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
-            </div>
-        </section>
-
-        <!-- Role Access Matrix / Demo Portals Section -->
+                <!-- Role Access Matrix / Demo Portals Section -->
         <section id="demo" class="py-20 sm:py-28">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
@@ -634,66 +550,79 @@
                     <p class="text-[var(--text-secondary)] text-base" x-text="t('demo_sub')">Tiga modul terpisah dengan otorisasi ketat server-side session dan UI shell tersendiri.</p>
                 </div>
 
-                <div class="grid sm:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="max-w-3xl mx-auto space-y-8">
 
-                    <!-- Role Card 1: Manajemen -->
-                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between space-y-6 glow-box-cyber">
-                        <div class="space-y-4">
+                    <!-- Role Overview Cards -->
+                    <div class="grid sm:grid-cols-3 gap-6">
+                        <!-- Role Card 1: Manajemen -->
+                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-5 hover:border-purple-500/50 transition-all duration-300 space-y-3 glow-box-cyber">
                             <div class="flex items-center justify-between">
-                                <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
-                                    <i class="ph ph-crown text-2xl"></i>
+                                <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                                    <i class="ph ph-crown text-xl"></i>
                                 </div>
-                                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">ROLE: MANAJEMEN</span>
+                                <span class="font-mono text-[9px] font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">MANAJEMEN</span>
                             </div>
                             <div>
-                                <h3 class="font-heading font-bold text-xl text-[var(--text-primary)]" x-text="t('role1_title')">Super Admin Portal</h3>
+                                <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]" x-text="t('role1_title')">Super Admin Portal</h3>
                                 <p class="text-xs text-[var(--text-secondary)] mt-1" x-text="t('role1_desc')">Akses penuh ke overview sistem, audit trail, keuangan & persetujuan kreator.</p>
                             </div>
                         </div>
-                        <div class="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] font-mono text-[11px] text-[var(--text-muted)]">
-                            <div>Shell: <code class="text-purple-400">/manajemen/</code></div>
-                            <div>Default: admin@app.com</div>
-                        </div>
-                    </div>
 
-                    <!-- Role Card 2: Creator -->
-                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--brand-primary)]/50 p-6 transition-all duration-300 flex flex-col justify-between space-y-6 relative overflow-hidden glow-box-cyber">
-                        <div class="absolute -top-12 -right-12 w-28 h-28 bg-orange-500/10 rounded-full blur-xl pointer-events-none"></div>
-                        <div class="space-y-4">
+                        <!-- Role Card 2: Creator -->
+                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--brand-primary)]/50 p-5 transition-all duration-300 space-y-3 relative overflow-hidden glow-box-cyber">
+                            <div class="absolute -top-12 -right-12 w-28 h-28 bg-orange-500/10 rounded-full blur-xl pointer-events-none"></div>
                             <div class="flex items-center justify-between">
-                                <div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)]">
-                                    <i class="ph ph-rocket-launch text-2xl"></i>
+                                <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-[var(--brand-primary)]">
+                                    <i class="ph ph-rocket-launch text-xl"></i>
                                 </div>
-                                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">ROLE: ADMIN (CREATOR)</span>
+                                <span class="font-mono text-[9px] font-bold px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">ADMIN</span>
                             </div>
                             <div>
-                                <h3 class="font-heading font-bold text-xl text-[var(--text-primary)]" x-text="t('role2_title')">Creator Studio</h3>
+                                <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]" x-text="t('role2_title')">Creator Studio</h3>
                                 <p class="text-xs text-[var(--text-secondary)] mt-1" x-text="t('role2_desc')">Dashboard upload konten, statistik performa karya, & manajemen royalti.</p>
                             </div>
                         </div>
-                        <div class="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] font-mono text-[11px] text-[var(--text-muted)]">
-                            <div>Shell: <code class="text-orange-400">/admin/</code></div>
-                            <div>Default: admin@app.id</div>
-                        </div>
-                    </div>
 
-                    <!-- Role Card 3: Client -->
-                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between space-y-6 glow-box-cyber">
-                        <div class="space-y-4">
+                        <!-- Role Card 3: Client -->
+                        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-5 hover:border-emerald-500/50 transition-all duration-300 space-y-3 glow-box-cyber">
                             <div class="flex items-center justify-between">
-                                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                                    <i class="ph ph-headphones text-2xl"></i>
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                                    <i class="ph ph-headphones text-xl"></i>
                                 </div>
-                                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ROLE: CLIENT</span>
+                                <span class="font-mono text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">CLIENT</span>
                             </div>
                             <div>
-                                <h3 class="font-heading font-bold text-xl text-[var(--text-primary)]" x-text="t('role3_title')">Client Application</h3>
+                                <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]" x-text="t('role3_title')">Client Application</h3>
                                 <p class="text-xs text-[var(--text-secondary)] mt-1" x-text="t('role3_desc')">Interface pengguna/pendengar untuk eksplorasi, playlist, & player audio.</p>
                             </div>
                         </div>
-                        <div class="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] font-mono text-[11px] text-[var(--text-muted)]">
-                            <div>Shell: <code class="text-emerald-400">/client/</code></div>
-                            <div>Default: client@app.com</div>
+                    </div>
+
+                    <!-- Demo Account Info + Download -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-5 glow-box-cyber">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-[var(--brand-primary)]/10 border border-[var(--brand-primary)]/30 flex items-center justify-center text-[var(--brand-primary)]">
+                                <i class="ph ph-play-circle text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-bold text-lg text-[var(--text-primary)]" x-text="t('demo_info_title')">Akun Demo Tersedia Setelah Setup</h3>
+                                <p class="text-xs text-[var(--text-secondary)]" x-text="t('demo_info_sub')">Setelah menjalankan skrip setup, 3 akun demo otomatis aktif — masing-masing untuk role Manajemen, Admin, dan Client.</p>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] font-mono text-xs text-[var(--text-muted)] space-y-1">
+                            <div class="flex items-center gap-2"><i class="ph ph-crown text-purple-400"></i> <span class="text-purple-400">Manajemen</span> — <span x-text="t('demo_full_access')">akses penuh seluruh sistem</span></div>
+                            <div class="flex items-center gap-2"><i class="ph ph-rocket-launch text-orange-400"></i> <span class="text-orange-400">Admin (Creator)</span> — <span x-text="t('demo_creator_access')">upload & kelola konten</span></div>
+                            <div class="flex items-center gap-2"><i class="ph ph-headphones text-emerald-400"></i> <span class="text-emerald-400">Client</span> — <span x-text="t('demo_client_access')">jelajahi & dengarkan konten</span></div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button onclick="downloadSetupScript()" class="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] text-white font-bold text-sm transition-all duration-200 shadow-lg shadow-orange-500/20">
+                                <i class="ph ph-download-simple text-lg"></i>
+                                <span x-text="t('btn_download_bat')">Download Setup (.bat)</span>
+                            </button>
+                            <button onclick="copyInstallCommand()" class="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] hover:border-[var(--brand-primary)]/50 text-[var(--text-primary)] font-bold text-sm transition-all duration-200">
+                                <i class="ph ph-copy text-lg"></i>
+                                <span x-text="t('btn_copy_cmd')">Copy PowerShell Command</span>
+                            </button>
                         </div>
                     </div>
 
@@ -766,6 +695,7 @@
                 hero_desc: "<strong class=\"text-[var(--text-primary)]\">Vibeforge</strong> adalah template starter professional untuk membangun aplikasi web dengan metode vibe coding: definisikan kebutuhan di dokumen, biarkan AI coding assistant menempa seluruh struktur kode fungsional.",
                 hero_copy_cmd: "Copy Command",
                 hero_copied: "Tercopy!",
+                hero_download: "Download",
                 hero_btn_setup: "SETUP APPLICATION",
                 hero_btn_demo: "COBA DEMO ROLES",
                 spec_php_sub: "Zero Heavy Framework Overhead",
@@ -795,41 +725,17 @@
                 term_s2: "✓ Menyiapkan struktur folder shell SPA (`manajemen/`, `admin/`, `client/`)",
                 term_s3: "✓ Mengonfigurasi Virtual Host & Local Host DNS domain (.test)",
                 term_s4: "✓ Menginisialisasi `users.json` dengan kredensial demo terenkripsi Argon2ID",
-                tab_new: "Alur Aplikasi Baru (12 Steps)",
-                tab_redesign: "Alur Redesain (5 Steps)",
-                new_title: "12 Langkah Setup Wizard — Greenfield App",
-                mode_greenfield: "MODE: GREENFIELD",
-                new_s1_t: "Overview Mode",
-                new_s1_d: "Pemilihan mode instalasi & penjelasan arsitektur Vibeforge.",
-                new_s2_t: "Definisi PRD",
-                new_s2_d: "Spesifikasi aplikasi & alur fitur di <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/prd.md</code>.",
-                new_s3_t: "Branding Tokens",
-                new_s3_d: "Konfigurasi token warna & font di <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/branding.md</code>.",
-                new_s4_t: "Logo Assets",
-                new_s4_d: "Upload asset gambar logo ke <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/logo.png</code>.",
-                new_s5_t: "Template Landing",
-                new_s5_d: "Kustomisasi halaman depan di <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/landingpage.html</code>.",
-                new_s6_t: "Auth Forms",
-                new_s6_d: "Desain form Login & Register di folder <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/</code>.",
-                new_s8_t: "Role Modules",
-                new_s8_d: "Dashboard Manajemen, Admin/Creator Studio, & Client Player.",
-                new_s11_t: "Config & Environment",
-                new_s11_d: "Penyesuaian variabel <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">.env</code> & database settings.",
-                new_s12_t: "AI Execution",
-                new_s12_d: "Buka CLI dan eksekusi <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">baca @docs/install.md</code>.",
-                redesign_title: "5 Langkah Setup Wizard — Redesain Aplikasi",
-                mode_refit: "MODE: REFIT",
-                redesign_s1_t: "Overview",
-                redesign_s1_d: "Pilih Mode Redesain pada Wizard UI.",
-                redesign_s2_t: "Upload References",
-                redesign_s2_d: "Letakkan codebase lama ke folder <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">references/</code>.",
-                redesign_s3_t: "Logo Assets",
-                redesign_s3_d: "Upload asset logo baru ke <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">docs/logo.png</code>.",
-                redesign_s4_t: "Target Host",
-                redesign_s4_d: "Tentukan jenis web server lokal (Laragon/XAMPP).",
-                redesign_s5_t: "AI Re-architecting",
-                redesign_s5_d: "Jalankan AI CLI untuk auto-generate PRD & menyerap struktur lama.",
-                demo_tag: "// ACCESS CONTROL MATRIX //",
+                wizard_title: "4 Tahap Setup Wizard",
+                wizard_mode: "UNIFIED FLOW",
+                wizard_t1_t: "Install",
+                wizard_t1_d: "Deteksi otomatis: nama aplikasi, path folder, domain lokal, & PHP version. Tidak ada input manual.",
+                wizard_t2_t: "Referensi",
+                wizard_t2_d: "Upload referensi HTML/CSS/JS atau source aplikasi lama (opsional). Skip jika memulai dari nol.",
+                wizard_t3_t: "Branding & Logo",
+                wizard_t3_d: "Identitas brand: nama app, tagline, warna, deskripsi, & upload logo.",
+                wizard_t4_t: "PRD",
+                wizard_t4_d: "Generate PRD otomatis oleh AI atau paste PRD sendiri. Lalu jalankan AI execution.",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                demo_tag: "// ACCESS CONTROL MATRIX //",
                 demo_title: "Arsitektur Role-Based (RBAC)",
                 demo_sub: "Tiga modul terpisah dengan otorisasi ketat server-side session dan UI shell tersendiri.",
                 role1_title: "Super Admin Portal",
@@ -838,6 +744,13 @@
                 role2_desc: "Dashboard upload konten, statistik performa karya, & manajemen royalti.",
                 role3_title: "Client Application",
                 role3_desc: "Interface pengguna/pendengar untuk eksplorasi, playlist, & player audio.",
+                demo_info_title: "Akun Demo Tersedia Setelah Setup",
+                demo_info_sub: "Setelah menjalankan skrip setup, 3 akun demo otomatis aktif — masing-masing untuk role Manajemen, Admin, dan Client.",
+                demo_full_access: "akses penuh seluruh sistem",
+                demo_creator_access: "upload & kelola konten",
+                demo_client_access: "jelajahi & dengarkan konten",
+                btn_download_bat: "Download Setup (.bat)",
+                btn_copy_cmd: "Copy PowerShell Command",
                 cta_tag: "// OPEN SOURCE REPOSITORY //",
                 cta_title: "Siap Mengembangkan Vibeforge?",
                 cta_desc: "Proyek ini 100% open-source di bawah lisensi Apache 2.0. Bebas digunakan untuk aplikasi komersial maupun pribadi.",
@@ -856,6 +769,7 @@
                 hero_desc: "<strong class=\"text-[var(--text-primary)]\">Vibeforge</strong> is a professional starter template for building web apps via vibe coding: specify requirements in docs, let AI coding assistant forge the entire functional codebase.",
                 hero_copy_cmd: "Copy Command",
                 hero_copied: "Copied!",
+                hero_download: "Download",
                 hero_btn_setup: "SETUP APPLICATION",
                 hero_btn_demo: "TRY DEMO ROLES",
                 spec_php_sub: "Zero Heavy Framework Overhead",
@@ -885,41 +799,16 @@
                 term_s2: "✓ Prepare SPA shell folder structure (`manajemen/`, `admin/`, `client/`)",
                 term_s3: "✓ Configure Virtual Host & Local Host DNS domain (.test)",
                 term_s4: "✓ Initialize `users.json` with Argon2ID encrypted demo credentials",
-                tab_new: "New App Workflow (12 Steps)",
-                tab_redesign: "Redesign Workflow (5 Steps)",
-                new_title: "12-Step Setup Wizard — Greenfield App",
-                mode_greenfield: "MODE: GREENFIELD",
-                new_s1_t: "Overview Mode",
-                new_s1_d: "Installation mode selection & Vibeforge architecture overview.",
-                new_s2_t: "PRD Definition",
-                new_s2_d: "App spec & feature workflow in <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/prd.md</code>.",
-                new_s3_t: "Branding Tokens",
-                new_s3_d: "Color tokens & font config in <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/branding.md</code>.",
-                new_s4_t: "Logo Assets",
-                new_s4_d: "Upload logo image asset to <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/logo.png</code>.",
-                new_s5_t: "Landing Template",
-                new_s5_d: "Customize front page at <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/landingpage.html</code>.",
-                new_s6_t: "Auth Forms",
-                new_s6_d: "Design Login & Register forms in <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/</code> folder.",
-                new_s8_t: "Role Modules",
-                new_s8_d: "Management Dashboard, Admin/Creator Studio, & Client Player.",
-                new_s11_t: "Config & Environment",
-                new_s11_d: "Environment variables <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">.env</code> & database settings adjustment.",
-                new_s12_t: "AI Execution",
-                new_s12_d: "Open CLI and execute <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">read @docs/install.md</code>.",
-                redesign_title: "5-Step Setup Wizard — App Redesign",
-                mode_refit: "MODE: REFIT",
-                redesign_s1_t: "Overview",
-                redesign_s1_d: "Select Redesign Mode in Wizard UI.",
-                redesign_s2_t: "Upload References",
-                redesign_s2_d: "Place legacy codebase into <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">references/</code> folder.",
-                redesign_s3_t: "Logo Assets",
-                redesign_s3_d: "Upload new logo asset to <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">docs/logo.png</code>.",
-                redesign_s4_t: "Target Host",
-                redesign_s4_d: "Specify local web server (Laragon/XAMPP).",
-                redesign_s5_t: "AI Re-architecting",
-                redesign_s5_d: "Run AI CLI to auto-generate PRD & digest legacy structure.",
-                demo_tag: "// ACCESS CONTROL MATRIX //",
+                wizard_title: "4-Step Setup Wizard",
+                wizard_mode: "UNIFIED FLOW",
+                wizard_t1_t: "Install",
+                wizard_t1_d: "Auto-detect: app name, folder path, local domain, & PHP version. No manual input required.",
+                wizard_t2_t: "References",
+                wizard_t2_d: "Upload HTML/CSS/JS references or old app source (optional). Skip if starting from scratch.",
+                wizard_t3_t: "Branding & Logo",
+                wizard_t3_d: "Brand identity: app name, tagline, colors, description, & logo upload.",
+                wizard_t4_t: "PRD",
+                wizard_t4_d: "Auto-generate PRD with AI or paste your own. Then run AI execution.",                demo_tag: "// ACCESS CONTROL MATRIX //",
                 demo_title: "Role-Based Architecture (RBAC)",
                 demo_sub: "Three separate modules with strict server-side session authorization and individual UI shells.",
                 role1_title: "Super Admin Portal",
@@ -928,6 +817,13 @@
                 role2_desc: "Content upload dashboard, performance analytics, & royalty management.",
                 role3_title: "Client Application",
                 role3_desc: "User/listener interface for exploration, playlists, & audio player.",
+                demo_info_title: "Demo Accounts Available After Setup",
+                demo_info_sub: "After running the setup script, 3 demo accounts are automatically active — one for each role: Manajemen, Admin, and Client.",
+                demo_full_access: "full system access",
+                demo_creator_access: "upload & manage content",
+                demo_client_access: "explore & listen to content",
+                btn_download_bat: "Download Setup (.bat)",
+                btn_copy_cmd: "Copy PowerShell Command",
                 cta_tag: "// OPEN SOURCE REPOSITORY //",
                 cta_title: "Ready to Build with Vibeforge?",
                 cta_desc: "This project is 100% open-source under Apache 2.0 license. Free for commercial and personal apps.",
@@ -946,6 +842,7 @@
                 hero_desc: "<strong class=\"text-[var(--text-primary)]\">Vibeforge</strong> هو قالب بداية احترافي لبناء تطبيقات الويب بطريقة vibe coding: حدد متطلباتك في المستندات، ودع مساعد الذكاء الاصطناعي يبني الكود بالكامل.",
                 hero_copy_cmd: "نسخ الأمر",
                 hero_copied: "تم النسخ!",
+                hero_download: "تحميل",
                 hero_btn_setup: "تثبيت التطبيق",
                 hero_btn_demo: "تجربة الأدوار",
                 spec_php_sub: "بدون أطر عمل ثقيلة",
@@ -975,41 +872,16 @@
                 term_s2: "✓ إعداد هيكل مجلدات غلاف SPA (`manajemen/`, `admin/`, `client/`)",
                 term_s3: "✓ تكوين المضيف الافتراضي و DNS المحلي (.test)",
                 term_s4: "✓ تهيئة `users.json` ببيانات اعتماد تجريبية مشفرة بـ Argon2ID",
-                tab_new: "مسار تطبيق جديد (12 خطوة)",
-                tab_redesign: "مسار إعادة التصميم (5 خطوات)",
-                new_title: "معالج الإعداد بـ 12 خطوة - تطبيق جديد",
-                mode_greenfield: "الوضع: تطبيق جديد",
-                new_s1_t: "وضع نظرة عامة",
-                new_s1_d: "اختيار وضع التثبيت ونظرة عامة على بنية Vibeforge.",
-                new_s2_t: "تعريف PRD",
-                new_s2_d: "مواصفات التطبيق ومسار الميزات في <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/prd.md</code>.",
-                new_s3_t: "رموز الهوية البصرية",
-                new_s3_d: "تكوين الألوان والخطوط في <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/branding.md</code>.",
-                new_s4_t: "أصول الشعار",
-                new_s4_d: "رفع صورة الشعار إلى <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">docs/logo.png</code>.",
-                new_s5_t: "قالب صفحة الهبوط",
-                new_s5_d: "تخصيص الصفحة الرئيسية في <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/landingpage.html</code>.",
-                new_s6_t: "نماذج المصادقة",
-                new_s6_d: "تصميم نماذج الدخول والتسجيل في مجلد <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">references/</code>.",
-                new_s8_t: "وحدات الأدوار",
-                new_s8_d: "لوحة تحكم الإدارة، استوديو المنشئ، ومشغل العميل.",
-                new_s11_t: "التكوين والبيئة",
-                new_s11_d: "تعديل متغيرات البيئة <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">.env</code> وإعدادات قاعدة البيانات.",
-                new_s12_t: "تنفيذ الذكاء الاصطناعي",
-                new_s12_d: "افتح موجه الأوامر ونفذ <code class=\"px-1 bg-[var(--bg-card)] text-[var(--brand-primary)] font-mono rounded\">قراءة @docs/install.md</code>.",
-                redesign_title: "معالج الإعداد بـ 5 خطوات - إعادة التصميم",
-                mode_refit: "الوضع: إعادة التصميم",
-                redesign_s1_t: "نظرة عامة",
-                redesign_s1_d: "اختر وضع إعادة التصميم في الواجهة.",
-                redesign_s2_t: "رفع المراجع",
-                redesign_s2_d: "ضع الكود القديم في مجلد <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">references/</code>.",
-                redesign_s3_t: "أصول الشعار",
-                redesign_s3_d: "رفع الشعار الجديد إلى <code class=\"px-1 bg-[var(--bg-card)] text-purple-400 font-mono rounded\">docs/logo.png</code>.",
-                redesign_s4_t: "الخادم المستهدف",
-                redesign_s4_d: "حدد نوع الخادم المحلي (Laragon/XAMPP).",
-                redesign_s5_t: "إعادة الهيكلة بالذكاء الاصطناعي",
-                redesign_s5_d: "قم بتشغيل الذكاء الاصطناعي لإنشاء PRD تلقائيًا واستيعاب الهيكل القديم.",
-                demo_tag: "// بنية التحكم بالأدوار //",
+                wizard_title: "معالج إعداد من 4 خطوات",
+                wizard_mode: "تدفق موحد",
+                wizard_t1_t: "تثبيت",
+                wizard_t1_d: "كشف تلقائي: اسم التطبيق، مسار المجلد، النطاق المحلي، وإصدار PHP. بدون إدخال يدوي.",
+                wizard_t2_t: "مراجع",
+                wizard_t2_d: "رفع مراجع HTML/CSS/JS أو مصدر التطبيق القديم (اختياري). تخطي إذا بدأت من الصفر.",
+                wizard_t3_t: "العلامة التجارية والشعار",
+                wizard_t3_d: "هوية العلامة التجارية: اسم التطبيق، الشعار، الألوان، الوصف، ورفع الشعار.",
+                wizard_t4_t: "PRD",
+                wizard_t4_d: "إنشاء PRD تلقائيًا بالذكاء الاصطناعي أو الصق PRD الخاص بك. ثم تشغيل التنفيذ.",                                                                                                                                                demo_tag: "// بنية التحكم بالأدوار //",
                 demo_title: "بنية التحكم بالأدوار (RBAC)",
                 demo_sub: "ثلاث وحدات منفصلة مع تفويض جلسة صارم وأغلفة واجهة مستخدم خاصة.",
                 role1_title: "بوابة المشرف الفائق",
@@ -1018,6 +890,13 @@
                 role2_desc: "لوحة رفع المحتوى، إحصائيات الأداء، وإدارة العوائد.",
                 role3_title: "تطبيق العميل",
                 role3_desc: "واجهة المستخدم/المستمع للاستكشاف، قوائم التشغيل، ومشغل الصوت.",
+                demo_info_title: "حسابات تجريبية متاحة بعد التثبيت",
+                demo_info_sub: "بعد تشغيل برنامج الإعداد، يتم تفعيل 3 حسابات تجريبية تلقائيًا — لكل دور: الإدارة، المشرف، والعميل.",
+                demo_full_access: "وصول كامل للنظام",
+                demo_creator_access: "رفع وإدارة المحتوى",
+                demo_client_access: "استكشاف والاستماع للمحتوى",
+                btn_download_bat: "تحميل الإعداد (.bat)",
+                btn_copy_cmd: "نسخ أمر PowerShell",
                 cta_tag: "// مستودع مفتوح المصدر //",
                 cta_title: "مستعد للتطوير مع Vibeforge؟",
                 cta_desc: "هذا المشروع مفتوح المصدر بنسبة 100٪ بموجب ترخيص Apache 2.0. مجاني للاستخدام التجاري والشخصي.",
@@ -1060,6 +939,80 @@
                         || key;
                 }
             };
+        }
+
+        function copyInstallCommand() {
+            var commandText = 'irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex';
+            var successCallback = function() {
+                showToast('Berhasil!', 'Command disalin ke clipboard');
+            };
+            var fallbackCopy = function() {
+                var textarea = document.createElement('textarea');
+                textarea.value = commandText;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    successCallback();
+                } catch (e) {
+                    showToast('Gagal!', 'Tidak dapat menyalin command', true);
+                }
+                document.body.removeChild(textarea);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(commandText).then(successCallback).catch(fallbackCopy);
+            } else {
+                fallbackCopy();
+            }
+        }
+
+        function showToast(title, message, isError) {
+            var existing = document.getElementById('vibeforge-toast');
+            if (existing) existing.remove();
+            var toast = document.createElement('div');
+            toast.id = 'vibeforge-toast';
+            toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;padding:12px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,0.4);transition:opacity 0.3s;max-width:320px;';
+            toast.style.background = isError ? '#991b1b' : '#065f46';
+            toast.style.color = '#fff';
+            toast.style.border = isError ? '1px solid #dc2626' : '1px solid #10b981';
+            toast.innerHTML = '<div style="font-weight:700;">' + title + '</div><div style="font-weight:400;opacity:0.85;margin-top:2px;">' + message + '</div>';
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.style.opacity = '0'; setTimeout(function() { toast.remove(); }, 300); }, 2500);
+        }
+
+        function downloadSetupScript() {
+            // The PowerShell command to run (as admin): download and execute setup-project.ps1
+            var psCommand = 'irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex';
+            // Encode to UTF-16LE Base64 for -EncodedCommand (avoids all CMD quoting issues)
+            var utf16le = [];
+            for (var i = 0; i < psCommand.length; i++) {
+                var cc = psCommand.charCodeAt(i);
+                utf16le.push(cc & 0xFF, (cc >> 8) & 0xFF);
+            }
+            var encoded = btoa(String.fromCharCode.apply(null, utf16le));
+
+            var batContent = '@echo off\r\n' +
+                'chcp 65001 >nul 2>&1\r\n' +
+                'echo.\r\n' +
+                'echo  ============================================================\r\n' +
+                'echo   Vibeforge Setup - Auto-Elevate to Administrator\r\n' +
+                'echo  ============================================================\r\n' +
+                'echo.\r\n' +
+                'echo  Requesting Administrator privileges...\r\n' +
+                'echo.\r\n' +
+                'powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process powershell.exe -ArgumentList \'-NoExit -ExecutionPolicy Bypass -NoProfile -EncodedCommand ' + encoded + '\' -Verb RunAs"\r\n' +
+                'exit\r\n';
+            var blob = new Blob([batContent], { type: 'application/octet-stream' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'vibeforge-setup.bat';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>
