@@ -1,4 +1,4 @@
-# Dokumentasi Instalasi & Protocol Eksekusi AI - vibeforge
+# Dokumentasi Instalasi & Protocol Eksekusi AI - Vibeforge
 
 > **FILE INI ADALAH TEMPLATE STATIC.**
 > Konfigurasi aktif tersimpan di `data/install_config.json` oleh Setup Wizard.
@@ -91,6 +91,7 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
    - `modules/auth/`
    - `.env`, `.env.example`
    - `data/users.json`
+   - `locales/languages.json` dan `locales/*.json`
 5. Jalankan **Audit Protocol** sesuai `docs/audit_protocol.md`
 6. Buat `docs/build_plan.md`
 7. **BERHENTI & TUNGGU persetujuan owner**
@@ -101,12 +102,18 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
 
 1. Buat file sesuai `build_plan.md`
 2. Ikuti arsitektur di CLAUDE.md:
-   - Entry Guard Pattern (§8)
-   - Router Proxy Pattern (§3f)
-   - Repo Pattern Dual-Mode (§3g)
-   - SPA Shell Architecture (§3a)
-3. Generate demo users dengan Argon2ID (CLAUDE.md §6b)
-4. Setup i18n files
+   - Entry Guard Pattern (§3b)
+   - Router Proxy Pattern (§2b)
+   - Repo Pattern Dual-Mode (§2c)
+   - SPA Shell Architecture (§2a)
+   - **Standar i18n & Multi-Bahasa (§2a)**:
+     - DILARANG hardcode string bahasa di file `public/*.php` atau `modules/*/*.php`.
+     - Seluruh string UI wajib diekstrak ke `locales/id.json` dan disinkronkan ke `locales/*.json` (en, ar, ja).
+     - Render statis di PHP via `<?= t('key') ?>`.
+     - Render dinamis di JS via payload `window._i18n = { key: <?= json_encode(t('key')) ?> }`.
+     - Dropdown bahasa wajib dikelilingi loop dinamis `getAvailableLanguages()`.
+3. Generate demo users dengan Argon2ID (CLAUDE.md §4b)
+4. Setup i18n files (`locales/languages.json` & `locales/*.json`)
 5. **CRUD harus berfungsi nyata**
 
 ---
@@ -120,7 +127,7 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
 **Checklist Manual (owner verifikasi di browser):**
 - [ ] Landing page sesuai `references/landingpage.html`
 - [ ] Quick-login demo berfungsi
-- [ ] i18n berfungsi
+- [ ] i18n multi-bahasa berfungsi tanpa teks hardcode & selector dinamis
 - [ ] Logout redirect ke landing page
 - [ ] Auth state konsisten
 
@@ -128,19 +135,19 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
 
 ## 6. Keamanan & Demo Users
 
-**Security Baseline (CLAUDE.md §8):**
+**Security Baseline (CLAUDE.md §3):**
 - Password: Argon2ID
 - CSRF Token Validation
 - IP+Username Rate Limiting
 - Prepared Statements
 
-**Demo Users (CLAUDE.md §6b):**
+**Demo Users (CLAUDE.md §4b):**
 
 | Role | Email | Password |
 |------|-------|----------|
-| Manajemen | `admin@<app>.com` | `password123` |
-| Admin | `admin@<app>.id` | `password123` |
-| Client | `client@<app>.com` | `password123` |
+| Manajemen | `manajemen@example.com` | `password123` |
+| Admin | `admin@example.com` | `password123` |
+| Client | `client@example.com` | `password123` |
 
 ---
 
@@ -148,7 +155,7 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
 
 | File | Scope |
 |------|-------|
-| `CLAUDE.md` | Konstitusi teknis utama |
+| `CLAUDE.md` | Konstitusi teknis utama & 13 Pilar Software |
 | `docs/document.md` | Decision guide |
 | `docs/prd.md` | Definisi produk |
 | `docs/branding.md` | Identitas visual |

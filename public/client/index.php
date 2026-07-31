@@ -1,7 +1,7 @@
 <?php
 /**
- * Vibeforge - Client Dashboard
- * IT Professional / Cyber-Tech Edition
+ * Vibeforge - Client Portal (Consumer Shell)
+ * Cyber-Tech & 13 Pillars Architecture Edition
  */
 defined('APP_ENTRY') or define('APP_ENTRY', true);
 
@@ -30,16 +30,19 @@ if (!$isLoggedIn || $userRole !== 'client') {
 }
 
 $themePreference = $user['theme_preference'] ?? 'dark';
-$userName = escape($user['name'] ?? 'User');
+$userName = escape($user['name'] ?? 'Client');
 $userInitial = strtoupper(substr($userName, 0, 2));
 $userEmail = escape($user['email'] ?? '');
+
+// Load Data via Data Access Layer (Repo)
+$allUsersCount = count(Repo::table('users')->all());
 ?>
 <!DOCTYPE html>
 <html lang="<?= $currentLang ?>" dir="<?= $isRtl ? 'rtl' : 'ltr' ?>" class="<?= $themePreference === 'light' ? '' : 'dark' ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $userName ?> - <?= APP_DISPLAY_NAME ?> Client</title>
+    <title><?= $userName ?> - <?= escape(APP_DISPLAY_NAME) ?> Client Portal</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F97316'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,7 +56,14 @@ $userEmail = escape($user['email'] ?? '');
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { brand: { primary: '#F97316', dark: '#0B0F17', card: '#111726', border: '#1E293B' } },
+                    colors: {
+                        brand: {
+                            primary: '#F97316',
+                            dark: '#0B0F17',
+                            card: '#111726',
+                            border: '#1E293B'
+                        }
+                    },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
                         heading: ['Plus Jakarta Sans', 'sans-serif'],
@@ -88,8 +98,8 @@ $userEmail = escape($user['email'] ?? '');
     <aside class="hidden md:flex flex-col w-64 bg-gray-950 border-r border-[var(--border-default)] shrink-0 font-mono">
         <div class="h-16 flex items-center px-6 border-b border-[var(--border-default)]">
             <a href="/" class="flex items-center gap-3 group">
-                <div class="w-8 h-8 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center group-hover:border-orange-500 transition-colors">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#F97316"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center group-hover:border-emerald-500 transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#10B981"><path d="M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z"/></svg>
                 </div>
                 <div class="flex flex-col">
                     <span class="font-heading font-extrabold text-base tracking-tight leading-none"><span class="text-white">Vibe</span><span class="text-gradient">forge</span></span>
@@ -99,7 +109,7 @@ $userEmail = escape($user['email'] ?? '');
         </div>
 
         <nav class="flex-1 py-4 px-3 space-y-1 text-xs">
-            <button onclick="nav('home')" id="s-home" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-orange-500/10 text-[var(--brand-primary)] border border-orange-500/20 transition-all"><i class="ph-fill ph-house text-lg"></i> <?= t('client.home') ?></button>
+            <button onclick="nav('home')" id="s-home" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 transition-all"><i class="ph-fill ph-house text-lg"></i> <?= t('client.home') ?></button>
             <button onclick="nav('templates')" id="s-templates" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-layout text-lg"></i> <?= t('client.explore') ?></button>
             <button onclick="nav('docs')" id="s-docs" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-book-open text-lg"></i> <?= t('nav_docs') ?></button>
             <button onclick="nav('profile')" id="s-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"><i class="ph ph-user text-lg"></i> <?= t('client.profile') ?></button>
@@ -121,19 +131,21 @@ $userEmail = escape($user['email'] ?? '');
         <header class="h-16 flex items-center justify-between px-6 bg-gray-950/80 border-b border-[var(--border-default)] shrink-0 font-mono text-xs">
             <div class="flex items-center gap-3">
                 <h1 id="pageTitle" class="font-heading font-extrabold text-sm text-white tracking-wide uppercase">// BERANDA CLIENT</h1>
-                <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px]">CONNECTED</span>
+                <span class="px-2.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] flex items-center gap-1.5 font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SESSION_ACTIVE
+                </span>
             </div>
             <div class="flex items-center gap-3">
                 <!-- Language Selector -->
                 <div class="relative group" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-orange-500 transition-colors text-xs font-mono" aria-label="Change Language">
+                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-emerald-500 transition-colors text-xs font-mono" aria-label="Change Language">
                         <img src="<?= escape(getAvailableLanguages()[$currentLang]['flag'] ?? '/assets/flags/_default.svg') ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" alt="<?= $currentLang ?>" class="w-4 h-3 rounded-sm">
                         <span class="hidden sm:inline uppercase font-bold text-gray-300"><?= escape($currentLang) ?></span>
                         <i class="ph ph-caret-down text-xs text-gray-500"></i>
                     </button>
                     <div x-show="open" x-transition class="absolute right-0 mt-1 bg-gray-900 rounded-xl shadow-2xl border border-gray-800 py-1 min-w-[160px] z-50 text-xs font-mono">
                         <?php foreach (getAvailableLanguages() as $code => $lang): ?>
-                        <a href="<?= escape(buildLangUrl($code)) ?>" class="flex items-center gap-2.5 px-3.5 py-2 hover:bg-gray-800 transition-colors <?= $currentLang === $code ? 'text-orange-400 font-bold bg-orange-500/10' : 'text-gray-300' ?>">
+                        <a href="<?= escape(buildLangUrl($code)) ?>" class="flex items-center gap-2.5 px-3.5 py-2 hover:bg-gray-800 transition-colors <?= $currentLang === $code ? 'text-emerald-400 font-bold bg-emerald-500/10' : 'text-gray-300' ?>">
                             <img src="<?= escape($lang['flag']) ?>" onerror="this.onerror=null;this.src='/assets/flags/_default.svg';" class="w-4 h-3 rounded-sm">
                             <span><?= escape($lang['name']) ?></span>
                         </a>
@@ -141,8 +153,8 @@ $userEmail = escape($user['email'] ?? '');
                     </div>
                 </div>
 
-                <button id="themeToggle" class="p-2 hover:bg-gray-800 rounded-lg text-amber-400" aria-label="Toggle theme"><i class="ph ph-moon text-base"></i></button>
-                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400" title="<?= t('auth_logout') ?>"><i class="ph ph-sign-out text-base"></i></a>
+                <button id="themeToggle" class="p-2 hover:bg-gray-800 rounded-lg text-amber-400 transition-colors" aria-label="Toggle theme"><i class="ph ph-moon text-base"></i></button>
+                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400 transition-colors" title="<?= t('auth_logout') ?>"><i class="ph ph-sign-out text-base"></i></a>
             </div>
         </header>
 
@@ -153,7 +165,7 @@ $userEmail = escape($user['email'] ?? '');
 <!-- Mobile Nav -->
 <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 z-50 font-mono text-xs">
     <div class="flex justify-around items-center h-16">
-        <button onclick="nav('home')" class="flex flex-col items-center gap-1 text-orange-400" id="m-home"><i class="ph-fill ph-house text-xl"></i><span class="text-[9px]">Beranda</span></button>
+        <button onclick="nav('home')" class="flex flex-col items-center gap-1 text-emerald-400" id="m-home"><i class="ph-fill ph-house text-xl"></i><span class="text-[9px]">Beranda</span></button>
         <button onclick="nav('templates')" class="flex flex-col items-center gap-1 text-gray-400" id="m-templates"><i class="ph ph-layout text-xl"></i><span class="text-[9px]">Template</span></button>
         <button onclick="nav('docs')" class="flex flex-col items-center gap-1 text-gray-400" id="m-docs"><i class="ph ph-book-open text-xl"></i><span class="text-[9px]">Dokumen</span></button>
         <button onclick="nav('profile')" class="flex flex-col items-center gap-1 text-gray-400" id="m-profile"><i class="ph ph-user text-xl"></i><span class="text-[9px]">Profil</span></button>
@@ -172,34 +184,35 @@ const V = {
     home: `
         <div class="space-y-6">
             <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 glow-box-cyber font-mono space-y-2">
-                <h2 class="text-xl font-bold text-white">Selamat Datang, <?= addslashes($userName) ?>!</h2>
-                <p class="text-xs text-gray-400 font-sans">Eksplorasi arsitektur SPA Vibeforge untuk proyek aplikasi web Anda.</p>
+                <h2 class="text-xl font-bold text-white">Selamat Datang, <?= $userName ?>!</h2>
+                <p class="text-xs text-gray-400 font-sans">Portal eksplorasi arsitektur SPA Vibeforge untuk aplikasi web Anda.</p>
             </div>
 
+            <!-- Bento Grid Stats -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
                     <div class="flex items-center justify-between text-gray-400">
                         <span>Active Projects</span>
-                        <i class="ph ph-folder-simple text-orange-400 text-xl"></i>
+                        <i class="ph ph-folder-simple text-emerald-400 text-xl"></i>
                     </div>
                     <p class="text-2xl font-bold text-white">1</p>
                     <span class="text-[10px] text-gray-400">Vibeforge Template</span>
                 </div>
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
                     <div class="flex items-center justify-between text-gray-400">
-                        <span>Steps Done</span>
-                        <i class="ph ph-check-circle text-emerald-400 text-xl"></i>
+                        <span>System Users</span>
+                        <i class="ph ph-users text-orange-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-bold text-emerald-400">3/12</p>
-                    <span class="text-[10px] text-gray-400">Setup Progress</span>
+                    <p class="text-2xl font-bold text-orange-400"><?= $allUsersCount ?></p>
+                    <span class="text-[10px] text-gray-400">Registered Accounts</span>
                 </div>
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
                     <div class="flex items-center justify-between text-gray-400">
                         <span>HTML Reference</span>
                         <i class="ph ph-code text-blue-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-bold text-white">6 Files</p>
-                    <span class="text-[10px] text-gray-400">Golden Templates</span>
+                    <p class="text-2xl font-bold text-white">6 Shells</p>
+                    <span class="text-[10px] text-gray-400">Golden References</span>
                 </div>
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
                     <div class="flex items-center justify-between text-gray-400">
@@ -207,7 +220,7 @@ const V = {
                         <i class="ph ph-rocket-launch text-purple-400 text-xl"></i>
                     </div>
                     <p class="text-2xl font-bold text-purple-400">READY</p>
-                    <span class="text-[10px] text-gray-400">VirtualHost Ready</span>
+                    <span class="text-[10px] text-gray-400">Apache DocumentRoot</span>
                 </div>
             </div>
 
@@ -224,7 +237,7 @@ const V = {
                         </div>
                     </div>
                     <a href="/install/" class="px-6 py-3 bg-gray-950 text-orange-400 font-bold text-xs rounded-xl hover:bg-gray-900 transition-colors shadow-lg flex items-center gap-2 shrink-0">
-                        <i class="ph ph-rocket-launch text-base"></i> LAUNCH WIZARD
+                        <i class="ph ph-rocket-launch text-base"></i> BUKA WIZARD
                     </a>
                 </div>
             </div>
@@ -292,11 +305,11 @@ function nav(p) {
         const d = document.getElementById('s-'+k);
         const m = document.getElementById('m-'+k);
         if(d) {
-            if(k===p) { d.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-orange-500/10 text-[var(--brand-primary)] border border-orange-500/20 transition-all'; }
+            if(k===p) { d.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 transition-all'; }
             else { d.className='w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-400 hover:bg-gray-900 hover:text-white transition-colors'; }
         }
         if(m) {
-            if(k===p) { m.className='flex flex-col items-center gap-1 text-orange-400'; }
+            if(k===p) { m.className='flex flex-col items-center gap-1 text-emerald-400'; }
             else { m.className='flex flex-col items-center gap-1 text-gray-400'; }
         }
     });

@@ -30,8 +30,6 @@ if (!defined('LANGUAGES_MANIFEST')) {
 
 /**
  * Build the language list for the selector UI from locales/languages.json.
- * Adding a language = add an entry here + drop the matching locales/xx.json
- * translation file. No PHP code change, no hardcoded language list.
  */
 function getAvailableLanguages(): array
 {
@@ -115,55 +113,92 @@ function getCountryCodeFromIP(string $ip): string
     return 'ID';
 }
 
+/**
+ * Language detection algorithm:
+ * 1. URL parameter (?lang=xx) -> updates session & user preference in DB (users.json / MySQL)
+ * 2. Active Session ($_SESSION['language'])
+ * 3. Logged-in user's saved preference in database (language_preference)
+ * 4. IP-based Country Detection:
+ *    - Arab League countries -> 'ar'
+ *    - Mapped countries in manifest (ID, JP, US, GB, etc.) -> matching language
+ *    - Unmapped country: if Arab country -> 'ar', otherwise -> 'en' (default fallback)
+ */
 function detectLanguage(): string
 {
     $available = getAvailableLocaleCodes();
 
-    // 1. URL Parameter (takes priority and updates session)
+    // 1. URL Parameter (highest priority, updates session & DB)
     if (!empty($_GET['lang']) && in_array($_GET['lang'], $available, true)) {
-        $_SESSION['language'] = $_GET['lang'];
-        return $_GET['lang'];
+        $lang = $_GET['lang'];
+        $_SESSION['language'] = $lang;
+
+        // Save preference to database if user is logged in
+        if (function_exists('isLoggedIn') && function_exists('getCurrentUser') && function_exists('Repo') && isLoggedIn()) {
+            $user = getCurrentUser();
+            if (!empty($user['id']) && ($user['language_preference'] ?? '') !== $lang) {
+                Repo::table('users')->update($user['id'], ['language_preference' => $lang]);
+            }
+        }
+        return $lang;
     }
 
-    // 2. Session
+    // 2. Active Session
     if (!empty($_SESSION['language']) && in_array($_SESSION['language'], $available, true)) {
         return $_SESSION['language'];
     }
 
-    // 3. IP-based Country Detection
+    // 3. Logged-in user database preference
+    if (function_exists('isLoggedIn') && function_exists('getCurrentUser') && isLoggedIn()) {
+        $user = getCurrentUser();
+        if (!empty($user['language_preference']) && in_array($user['language_preference'], $available, true)) {
+            $_SESSION['language'] = $user['language_preference'];
+            return $user['language_preference'];
+        }
+    }
+
+    // 4. IP-based Country Detection & Mapping
     $ip = getClientIp();
     $countryCode = getCountryCodeFromIP($ip);
 
+    $arabicCountries = [
+        'SA', 'AE', 'EG', 'IQ', 'JO', 'MA', 'DZ', 'KW', 'QA', 'BH', 'OM', 'YE', 'SY', 'LB', 'SD', 'LY', 'TN', 'MR', 'PS', 'SO', 'DJ', 'KM'
+    ];
+
     $countryToLang = [
-        // Indonesian / ASEAN
+        // ASEAN (Indonesian)
         'ID' => 'id', 'MY' => 'id', 'SG' => 'id', 'BN' => 'id', 'TL' => 'id',
         // Japanese
         'JP' => 'ja',
-        // English speaking countries
+        // English speaking
         'US' => 'en', 'GB' => 'en', 'AU' => 'en', 'NZ' => 'en', 'CA' => 'en', 'IE' => 'en',
-        // Arabic speaking countries
-        'SA' => 'ar', 'AE' => 'ar', 'EG' => 'ar', 'IQ' => 'ar', 'JO' => 'ar',
-        'MA' => 'ar', 'DZ' => 'ar', 'KW' => 'ar', 'QA' => 'ar', 'BH' => 'ar',
-        'OM' => 'ar', 'YE' => 'ar', 'SY' => 'ar', 'LB' => 'ar', 'SD' => 'ar',
     ];
+    foreach ($arabicCountries as $ac) {
+        $countryToLang[$ac] = 'ar';
+    }
 
     if (isset($countryToLang[$countryCode]) && in_array($countryToLang[$countryCode], $available, true)) {
         $_SESSION['language'] = $countryToLang[$countryCode];
         return $countryToLang[$countryCode];
     }
 
-    // Unmapped or missing country -> Log warning in APP_DEBUG mode and fallback to English ('en')
+    // Unmapped country fallback: 'ar' for Arab countries, 'en' for all others
+    if (in_array($countryCode, $arabicCountries, true) && in_array('ar', $available, true)) {
+        $fallback = 'ar';
+    } else {
+        $fallback = in_array('en', $available, true) ? 'en' : ($available[0] ?? 'en');
+    }
+
     if (defined('APP_DEBUG') && APP_DEBUG) {
         $logLine = sprintf(
-            "[%s] [i18n] Negara \"%s\" (IP: %s) belum punya mapping bahasa di detectLanguage(). Fallback ke \"en\".\n",
+            "[%s] [i18n] Country \"%s\" (IP: %s) fallback to \"%s\".\n",
             date('Y-m-d H:i:s'),
             $countryCode,
-            $ip
+            $ip,
+            $fallback
         );
         @file_put_contents(dirname(__DIR__) . '/cache/debug.log', $logLine, FILE_APPEND);
     }
 
-    $fallback = in_array('en', $available, true) ? 'en' : ($available[0] ?? 'en');
     $_SESSION['language'] = $fallback;
     return $fallback;
 }

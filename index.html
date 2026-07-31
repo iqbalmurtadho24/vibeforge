@@ -166,7 +166,7 @@
         <div class="flex items-center gap-4">
             <span x-text="t('sys_repo')">Repo Mode: Dual-Engine (Auto SQL/JSON)</span>
             <span class="text-[var(--border-default)]">|</span>
-            <span class="text-[var(--brand-primary)] font-bold">v3.2.0-STABLE</span>
+            <span class="text-[var(--brand-primary)] font-bold">v3.3.0-STABLE</span>
         </div>
     </div>
 
@@ -194,6 +194,9 @@
                 <div class="hidden md:flex items-center gap-8 font-medium text-sm">
                     <a href="#fitur" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
                         <i class="ph ph-cpu text-base text-[var(--brand-primary)]"></i> <span x-text="t('nav_arch')">Arsitektur</span>
+                    </a>
+                    <a href="#pilar" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
+                        <i class="ph ph-tree-structure text-base text-[var(--brand-primary)]"></i> <span x-text="t('nav_pillars')">13 Pilar</span>
                     </a>
                     <a href="#cara-pasang" class="text-[var(--text-secondary)] hover:text-[var(--brand-primary)] transition-colors flex items-center gap-1.5">
                         <i class="ph ph-terminal-window text-base text-[var(--brand-primary)]"></i> <span x-text="t('nav_installer')">Installer</span>
@@ -238,6 +241,12 @@
                                 <img src="https://flagcdn.com/w20/sa.png" class="w-4 h-3 rounded-sm object-cover" alt="AR">
                                 <span>العربية</span>
                             </button>
+                            <button @click="setLang('ja'); langOpen = false"
+                                    class="w-full flex items-center gap-2.5 px-3.5 py-2 hover:bg-[var(--bg-hover)] transition-colors text-left cursor-pointer"
+                                    :class="lang === 'ja' ? 'text-[var(--brand-primary)] font-bold bg-orange-500/10' : 'text-[var(--text-secondary)]'">
+                                <img src="https://flagcdn.com/w20/jp.png" class="w-4 h-3 rounded-sm object-cover" alt="JA">
+                                <span>日本語</span>
+                            </button>
                         </div>
                     </div>
 
@@ -260,6 +269,9 @@
         <div x-show="mobileMenuOpen" x-transition class="md:hidden border-b border-[var(--border-default)] bg-[var(--bg-secondary)] px-4 pt-2 pb-4 space-y-3 font-mono text-xs">
             <a href="#fitur" @click="mobileMenuOpen = false" class="block py-2 text-[var(--text-secondary)] hover:text-[var(--brand-primary)]">
                 <i class="ph ph-cpu mr-2 text-[var(--brand-primary)]"></i> <span x-text="t('nav_arch')">Arsitektur</span>
+            </a>
+            <a href="#pilar" @click="mobileMenuOpen = false" class="block py-2 text-[var(--text-secondary)] hover:text-[var(--brand-primary)]">
+                <i class="ph ph-tree-structure mr-2 text-[var(--brand-primary)]"></i> <span x-text="t('nav_pillars')">13 Pilar</span>
             </a>
             <a href="#cara-pasang" @click="mobileMenuOpen = false" class="block py-2 text-[var(--text-secondary)] hover:text-[var(--brand-primary)]">
                 <i class="ph ph-terminal-window mr-2 text-[var(--brand-primary)]"></i> <span x-text="t('nav_installer')">Installer</span>
@@ -437,6 +449,92 @@
             </div>
         </section>
 
+        <!-- 13 Pillars Software Architecture Matrix Section -->
+        <section id="pilar" class="py-20 sm:py-28 bg-[var(--bg-secondary)]/30 border-y border-[var(--border-default)]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                    <span class="font-mono text-xs text-[var(--brand-primary)] tracking-widest uppercase font-bold" x-text="t('pillars_tag')">// 13 PILARS SOFTWARE ARCHITECTURE //</span>
+                    <h2 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight" x-text="t('pillars_title')">Pemetaan 13 Pilar Software (6 Lapisan)</h2>
+                    <p class="text-[var(--text-secondary)] text-base" x-text="t('pillars_sub')">Vibeforge memetakan 13 Pilar Software secara terstruktur ke dalam arsitektur native PHP.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 font-mono text-xs">
+                    <!-- Layer 1 -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 glow-box-cyber">
+                        <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
+                            <span class="font-bold text-orange-400 uppercase" x-text="t('layer_1')">1. Inti Aplikasi</span>
+                            <i class="ph ph-cpu text-lg text-orange-400"></i>
+                        </div>
+                        <ul class="space-y-2 text-[var(--text-secondary)] font-sans text-xs">
+                            <li><strong class="font-mono text-[var(--text-primary)]">1. Frontend:</strong> SPA Shell (public/*/), Golden References (references/*.html), Dynamic Branding, i18n GeoIP</li>
+                            <li><strong class="font-mono text-[var(--text-primary)]">2. API &amp; Logic:</strong> Router Proxy Pattern, AJAX Module Controllers, Helper Functions</li>
+                            <li><strong class="font-mono text-[var(--text-primary)]">3. Database:</strong> Centralized Repo::table() Auto-Switch SQL/JSON, File Lock &amp; Atomic Write</li>
+                        </ul>
+                    </div>
+
+                    <!-- Layer 2 -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 glow-box-cyber">
+                        <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
+                            <span class="font-bold text-emerald-400 uppercase" x-text="t('layer_2')">2. Keamanan</span>
+                            <i class="ph ph-shield-check text-lg text-emerald-400"></i>
+                        </div>
+                        <ul class="space-y-2 text-[var(--text-secondary)] font-sans text-xs">
+                            <li><strong class="font-mono text-[var(--text-primary)]">4. Auth &amp; Session:</strong> Argon2ID Hashing, Session Regeneration, Remember-Me Selector+Validator</li>
+                            <li><strong class="font-mono text-[var(--text-primary)]">5. RBAC &amp; Guards:</strong> Role-to-Shell Mapping (manajemen, admin, client), Dual-Pattern Entry Guard</li>
+                        </ul>
+                    </div>
+
+                    <!-- Layer 3 -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 glow-box-cyber">
+                        <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
+                            <span class="font-bold text-indigo-400 uppercase" x-text="t('layer_3')">3. Tempat &amp; Tenaga</span>
+                            <i class="ph ph-hard-drives text-lg text-indigo-400"></i>
+                        </div>
+                        <ul class="space-y-2 text-[var(--text-secondary)] font-sans text-xs">
+                            <li><strong class="font-mono text-[var(--text-primary)]">6. Hosting:</strong> Document Root public/, Laragon/XAMPP Vhost, Security Headers &amp; CSP (.htaccess)</li>
+                            <li><strong class="font-mono text-[var(--text-primary)]">7. Cloud Compute:</strong> Native PHP 8.3+ Runtime, Strict Environment Isolation (APP_ENV)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Layer 4 -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 glow-box-cyber">
+                        <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
+                            <span class="font-bold text-amber-400 uppercase" x-text="t('layer_4')">4. Alur Kerja Aman</span>
+                            <i class="ph ph-git-branch text-lg text-amber-400"></i>
+                        </div>
+                        <ul class="space-y-2 text-[var(--text-secondary)] font-sans text-xs">
+                            <li><strong class="font-mono text-[var(--text-primary)]">8. CI/CD &amp; Versioning:</strong> SemVer Changelog, Syntax Validation (php -l), 3-Tahap Build Protocol (Audit → Build → Verify)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Layer 5 -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 glow-box-cyber">
+                        <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
+                            <span class="font-bold text-purple-400 uppercase" x-text="t('layer_5')">5. Performa &amp; Skala</span>
+                            <i class="ph ph-gauge text-lg text-purple-400"></i>
+                        </div>
+                        <ul class="space-y-2 text-[var(--text-secondary)] font-sans text-xs">
+                            <li><strong class="font-mono text-[var(--text-primary)]">9. Rate Limiting:</strong> Fixed-Window IP + Username Brute Force Protection</li>
+                            <li><strong class="font-mono text-[var(--text-primary)]">10. Cache &amp; CDN:</strong> Tailwind/Phosphor CDN Whitelist, In-Memory Locale Cache</li>
+                            <li><strong class="font-mono text-[var(--text-primary)]">11. Scaling:</strong> Seamless MySQL Migration, PDO Prepared Statements, Stateless Session</li>
+                        </ul>
+                    </div>
+
+                    <!-- Layer 6 -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 space-y-3 glow-box-cyber">
+                        <div class="flex items-center justify-between border-b border-[var(--border-default)] pb-3">
+                            <span class="font-bold text-red-400 uppercase" x-text="t('layer_6')">6. Keandalan</span>
+                            <i class="ph ph-warning-circle text-lg text-red-400"></i>
+                        </div>
+                        <ul class="space-y-2 text-[var(--text-secondary)] font-sans text-xs">
+                            <li><strong class="font-mono text-[var(--text-primary)]">12. Logging:</strong> cache/debug.log (Dev Only) vs data/audit_trail.json (Append-Only Permanen)</li>
+                            <li><strong class="font-mono text-[var(--text-primary)]">13. Availability:</strong> Atomic Temp Write + Rename, Production JSON-DB Mode Halt Guard</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Interactive Automated Deployment Guide Section -->
         <section id="cara-pasang" class="py-20 sm:py-28 bg-[var(--bg-secondary)]/50 border-y border-[var(--border-default)]">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -491,6 +589,7 @@
                         </div>
                     </div>
                 </div>
+
                 <!-- Workflow Step Cards -->
                 <div id="alur-aplikasi" class="space-y-8">
                     <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-default)] p-6 sm:p-8 space-y-6">
@@ -615,11 +714,11 @@
                             <div class="flex items-center gap-2"><i class="ph ph-headphones text-emerald-400"></i> <span class="text-emerald-400">Client</span> — <span x-text="t('demo_client_access')">jelajahi & dengarkan konten</span></div>
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3">
-                            <button onclick="downloadSetupScript()" class="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] text-white font-bold text-sm transition-all duration-200 shadow-lg shadow-orange-500/20">
+                            <button onclick="downloadSetupScript()" class="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-hover)] text-white font-bold text-sm transition-all duration-200 shadow-lg shadow-orange-500/20 cursor-pointer">
                                 <i class="ph ph-download-simple text-lg"></i>
                                 <span x-text="t('btn_download_bat')">Download Setup (.bat)</span>
                             </button>
-                            <button onclick="copyInstallCommand()" class="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] hover:border-[var(--brand-primary)]/50 text-[var(--text-primary)] font-bold text-sm transition-all duration-200">
+                            <button onclick="copyInstallCommand()" class="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] hover:border-[var(--brand-primary)]/50 text-[var(--text-primary)] font-bold text-sm transition-all duration-200 cursor-pointer">
                                 <i class="ph ph-copy text-lg"></i>
                                 <span x-text="t('btn_copy_cmd')">Copy PowerShell Command</span>
                             </button>
@@ -687,9 +786,19 @@
                 sys_arch: "Arsitektur: SPA Shell Proxy",
                 sys_repo: "Repo Mode: Dual-Engine (Auto SQL/JSON)",
                 nav_arch: "Arsitektur",
+                nav_pillars: "13 Pilar",
                 nav_installer: "Installer",
                 nav_demo: "Demo Roles",
                 nav_github: "GitHub",
+                pillars_tag: "// 13 PILAR SOFTWARE ARCHITECTURE //",
+                pillars_title: "Pemetaan 13 Pilar Software (6 Lapisan)",
+                pillars_sub: "Vibeforge memetakan 13 Pilar Software secara terstruktur ke dalam arsitektur native PHP.",
+                layer_1: "1. Inti Aplikasi",
+                layer_2: "2. Keamanan",
+                layer_3: "3. Tempat & Tenaga",
+                layer_4: "4. Alur Kerja Aman",
+                layer_5: "5. Performa & Skala",
+                layer_6: "6. Keandalan",
                 badge_hero: "AI-POWERED VIBE CODING TEMPLATE // ARCHITECTURE READY",
                 hero_title: "Wujudkan Aplikasi Anda<br><span class=\"text-gradient\">dari Dokumen ke Kode Jadi</span>",
                 hero_desc: "<strong class=\"text-[var(--text-primary)]\">Vibeforge</strong> adalah template starter professional untuk membangun aplikasi web dengan metode vibe coding: definisikan kebutuhan di dokumen, biarkan AI coding assistant menempa seluruh struktur kode fungsional.",
@@ -735,7 +844,7 @@
                 wizard_t3_d: "Identitas brand: nama app, tagline, warna, deskripsi, & upload logo.",
                 wizard_t4_t: "PRD",
                 wizard_t4_d: "Generate PRD otomatis oleh AI atau paste PRD sendiri. Lalu jalankan AI execution.",
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                demo_tag: "// ACCESS CONTROL MATRIX //",
+                demo_tag: "// ACCESS CONTROL MATRIX //",
                 demo_title: "Arsitektur Role-Based (RBAC)",
                 demo_sub: "Tiga modul terpisah dengan otorisasi ketat server-side session dan UI shell tersendiri.",
                 role1_title: "Super Admin Portal",
@@ -761,9 +870,19 @@
                 sys_arch: "Architecture: SPA Shell Proxy",
                 sys_repo: "Repo Mode: Dual-Engine (Auto SQL/JSON)",
                 nav_arch: "Architecture",
+                nav_pillars: "13 Pillars",
                 nav_installer: "Installer",
                 nav_demo: "Demo Roles",
                 nav_github: "GitHub",
+                pillars_tag: "// 13 PILLARS SOFTWARE ARCHITECTURE //",
+                pillars_title: "13 Pillars Mapping (6 Layers)",
+                pillars_sub: "Vibeforge maps the 13 Software Pillars into a structured PHP native architecture.",
+                layer_1: "1. App Core",
+                layer_2: "2. Security",
+                layer_3: "3. Hosting & Compute",
+                layer_4: "4. Secure Workflow",
+                layer_5: "5. Performance & Scale",
+                layer_6: "6. Reliability",
                 badge_hero: "AI-POWERED VIBE CODING TEMPLATE // ARCHITECTURE READY",
                 hero_title: "Forge Your Application<br><span class=\"text-gradient\">from Document to Code</span>",
                 hero_desc: "<strong class=\"text-[var(--text-primary)]\">Vibeforge</strong> is a professional starter template for building web apps via vibe coding: specify requirements in docs, let AI coding assistant forge the entire functional codebase.",
@@ -808,7 +927,8 @@
                 wizard_t3_t: "Branding & Logo",
                 wizard_t3_d: "Brand identity: app name, tagline, colors, description, & logo upload.",
                 wizard_t4_t: "PRD",
-                wizard_t4_d: "Auto-generate PRD with AI or paste your own. Then run AI execution.",                demo_tag: "// ACCESS CONTROL MATRIX //",
+                wizard_t4_d: "Auto-generate PRD with AI or paste your own. Then run AI execution.",
+                demo_tag: "// ACCESS CONTROL MATRIX //",
                 demo_title: "Role-Based Architecture (RBAC)",
                 demo_sub: "Three separate modules with strict server-side session authorization and individual UI shells.",
                 role1_title: "Super Admin Portal",
@@ -834,9 +954,19 @@
                 sys_arch: "البنية: وكيل SPA Shell",
                 sys_repo: "المستودع: محرك مزدوج (SQL/JSON)",
                 nav_arch: "المعمارية",
+                nav_pillars: "الركائز الـ13",
                 nav_installer: "برنامج التثبيت",
                 nav_demo: "أدوار العرض",
                 nav_github: "GitHub",
+                pillars_tag: "// الركائز الـ13 لهندسة البرمجيات //",
+                pillars_title: "خريطة الركائز الـ13 (6 طبقات)",
+                pillars_sub: "يقوم Vibeforge بربط الركائز الـ13 لهندسة البرمجيات ببنية PHP الأصلية بشكل منظم.",
+                layer_1: "1. جوهر التطبيق",
+                layer_2: "2. الأمان",
+                layer_3: "3. الاستضافة والموارد",
+                layer_4: "4. سير العمل الآمن",
+                layer_5: "5. الأداء والتوسع",
+                layer_6: "6. الموثوقية",
                 badge_hero: "قالب VIBE CODING بالذكاء الاصطناعي // البنية جاهزة",
                 hero_title: "اصنع تطبيقك<br><span class=\"text-gradient\">من المستندات إلى كود جاهز</span>",
                 hero_desc: "<strong class=\"text-[var(--text-primary)]\">Vibeforge</strong> هو قالب بداية احترافي لبناء تطبيقات الويب بطريقة vibe coding: حدد متطلباتك في المستندات، ودع مساعد الذكاء الاصطناعي يبني الكود بالكامل.",
@@ -881,7 +1011,8 @@
                 wizard_t3_t: "العلامة التجارية والشعار",
                 wizard_t3_d: "هوية العلامة التجارية: اسم التطبيق، الشعار، الألوان، الوصف، ورفع الشعار.",
                 wizard_t4_t: "PRD",
-                wizard_t4_d: "إنشاء PRD تلقائيًا بالذكاء الاصطناعي أو الصق PRD الخاص بك. ثم تشغيل التنفيذ.",                                                                                                                                                demo_tag: "// بنية التحكم بالأدوار //",
+                wizard_t4_d: "إنشاء PRD تلقائيًا بالذكاء الاصطناعي أو الصق PRD الخاص بك. ثم تشغيل التنفيذ.",
+                demo_tag: "// بنية التحكم بالأدوار //",
                 demo_title: "بنية التحكم بالأدوار (RBAC)",
                 demo_sub: "ثلاث وحدات منفصلة مع تفويض جلسة صارم وأغلفة واجهة مستخدم خاصة.",
                 role1_title: "بوابة المشرف الفائق",
@@ -900,6 +1031,90 @@
                 cta_tag: "// مستودع مفتوح المصدر //",
                 cta_title: "مستعد للتطوير مع Vibeforge؟",
                 cta_desc: "هذا المشروع مفتوح المصدر بنسبة 100٪ بموجب ترخيص Apache 2.0. مجاني للاستخدام التجاري والشخصي.",
+                footer_copy: "&copy; 2026 Vibeforge. Developer-Grade Vibe Coding Architecture."
+            },
+            ja: {
+                sys_online: "SYSTEM: オンライン",
+                sys_arch: "アーキテクチャ: SPA Shell プロキシ",
+                sys_repo: "Repo モード: デュアルエンジン (自動 SQL/JSON)",
+                nav_arch: "アーキテクチャ",
+                nav_pillars: "13の柱",
+                nav_installer: "インストーラー",
+                nav_demo: "デモロール",
+                nav_github: "GitHub",
+                pillars_tag: "// ソフトウェア13の柱アーキテクチャ //",
+                pillars_title: "ソフトウェア13の柱マッピング (6レイヤー)",
+                pillars_sub: "Vibeforgeはソフトウェア13の柱をPHPネイティブアーキテクチャへ体系的にマッピングします。",
+                layer_1: "1. アプリケーションコア",
+                layer_2: "2. セキュリティ",
+                layer_3: "3. ホスティングと計算資源",
+                layer_4: "4. 安全なワークフロー",
+                layer_5: "5. パフォーマンスとスケール",
+                layer_6: "6. 信頼性",
+                badge_hero: "AI駆動バイブコーディングテンプレート // アーキテクチャ準備完了",
+                hero_title: "ドキュメントからコードへ<br><span class=\"text-gradient\">アプリを構築・鍛造する</span>",
+                hero_desc: "<strong class=\"text-[var(--text-primary)]\">Vibeforge</strong> はバイブコーディング手法でWebアプリを構築するためのプロフェッショナルスターターテンプレートです。要件をドキュメントに定義し、AIコーディングアシスタントが完全な機能コードを生成します。",
+                hero_copy_cmd: "コマンドをコピー",
+                hero_copied: "コピー完了!",
+                hero_download: "ダウンロード",
+                hero_btn_setup: "アプリの構築を開始",
+                hero_btn_demo: "デモロールを試す",
+                spec_php_sub: "重いフレームワークオーバーヘッドゼロ",
+                spec_repo_title: "デュアルエンジン Repo",
+                spec_repo_sub: "SQL / JSON ストレージ自動切り替え",
+                spec_owasp_title: "OWASP ASVS 保護",
+                spec_owasp_sub: "Argon2ID + CSRF + レートリミッター",
+                spec_spa_title: "SPA Shell アーキテクチャ",
+                spec_spa_sub: "ルータープロキシパターン (ノーリロード)",
+                fitur_tag: "// KEY ARCHITECTURE //",
+                fitur_title: "なぜVibeforgeなのか？",
+                fitur_sub: "AI CLI (Claude Code, Cursor, Copilot) が迷うことなく正確に作業できるように特別設計されたクリーンなアーキテクチャ。",
+                feat1_title: "ドキュメントからコードへ",
+                feat1_desc: "<code class=\"px-1.5 py-0.5 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--brand-primary)] font-mono rounded\">docs/prd.md</code> と <code class=\"px-1.5 py-0.5 bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--brand-primary)] font-mono rounded\">docs/branding.md</code> を更新するだけ。AIが正確に機能を実装します。",
+                feat2_title: "Clean-URL SPA Shell",
+                feat2_desc: "ランディング、ログイン、登録、管理、管理者、クライアント — AJAXルータープロキシで分離。",
+                feat3_title: "エンタープライズセキュリティ",
+                feat3_desc: "Argon2IDパスワードハッシュ、自動CSRF保護、IP/ユーザー名レート制限、RBACミドルウェア。",
+                feat4_title: "ネイティブ i18n & RTL",
+                feat4_desc: "GeoIP検出とRTLレイアウト (アラビア語) の完全サポートを備えた中央集権型多言語翻訳システム。",
+                pasang_tag: "// DEPLOYMENT CONSOLE & WORKFLOW //",
+                pasang_title: "アプリのダウンロードと設定",
+                pasang_sub: "以下のPowerShellコマンドを実行して、ローカルサーバー上にテンプレートをクローンし、ワークスペースを設定します。",
+                term_comment: "# 以下のPowerShellコマンドをWindowsターミナル (Laragon / XAMPP) で実行してください:",
+                term_bold: "この自動スクリプトは以下の処理を行います：",
+                term_s1: "✓ Vibeforgeテンプレートの最新バージョンをダウンロード",
+                term_s2: "✓ SPA shellフォルダ構造のセットアップ (`manajemen/`, `admin/`, `client/`)",
+                term_s3: "✓ 仮想ホストおよびローカルDNSドメイン (.test) の設定",
+                term_s4: "✓ Argon2ID暗号化デモ資格情報で `users.json` を初期化",
+                wizard_title: "4ステップセットアップウィザード",
+                wizard_mode: "UNIFIED FLOW",
+                wizard_t1_t: "インストール",
+                wizard_t1_d: "自動検出：アプリ名、フォルダパス、ローカルドメイン、およびPHPバージョン。手動入力不要。",
+                wizard_t2_t: "参照",
+                wizard_t2_d: "HTML/CSS/JSまたは既存ソースコードを references/ フォルダにアップロード (任意)。",
+                wizard_t3_t: "ブランディング＆ロゴ",
+                wizard_t3_d: "ブランドアイデンティティ：アプリ名、キャッチコピー、カラー、説明、ロゴ登録。",
+                wizard_t4_t: "PRD",
+                wizard_t4_d: "AIでPRDを自動生成、または独自のPRDを貼り付け。実行をクリックしてAI処理を開始。",
+                demo_tag: "// ACCESS CONTROL MATRIX //",
+                demo_title: "ロールベースアーキテクチャ (RBAC)",
+                demo_sub: "厳格なサーバーサイドセッション認可と独自のUIシェルを備えた3つの独立モジュール。",
+                role1_title: "スーパー管理者ポータル",
+                role1_desc: "システム概要、監査トレール、財務、クリエイター承認へのフルアクセス。",
+                role2_title: "クリエイタースタジオ",
+                role2_desc: "コンテンツアップロードダッシュボード、作品のパフォーマンス分析、ロイヤリティ管理。",
+                role3_title: "クライアントアプリケーション",
+                role3_desc: "探索、プレイリスト、オーディオプレイヤー用のユーザー/リスナーインターフェース。",
+                demo_info_title: "セットアップ後に利用可能なデモアカウント",
+                demo_info_sub: "セットアップスクリプト実行後、管理、管理者、クライアントの各ロール用アカウントが自動有効化されます。",
+                demo_full_access: "システム全体へのフルアクセス",
+                demo_creator_access: "コンテンツのアップロードと管理",
+                demo_client_access: "コンテンツの探索と視聴",
+                btn_download_bat: "セットアップをダウンロード (.bat)",
+                btn_copy_cmd: "PowerShellコマンドをコピー",
+                cta_tag: "// OPEN SOURCE REPOSITORY //",
+                cta_title: "Vibeforgeで開発を始める準備はできましたか？",
+                cta_desc: "このプロジェクトはApache 2.0ライセンスのもとで100%オープンソースです。商用および個人用アプリに自由に使用できます。",
                 footer_copy: "&copy; 2026 Vibeforge. Developer-Grade Vibe Coding Architecture."
             }
         };
@@ -929,7 +1144,8 @@
                     const flags = {
                         id: 'https://flagcdn.com/w20/id.png',
                         en: 'https://flagcdn.com/w20/gb.png',
-                        ar: 'https://flagcdn.com/w20/sa.png'
+                        ar: 'https://flagcdn.com/w20/sa.png',
+                        ja: 'https://flagcdn.com/w20/jp.png'
                     };
                     return flags[this.lang] || flags.id;
                 },
@@ -983,9 +1199,7 @@
         }
 
         function downloadSetupScript() {
-            // The PowerShell command to run (as admin): download and execute setup-project.ps1
             var psCommand = 'irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex';
-            // Encode to UTF-16LE Base64 for -EncodedCommand (avoids all CMD quoting issues)
             var utf16le = [];
             for (var i = 0; i < psCommand.length; i++) {
                 var cc = psCommand.charCodeAt(i);

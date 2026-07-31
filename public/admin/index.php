@@ -1,7 +1,7 @@
 <?php
 /**
- * Vibeforge - Admin Studio (Creator)
- * IT Professional / Cyber-Tech Edition
+ * Vibeforge - Admin Studio (Creator Studio)
+ * Cyber-Tech & 13 Pillars Architecture Edition
  */
 defined('APP_ENTRY') or define('APP_ENTRY', true);
 
@@ -32,13 +32,18 @@ $themePreference = $user['theme_preference'] ?? 'dark';
 $userName = escape($user['name'] ?? 'Creator');
 $userInitial = strtoupper(substr($userName, 0, 2));
 $userEmail = escape($user['email'] ?? '');
+
+// Load Data via Data Access Layer (Repo)
+$allUsers = Repo::table('users')->all();
+$totalUsers = count($allUsers);
+$auditTrailCount = count(Repo::table('audit_trail')->all());
 ?>
 <!DOCTYPE html>
 <html lang="<?= $currentLang ?>" dir="<?= $isRtl ? 'rtl' : 'ltr' ?>" class="<?= $themePreference === 'light' ? '' : 'dark' ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $userName ?> - <?= APP_DISPLAY_NAME ?> Admin Creator</title>
+    <title><?= $userName ?> - <?= escape(APP_DISPLAY_NAME) ?> Creator Studio</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F97316'%3E%3Cpath d='M12 23c-4.97 0-9-3.134-9-7 0-2.5 1.5-5.5 3-8.5 1.5-3 1.5-5 1.5-5s3 2.5 3 5.5c0 1.5-1 3-2 4 1-1.5 2-3.5 3-6 1.5 2.5 3 5.5 3 5.5s-1 2-2.5 4c1-1 1.5-2 1.5-2s2 1.5 2 3.5c0 .5-.5 1-1 1 1.5 0 2.5 1.5 2.5 3.5 0 3.866-4.03 7-9 7z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,7 +57,14 @@ $userEmail = escape($user['email'] ?? '');
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { brand: { primary: '#F97316', dark: '#0B0F17', card: '#111726', border: '#1E293B' } },
+                    colors: {
+                        brand: {
+                            primary: '#F97316',
+                            dark: '#0B0F17',
+                            card: '#111726',
+                            border: '#1E293B'
+                        }
+                    },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
                         heading: ['Plus Jakarta Sans', 'sans-serif'],
@@ -120,7 +132,9 @@ $userEmail = escape($user['email'] ?? '');
         <header class="h-16 flex items-center justify-between px-6 bg-gray-950/80 border-b border-[var(--border-default)] shrink-0 font-mono text-xs">
             <div class="flex items-center gap-3">
                 <h1 id="pageTitle" class="font-heading font-extrabold text-sm text-white tracking-wide uppercase">// OVERVIEW</h1>
-                <span class="px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px]">BUILD_ACTIVE</span>
+                <span class="px-2.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] flex items-center gap-1.5 font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></span> BUILD_ACTIVE
+                </span>
             </div>
             <div class="flex items-center gap-3">
                 <!-- Language Selector -->
@@ -140,8 +154,8 @@ $userEmail = escape($user['email'] ?? '');
                     </div>
                 </div>
 
-                <button id="themeToggle" class="p-2 hover:bg-gray-800 rounded-lg text-amber-400" aria-label="Toggle theme"><i class="ph ph-moon text-base"></i></button>
-                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400" title="<?= t('auth_logout') ?>"><i class="ph ph-sign-out text-base"></i></a>
+                <button id="themeToggle" class="p-2 hover:bg-gray-800 rounded-lg text-amber-400 transition-colors" aria-label="Toggle theme"><i class="ph ph-moon text-base"></i></button>
+                <a href="/logout/" class="p-2 hover:bg-red-500/10 rounded-lg text-red-400 transition-colors" title="<?= t('auth_logout') ?>"><i class="ph ph-sign-out text-base"></i></a>
             </div>
         </header>
 
@@ -170,6 +184,7 @@ window._i18n = {
 const V = {
     overview: `
         <div class="space-y-6">
+            <!-- Bento Grid Metrics -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
                     <div class="flex items-center justify-between text-gray-400">
@@ -189,23 +204,23 @@ const V = {
                 </div>
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
                     <div class="flex items-center justify-between text-gray-400">
-                        <span class="text-xs uppercase font-bold">PRD Engine</span>
-                        <i class="ph ph-file-doc text-purple-400 text-xl"></i>
+                        <span class="text-xs uppercase font-bold">System Users</span>
+                        <i class="ph ph-users text-purple-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-extrabold text-purple-400">READY</p>
-                    <span class="text-[10px] text-gray-400">docs/prd.md Loaded</span>
+                    <p class="text-3xl font-extrabold text-purple-400"><?= $totalUsers ?></p>
+                    <span class="text-[10px] text-gray-400">Active Accounts</span>
                 </div>
                 <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-5 glow-box-cyber space-y-2">
                     <div class="flex items-center justify-between text-gray-400">
-                        <span class="text-xs uppercase font-bold">Virtual Host</span>
-                        <i class="ph ph-terminal-window text-emerald-400 text-xl"></i>
+                        <span class="text-xs uppercase font-bold">Audit Events</span>
+                        <i class="ph ph-shield-check text-emerald-400 text-xl"></i>
                     </div>
-                    <p class="text-2xl font-extrabold text-emerald-400">AUTOMATED</p>
-                    <span class="text-[10px] text-gray-400">Laragon/XAMPP Auto-detect</span>
+                    <p class="text-3xl font-extrabold text-emerald-400"><?= $auditTrailCount ?></p>
+                    <span class="text-[10px] text-gray-400">Recorded Log Events</span>
                 </div>
             </div>
 
-            <!-- Developer Banner -->
+            <!-- Creator Setup Wizard Banner -->
             <div class="bg-gradient-brand rounded-2xl p-6 text-white shadow-xl glow-box-cyber font-mono">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
@@ -213,13 +228,30 @@ const V = {
                             <i class="ph ph-rocket-launch text-2xl"></i>
                         </div>
                         <div>
-                            <h3 class="font-heading font-extrabold text-lg">Vibeforge Creator Dashboard</h3>
-                            <p class="text-white/80 text-xs font-sans">Mengembangkan aplikasi berbasis template untuk bisnis Anda.</p>
+                            <h3 class="font-heading font-extrabold text-lg">Vibeforge Creator Studio</h3>
+                            <p class="text-white/80 text-xs font-sans">Kembangkan aplikasi bisnis Anda berbasis template dan AI Assistant.</p>
                         </div>
                     </div>
                     <a href="/install/" class="px-6 py-3 bg-gray-950 text-orange-400 font-bold text-xs rounded-xl hover:bg-gray-900 transition-colors shadow-lg flex items-center gap-2 shrink-0">
-                        <i class="ph ph-magic-wand text-base"></i> EXECUTE SETUP WIZARD
+                        <i class="ph ph-magic-wand text-base"></i> BUKA WIZARD
                     </a>
+                </div>
+            </div>
+
+            <!-- Architecture Guidelines for Creator -->
+            <div class="bg-gray-950/90 rounded-2xl border border-gray-800 p-6 space-y-4 glow-box-cyber font-mono">
+                <h3 class="font-bold text-xs uppercase text-orange-400 flex items-center gap-2">
+                    <i class="ph ph-tree-structure text-base"></i> Pedoman Pengembang Creator (13 Pilar)
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4 text-xs font-sans">
+                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800">
+                        <p class="font-bold font-mono text-orange-400 mb-1">SPA Shell Architecture (Pilar 1)</p>
+                        <p class="text-gray-400 text-xs leading-relaxed">Navigasi antar tab menggunakan AJAX ke core/router.php tanpa reload halaman penuh.</p>
+                    </div>
+                    <div class="p-4 bg-gray-900/60 rounded-xl border border-gray-800">
+                        <p class="font-bold font-mono text-orange-400 mb-1">Centralized Data Repo (Pilar 3)</p>
+                        <p class="text-gray-400 text-xs leading-relaxed">Akses data wajib via Repo::table() tanpa query PDO atau manipulasi JSON langsung.</p>
+                    </div>
                 </div>
             </div>
         </div>
