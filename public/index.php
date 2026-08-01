@@ -243,7 +243,7 @@ $projectRoot = dirname(__DIR__);
 
                     <!-- Call To Action -->
                     <div class="flex justify-center pt-4">
-                        <a href="/install/" class="inline-flex items-center justify-center gap-2.5 px-10 py-5 bg-gradient-brand text-white font-extrabold rounded-2xl hover:opacity-95 transition-all shadow-2xl glow-orange text-base font-mono tracking-wide group">
+                        <a href="install/index.php" class="inline-flex items-center justify-center gap-2.5 px-10 py-5 bg-gradient-brand text-white font-extrabold rounded-2xl hover:opacity-95 transition-all shadow-2xl glow-orange text-base font-mono tracking-wide group">
                             <i class="ph ph-sparkle text-2xl group-hover:rotate-12 transition-transform"></i> <?= t('index.btn_setup') ?>
                         </a>
                     </div>
@@ -537,7 +537,7 @@ $projectRoot = dirname(__DIR__);
                         </div>
 
                         <div class="text-center pt-2">
-                            <a href="/install/" class="inline-flex items-center justify-center gap-2.5 px-10 py-5 bg-gradient-brand text-white font-extrabold rounded-2xl hover:opacity-95 transition-all shadow-2xl glow-orange text-base font-mono tracking-wide group">
+                            <a href="install/index.php" class="inline-flex items-center justify-center gap-2.5 px-10 py-5 bg-gradient-brand text-white font-extrabold rounded-2xl hover:opacity-95 transition-all shadow-2xl glow-orange text-base font-mono tracking-wide group">
                                 <i class="ph ph-sparkle text-2xl group-hover:rotate-12 transition-transform"></i> <?= t('index.btn_setup') ?>
                             </a>
                         </div>
@@ -671,7 +671,7 @@ $projectRoot = dirname(__DIR__);
                 <i class="ph ph-shield-check text-xl"></i>
                 <span class="text-[9px] font-semibold">Demo</span>
             </a>
-            <a href="/install/" class="flex flex-col items-center gap-1 text-[var(--brand-primary)]">
+            <a href="install/index.php" class="flex flex-col items-center gap-1 text-[var(--brand-primary)]">
                 <i class="ph ph-magic-wand text-xl"></i>
                 <span class="text-[9px] font-bold">Wizard</span>
             </a>

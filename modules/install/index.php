@@ -541,17 +541,18 @@ function handleGenerateInstallMd(array $input): void
     // Build references section
     $referencesSection = "## 3. Referensi Aplikasi (`references/`)\n\n";
     if (!empty($refFiles)) {
-        $referencesSection .= "File referensi berikut di-upload melalui Tahap 2 wizard. AI akan menganalisa seluruh isi folder `references/` sebagai acuan.\n\n";
+        $referencesSection .= "File/folder referensi berikut di-upload melalui Tahap 2 wizard. AI akan menganalisa seluruh isi folder `references/` (HTML, PHP, CSS, JS, Gambar, Video, Font, SQL skema) sebagai acuan alur & tampilan.\n\n";
         $referencesSection .= "**Daftar File Referensi:**\n\n";
         foreach ($refFiles as $file) {
             $referencesSection .= "- `{$file}`\n";
         }
-        $referencesSection .= "\n> **Instruksi AI (Referensi)**:\n" .
-            "> 1. Baca SELURUH file/folder di `references/` terlebih dahulu.\n" .
-            "> 2. Gunakan sebagai acuan untuk menyusun `docs/prd.md` dan `docs/branding.md`.\n" .
-            "> 3. Konsolidasikan `references/*.html` ke template shell yang sesuai (lihat CLAUDE.md §12c).\n\n";
+        $referencesSection .= "\n> **Instruksi AI (Referensi & Transformasi)**:\n" .
+            "> 1. Baca SELURUH file/folder media & skrip di `references/` terlebih dahulu.\n" .
+            "> 2. Gunakan sebagai acuan untuk menyusun `docs/prd.md` dan `docs/branding.md` (apabila mode auto).\n" .
+            "> 3. GANTI total tampilan `public/index.php` dan shell `public/*.php` serta perbarui file root (`.env`, `.env.example`, `README.md`, `LICENSE`, `CHANGELOG.md`) sesuai branding baru.\n" .
+            "> 4. Jika terdapat file SQL/query di `references/`, gunakan mode `DB_MODE=mysql` (atau `auto`) dengan migrasi di `migrations/`. Jika tidak ada SQL, gunakan `DB_MODE=json` (`data/*.json`).\n\n";
     } else {
-        $referencesSection .= "Tidak ada file referensi di-upload. Aplikasi akan dibangun sepenuhnya dari PRD.\n\n";
+        $referencesSection .= "Tidak ada file referensi di-upload. AI WAJIB men-generate file HTML referensi terlebih dahulu di `references/` sebelum membangun aplikasi.\n\n";
     }
 
     // Build auto-generated files section
@@ -610,6 +611,27 @@ Dokumen ini adalah panduan utama instalasi dan **Build Protocol** untuk mengkonf
 
 ---
 
+## 0. VIBEFORGE AI GUIDELINES & ERROR PREVENTION PROTOCOL (MUTLAK)
+
+Sebelum menjalankan **Build Protocol**, AI Coding Assistant WAJIB mematuhi guardrail pencegahan error berikut:
+
+### 0.1 Mencegah File Write / Lock / Update Errors
+- **Penanganan Hak Akses Folder & Environment Lock**: Sebelum memulai pembangunan, jalankan `installer_skill_claude.bat` sebagai **Administrator** di Windows. Script ini mengeksekusi `icacls` untuk hak akses folder serta mengonfigurasi MCP (FileSystem Server, Sequential Thinking, Memory Server) guna mencegah *file permission lock* dan kegagalan penulisan file.
+- **Single Component Execution (Stabilitas Memori & I/O)**: Bekerja secara bertahap — selesaikan **satu file/komponen pada satu waktu**. DILARANG menulis atau mengubah banyak file sekaligus di berbagai direktori dalam satu langkah eksekusi untuk mencegah file permission lock, buffer overflow, atau write collision.
+- **Atomic File Write Protection**: Untuk penyimpanan JSON di `data/`, gunakan mekanisme file lock (`.lock`) dan atomic write (`.tmp` → `rename()`). Jangan menulis langsung ke file JSON utama tanpa `.tmp`.
+- **Handling Permission Locks**: Jika terjadi kegagalan penulisan file, periksa status file lock / hak akses folder proyek sebelum mencoba ulang. Jalankan terminal tempat AI berada dalam mode Administrator.
+
+### 0.2 Standar Penamaan & Konsistensi Database (Mencegah Runtime Mismatch)
+- Seluruh variabel PHP/JS, kolom database, dan `id`/`name` input HTML WAJIB menggunakan format **`snake_case`**.
+- **Aturan Mutlak Kolom Wilayah**: Setiap data yang berkaitan dengan alamat, kota, atau kabupaten WAJIB menggunakan nama kolom/variabel **`kota_kabupaten_rumah`**. DILARANG menggunakan nama alternatif (`city`, `kota_rumah`, `kabupaten`, dll) untuk mencegah runtime error dan ketidakcocokan query antar-modul.
+
+### 0.3 Alur Kerja Agentic (Ruflo & Graphify Execution)
+1. **Analisis Relasi**: Periksa file `core/router.php`, modul `modules/`, dan skema DB (atau Graphify jika tersedia) sebelum mengubah kode.
+2. **Pecah Tugas Linear**: Pecah fitur ke sub-tahap: (1) UI Frontend SPA Shell, (2) Backend Endpoint (`modules/*/*.php`), (3) Integrasi Fetch/AJAX.
+3. **Pesan Konfirmasi**: Setelah memahami seluruh aturan, AI wajib membalas di awal turn: `"Vibeforge Guidelines & Protection Protocol Diterima. Siap eksekusi."`
+
+---
+
 ## 1. Konfigurasi Server & Workspace
 
 - **Mode Aplikasi**: `unified`
@@ -651,37 +673,42 @@ Setiap AI Coding Assistant (Claude Code CLI) WAJIB mengikuti urutan 3 Tahap Ekse
 
 ### TAHAP 1 — AUDIT & RENCANA (Read-Only)
 1. Baca `CLAUDE.md`, `docs/prd.md`, dan `docs/branding.md`.
-2. Jika ada file di `references/`: Baca seluruh folder `references/` -> gunakan sebagai acuan untuk `docs/prd.md` & `docs/branding.md` -> konsolidasikan `references/*.html`.
-3. Audit struktur file core:
+2. Audit keberadaan file/folder di `references/`:
+   - **Jika `references/` Kosong**: AI WAJIB men-generate file HTML referensi di `references/` serta menyusun `docs/prd.md` & `docs/branding.md` sesuai konsep aplikasi baru.
+   - **Jika `references/` Berisi File/Folder**: Baca seluruh folder `references/` (HTML, PHP, CSS, JS, media, skema SQL) -> gunakan sebagai acuan untuk `docs/prd.md` & `docs/branding.md`.
+3. Audit skema database pada file di `references/`:
+   - **Ada SQL**: Rencanakan skema migrasi di `migrations/` & set `DB_MODE=mysql` (atau `auto`).
+   - **Tidak Ada SQL**: Set `DB_MODE=json` & buat skema entitas di `data/*.json`.
+4. Audit struktur file core & root:
    - `include/config.php`, `include/helper.php`
    - `core/router.php`, `core/session.php`, `core/csrf.php`, `core/Repo.php`
    - `public/core/router.php` (router proxy - WAJIB)
-   - `modules/auth/`
-   - `.env`, `.env.example`
+   - `.env`, `.env.example`, `README.md`, `LICENSE`, `CHANGELOG.md`
    - `data/users.json`
-4. Jalankan **Audit Protocol** sesuai `docs/audit_protocol.md`:
+   - `locales/languages.json` dan `locales/*.json`
+5. Jalankan **Audit Protocol** sesuai `docs/audit_protocol.md`:
    - Output: `docs/AUDIT_BASIC.md`
    - Jika proyek memiliki multi-mode storage atau governance kompleks, lanjut dengan `docs/audit_conformance_addendum.md`
-5. Buat file `docs/build_plan.md` yang memuat:
+6. Buat file `docs/build_plan.md` yang memuat:
    - Mapping shell vs file yang sudah ada
    - Daftar file yang belum ada
    - Daftar variabel environment dari `.env.example`
-6. **BERHENTI dan TUNGGU persetujuan project owner** sebelum lanjut ke TAHAP 2.
+7. **BERHENTI dan TUNGGU persetujuan project owner** sebelum lanjut ke TAHAP 2.
 
 ---
 
 ### TAHAP 2 — BUILD (Eksekusi)
 
-1. Buat file yang belum ada sesuai `build_plan.md`:
-   - Shell files: `public/*/index.php`
-   - Router proxy: `public/core/router.php`
-   - Core modules: `core/*.php`, `include/*.php`
-   - Auth modules: `modules/auth/*.php`
-2. Ikuti struktur arsitektur di CLAUDE.md:
+1. **Transformasi Total Tampilan, Root Files & Branding (WAJIB)**:
+   - GANTI total tampilan `public/index.php` dan seluruh shell `public/*.php` sesuai desain `references/`, `docs/prd.md`, dan `docs/branding.md`.
+   - Update file-file konfigurasi & dokumentasi root (`.env`, `.env.example`, `README.md`, `LICENSE`, `CHANGELOG.md`) dengan nama aplikasi baru, tagline, deskripsi, dan lisensi/versi yang sesuai (DILARANG menyisakan nama "Vibeforge" atau landing page framework bawaan pada aplikasi hasil generate).
+   - Periksa seluruh tautan navigasi (tombol, menu, form action). Pastikan tautan berfungsi baik di environment VirtualHost maupun non-VirtualHost (gunakan relative path atau URL helper).
+2. **Kepatuhan Arsitektur 13 Pilar Software (WAJIB)**:
    - Entry Guard Pattern (CLAUDE.md §8)
    - Router Proxy Pattern (CLAUDE.md §3f)
    - Repo Pattern Dual-Mode (CLAUDE.md §3g)
    - SPA Shell Architecture (CLAUDE.md §3a)
+   - Standar i18n & Multi-Bahasa (CLAUDE.md §2a): DILARANG hardcode string bahasa, gunakan `t('key')` & `locales/*.json`.
 3. Generate demo users di `data/users.json`:
    - Lihat CLAUDE.md Section 6b untuk format dan password hash
    - Gunakan Argon2ID hash (jangan plain text)
@@ -689,9 +716,10 @@ Setiap AI Coding Assistant (Claude Code CLI) WAJIB mengikuti urutan 3 Tahap Ekse
    - `locales/languages.json` (manifest)
    - `locales/id.json`, `locales/en.json`, `locales/ar.json`
    - Flag assets di `public/assets/flags/`
-5. **SETIAP MODUL yang relevan harus berfungsi nyata**:
-   - Create/Read/Update/Delete tidak boleh cuma UI tanpa backend
-   - Diuji untuk skenario storage SQL maupun JSON sesuai deteksi `DB_MODE`
+5. **Implementasi Database & CRUD Nyata**:
+   - Jika ditemukan file/query SQL di `references/`, bangun tabel MySQL di database dan jalankan query via `Repo::table()`.
+   - Jika tidak ada SQL di `references/`, gunakan mode JSON (`data/*.json`) dengan file locking & atomic write.
+   - Pastikan seluruh fitur CRUD (Create, Read, Update, Delete) berfungsi secara nyata sesuai spesifikasi di `docs/prd.md`.
 
 ---
 

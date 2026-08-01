@@ -18,7 +18,7 @@ Audit ini bertujuan untuk mengidentifikasi celah struktural, keamanan, dan kepat
 1. `CLAUDE.md` — Konstitusi teknis & arsitektur 13 Pilar Software (6 Lapisan)
 2. `docs/prd.md` — Definisi spesifikasi produk, fitur, dan role pengguna
 3. `docs/branding.md` — Identitas visual, warna, font, dan CSS variables
-4. `references/*.html` — Golden reference template untuk setiap shell
+4. `references/` — Golden reference template / aplikasi referensi (seluruh file `.html`, `.php`, atau folder aset referensi)
 5. `locales/*.json` — Manifest dan dictionary i18n (`id.json`, `en.json`, `ar.json`, `ja.json`, `languages.json`)
 6. `.env` dan `.env.example` — Konfigurasi environment aktif vs template
 7. Listing struktur folder aktual (mengabaikan `vendor/`, `node_modules/`, `.git/`, `cache/`, `.claude/`)

@@ -3,7 +3,7 @@
 Dokumen ini adalah rujukan wajib untuk setiap sesi Claude Code CLI di project Vibeforge. Semua audit, pengembangan, dan pemeliharaan kode WAJIB mematuhi arsitektur **13 Pilar Software (6 Lapisan)** dan ketentuan teknis di bawah ini.
 
 > **VIBEFORGE TEMPLATE**: Project ini adalah template PHP Native SPA untuk membangun aplikasi website berbasis *vibe coding*. 
-> Konfigurasi alur instalasi: `public/install/` → `data/install_config.json` → `docs/install.md` → `docs/prd.md` & `docs/branding.md` → `references/*.html` (Golden Template) → `public/*.php` (SPA Shell).
+> Konfigurasi alur instalasi: `public/install/` → `data/install_config.json` → `docs/install.md` → `docs/prd.md` & `docs/branding.md` → `references/` (Golden Template / Aplikasi Referensi) → `public/*.php` (SPA Shell).
 
 ---
 
@@ -44,13 +44,26 @@ Dokumen ini adalah rujukan wajib untuk setiap sesi Claude Code CLI di project Vi
 - **SPA Shell Architecture**: Clean-URL folders (`login/`, `register/`, `manajemen/`, `admin/`, `client/`) berisi shell tipis (`index.php`) yang dimuat Apache tanpa `mod_rewrite`.
 - **AJAX Navigation**: Perpindahan tab/state dalam 1 shell TIDAK BENTUK full-page reload. Gunakan AJAX ke `core/router.php`. Reload penuh hanya terjadi saat berpindah ANTAR shell.
 - **Golden References (`references/*.html`)**: Setiap shell `public/xxx/index.php` HARUS mengikuti struktur HTML, styling CSS, dan komponen visual SAMA PERSIS dengan template di `references/*.html`:
-  - `public/index.php` → `references/landingpage.html`
-  - `public/login/index.php` → `references/login.html`
-  - `public/register/index.php` → `references/register.html`
+  - `public/index.php` → `references/landingpage.html` (atau `references/index.html`/`index.php` yang di-convert ke SPA Shell)
+  - `public/login/index.php` → `references/login.html` (atau file login referensi)
+  - `public/register/index.php` → `references/register.html` (atau file register referensi)
   - `public/manajemen/index.php` → `references/modul_manajemen.html`
   - `public/admin/index.php` → `references/modul_admin.html`
   - `public/client/index.php` → `references/modul_client.html`
-  *Jika `references/` kosong, AI WAJIB men-generate file HTML referensi terlebih dahulu sebelum membangun shell.*
+  *PENTING (Proses Analisis & Transformasi Referensi ke Public SPA Shell)*:
+  1. **Multi-Asset & Multi-File Support**: Folder `references/` dapat berisi file HTML, PHP, CSS, JS, gambar (PNG/SVG/JPG), video (MP4/WebM), font, JSON, maupun seluruh struktur folder aplikasi lawas/legacy.
+  2. **Audit & pemetaan Alur Lengkap**: AI WAJIB membaca dan memetakan alur komprehensif dari seluruh file referensi — menelusuri entry-point (`index.html`/`index.php`), relasi navigasi, penanganan aset (pindah ke `public/assets/`), hingga alur logika bisnis dan data.
+  3. **Generasi Aplikasi Baru Berbasis Referensi**: Output aplikasi di `public/` WAJIB menjadi aplikasi baru yang bersih, modern, dan berfungsi penuh dengan alur bisnis yang SAMA PERSIS dengan referensi di `references/`, tetapi sepenuhnya menggunakan nama aplikasi, logo, palet warna, dan identitas visual dari `docs/branding.md` & `docs/prd.md` (DILARANG mempertahankan landing page atau branding bawaan Vibeforge Framework).
+  5. **Mode Manual vs Auto**:
+     - Cek keberadaan file di `references/`. Jika kosong, AI WAJIB men-generate file HTML referensi terlebih dahulu di `references/` berdasarkan konsep di `docs/prd.md` & `docs/branding.md`.
+     - Jika `references/` berisi file/folder, AI WAJIB mengganti seluruh branding dan UI bawaan Vibeforge di `public/` (`public/index.php`, `public/login/`, dll) serta memperbarui file root (`.env`, `.env.example`, `README.md`, `LICENSE`, `CHANGELOG.md`) dengan nama aplikasi, tagline, dan konfigurasi baru.
+  6. **Deteksi Otomatis Skema Database (SQL vs JSON)**:
+     - AI WAJIB menelusuri seluruh file di `references/` untuk mencari ketersediaan file skema database SQL (`.sql` atau ddl di file `.php`).
+     - **Jika Ditemukan SQL**: AI WAJIB menyusun migrasi di `migrations/`, mengkonfigurasi `.env` dengan `DB_MODE=mysql` (atau `auto` yang mendeteksi tabel SQL), dan memastikan aplikasi menggunakan SQL secara nyata via `Repo::table()`.
+     - **Jika Tidak Ditemukan SQL**: AI WAJIB mengkonfigurasi `DB_MODE=json` (atau fallback JSON) dan membuat file data JSON di `data/*.json` dengan kepastian seluruh fitur CRUD berjalan nyata dan aman (Atomic Write + Lock).
+  7. **Auto-Generate PRD & Branding (Wizard Auto-Mode)**:
+     - Jika `prdMode = "auto"` dan/atau `brandingMode = "auto"` di `data/install_config.json` (dari Wizard `/install/`), AI WAJIB menganalisis seluruh aset di `references/` (HTML, PHP, media, alur aplikasi, skema SQL) untuk memunculkan `docs/prd.md` dan `docs/branding.md` secara otomatis.
+     - Penulisan `docs/prd.md` WAJIB mempertahankan format standar 7 bagian (Problem Statement, Goals, Target User, User Stories, FR, NFR, Scope) dan `docs/branding.md` (6 bagian: Nama/Tagline, Value Prop, Target/Tone, Palet Warna, Typography, Logo) sesuai template wizard.
 - **Branding & Theme Dinamis**: Warna, logo, dan font didefinisikan via `docs/branding.md` dan CSS variables di `public/assets/css/branding.css`. Nama aplikasi diambil dari `APP_DISPLAY_NAME` di `.env`. Theme dark/light dikontrol via `<html data-theme="dark|light">` dan disinkronkan ke `users.json` (`theme_preference`).
 - **Navigasi Responsif & Scroll Spy**: Sidebar vertikal di Desktop, Bottom Nav di Mobile. Mobile bottom nav WAJIB menggunakan `IntersectionObserver` scroll spy untuk meng-highlight menu aktif secara otomatis.
 - **Algoritma Deteksi Bahasa i18n & Persistensi Data (WAJIB)**:
