@@ -151,10 +151,34 @@ Audit ini bertujuan untuk mengidentifikasi celah struktural, keamanan, dan kepat
 
 ---
 
-### J. Reference Template Compliance (CLAUDE.md §2a - Pilar 1)
+### J. Reference Template Compliance & Dynamic Structure (CLAUDE.md §2a - Pilar 1)
 
 - [ ] Apakah setiap shell mengikuti struktur `references/*.html` yang sesuai?
 - [ ] Apakah SEMUA teks statis dan dinamis menggunakan sistem i18n (`t()` / `window._i18n`)?
+
+### Jb. Struktur Folder Dinamis (CLAUDE.md §2a - Pilar 1)
+
+- [ ] Apakah nama folder di `public/` mengikuti struktur folder di `references/` (bukan hardcode `client`/`admin`/`manajemen`)?
+- [ ] Jika `references/` memiliki folder dengan nama berbeda (misal `pendaftar`, `peserta`), apakah folder `public/`-nya juga menggunakan nama yang sama?
+- [ ] Apakah mapping role ↔ folder konsisten dengan struktur referensi?
+
+### Jc. Login di Index (CLAUDE.md §2a - Pilar 1)
+
+- [ ] Apakah jika hanya Login dan 1 halaman lain yang dicentang (tanpa Landing Page), login tetap berada di `public/index.php` tanpa redirect ke `public/login/`?
+- [ ] Apakah `public/index.php` berfungsi sebagai halaman login utama ketika Landing Page tidak dicentang?
+
+### Jd. Penghapusan Halaman Tidak Dicentang (CLAUDE.md §2a - Pilar 1)
+
+- [ ] Apakah wizard menghapus file dan folder terkait halaman yang tidak dicentang di `public/`?
+- [ ] Apakah tidak ada jejak folder/halaman yang tidak dicentang di `public/` setelah build?
+- [ ] Apakah jika Landing Page tidak dicentang dan Login dicentang, `public/index.php` berisi redirect ke `/login/`?
+
+### Je. Deteksi DB Mode dari References (CLAUDE.md §2c - Pilar 3)
+
+- [ ] Apakah wizard secara otomatis mendeteksi apakah `references/` mengandung file/query SQL/MySQL?
+- [ ] Jika ditemukan SQL/MySQL di `references/`: apakah `DB_MODE` dikonfigurasi ke `mysql` dan seluruh konsep JSON dihapus?
+- [ ] Jika TIDAK ditemukan SQL/MySQL di `references/`: apakah `DB_MODE` dikonfigurasi ke `json`?
+- [ ] Apakah akses login menggunakan database (bukan JSON buatan) ketika `DB_MODE=mysql`?
 
 ---
 

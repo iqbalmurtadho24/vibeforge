@@ -1857,6 +1857,29 @@ require_once __DIR__ . '/header.php';
         try {
             await saveCurrentStep();
 
+            // === HAPUS HALAMAN YANG TIDAK DICENTANG DI PUBLIC/ ===
+            await fetch('/core/router.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    module: 'install',
+                    action: 'cleanup_unchecked_pages',
+                    pageStructure: pageStructure,
+                    csrf_token: csrfToken
+                })
+            });
+
+            // === HAPUS FOLDER INSTALL/ INI SETELAH VIBE CODING BERJALAN ===
+            await fetch('/core/router.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    module: 'install',
+                    action: 'remove_install_page',
+                    csrf_token: csrfToken
+                })
+            });
+
             // Generate install.md
             await fetch('/core/router.php', {
                 method: 'POST',

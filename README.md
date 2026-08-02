@@ -66,13 +66,13 @@ Vibeforge memetakan 13 Pilar Software (6 Lapisan) secara tepat ke dalam struktur
 
 ### SPA Shell Architecture
 - **Landing Page** (`public/index.php`) — Hero, fitur, demo, install guide. Jika Landing Page dicentang TANPA Login, halaman ini adalah landing page publik tanpa tombol Masuk/Daftar.
-- **Auth Shells** — `/login/`, `/register/`, `/logout/` (SPA via AJAX)
-- **Dashboard Shells** (role-based):
-  - `/manajemen/` — Super Admin (overview, users, system, audit)
-  - `/admin/` — Creator (upload karya, analitik, royalti)
-  - `/client/` — Client (eksplorasi konten, player)
+- **Auth Shells** — `/login/`, `/register/`, `/logout/` (SPA via AJAX). **Aturan Index Login**: Jika hanya Login dan 1 halaman lain yang dicentang (tanpa Landing Page), login TETAP berada di `public/index.php` — **JANGAN redirect ke `/login/`**.
+- **Dashboard Shells (Dinamis berbasis Referensi)**:
+  - Nama folder di `public/` dan `references/` HARUS mengikuti struktur yang ada di `references/` (misal `/pendaftar/`, `/peserta/`, `/manajemen/`, `/admin/`, `/client/`). Jangan memaksa nama tetap.
+- **Penghapusan Halaman Tidak Dicentang**: Halaman yang TIDAK dicentang di Tahap 3B wizard akan secara otomatis dihapus file/foldernya dari `public/` tanpa menyisakan route bocor.
+- **Auto-Delete Install Wizard**: Folder `public/install/` akan secara otomatis dihapus setelah proses vibe coding/build AI berjalan agar wizard tidak dapat diakses kembali.
 - **Router Proxy Pattern** — Doc root `public/`, AJAX ke `public/core/router.php` → `core/router.php`
-- **Aturan Landing ↔ Login**: Minimal salah satu dari Landing Page atau Login harus aktif. Jika Login aktif, minimal satu role (Manajemen, Admin, Client) wajib ada. Jika hanya Landing Page yang aktif, role halaman tidak wajib dan tombol Auth disembunyikan.
+- **Aturan Landing ↔ Login**: Minimal salah satu dari Landing Page atau Login harus aktif. Jika Login aktif, minimal satu role/halaman dashboard wajib ada. Jika hanya Landing Page yang aktif, role halaman tidak wajib dan tombol Auth disembunyikan.
 
 ### Internationalization (i18n) Tingkat Lanjut
 - **GeoIP & Smart Fallback**: Deteksi otomatis negara IP pengunjung (Negara Liga Arab → Bahasa Arab `ar`, Mapped Countries → `id`/`ja`/`en`). IP negara yang tidak terdaftar akan otomatis diarahkan ke Bahasa Arab (`ar`) jika berasal dari kawasan Arab, atau Bahasa Inggris (`en`) sebagai standar universal.

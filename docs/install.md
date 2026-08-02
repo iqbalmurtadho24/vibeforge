@@ -27,10 +27,6 @@ Sebelum menjalankan **Build Protocol**, AI Coding Assistant WAJIB mematuhi guard
 
 ---
 
-Dokumen ini adalah panduan utama instalasi dan **Build Protocol** untuk mengkonfigurasi serta memproses pembuatan aplikasi berbasis **Vibeforge Template** (PHP Single Page Application Framework).
-
----
-
 ## 1. Konfigurasi Server & Workspace
 
 Konfigurasi aktif ada di `data/install_config.json`. Untuk referensi cepat:
@@ -43,6 +39,8 @@ Konfigurasi aktif ada di `data/install_config.json`. Untuk referensi cepat:
 | Folder Kerja | `data/install_config.json` → `installPath` |
 | Branding Mode | `data/install_config.json` → `brandingMode` |
 | PRD Mode | `data/install_config.json` → `prdMode` |
+| Struktur Halaman | `data/install_config.json` → `pageStructure` |
+| DB Mode | `data/install_config.json` → `dbMode` (auto-detected dari references/) |
 
 ---
 
@@ -57,6 +55,12 @@ Halaman yang dicentang di wizard Tahap 3B (hanya ini yang dibangun). Lihat `data
 - Jika Login & Register dicentang, Landing Page **WAJIB** menampilkan tombol Masuk & Daftar.
 - Jika hanya Login yang dicentang, tampilkan tombol Masuk saja di Landing Page.
 - Jika Landing Page TIDAK dicentang, `public/index.php` **WAJIB** berisi redirect PHP (`header('Location: /login/'); exit;`).
+- **Aturan Baru — Login di Index**: Jika hanya Login dan 1 halaman lain yang dicentang (tanpa Landing Page), login TETAP berada di `public/index.php` — **JANGAN redirect ke `public/login/`**. Halaman login adalah halaman utama (index).
+
+**Aturan Penghapusan Halaman Tidak Dicentang (Tahap 3B)**:
+- Jika sebuah halaman **TIDAK** dicentang di Tahap 3B, wizard akan **menghapus** seluruh file dan folder yang berkaitan dengan halaman tersebut dari `public/`.
+- Ini termasuk: subfolder `public/{halaman}/`, file `public/{halaman}/index.php`, dan aset terkait.
+- Halaman yang tidak dicentang **TIDAK BOLEH** meninggalkan jejak apapun di `public/`.
 
 | Shell Folder | Allowed Role | Template Reference |
 |-------------|-------------|------------------|
@@ -66,6 +70,8 @@ Halaman yang dicentang di wizard Tahap 3B (hanya ini yang dibangun). Lihat `data
 | `public/manajemen/index.php` | `manajemen` | `references/modul_manajemen.html` |
 | `public/admin/index.php` | `admin` | `references/modul_admin.html` |
 | `public/client/index.php` | `client` | `references/modul_client.html` |
+
+> **Catatan Penting — Nama Folder Dinamis**: Nama folder di `public/` dan `references/` **TIDAK HARUS** selalu `client`, `admin`, atau `manajemen`. Jika folder referensi memiliki nama berbeda (misal `pendaftar`, `peserta`, `member`), maka folder `public/` HARUS menggunakan nama yang sama. Wizard tidak memaksa nama tetap — ikuti struktur yang ada di `references/`.
 
 ---
 
@@ -104,11 +110,13 @@ Lihat `data/install_config.json` → `referencesCount` untuk jumlah file referen
 - **Auto**: Jika `prdMode = "auto"` di `data/install_config.json` (yang diatur dari Setup Wizard `/install/`).
 - **Ketentuan Format**: AI WAJIB menghasilkan `docs/prd.md` yang mematuhi struktur 7 bagian standar template (1. Problem Statement, 2. Goals, 3. Target User, 4. User Stories, 5. Functional Requirements, 6. Non-Functional Requirements, 7. Scope).
 - **Sumber Ekstraksi**: Di-generate berdasarkan audit menyeluruh alur fungsional, formulir, menu navigasi, dan logika bisnis yang ditemukan pada seluruh file di `references/`.
+- **Struktur Lengkap**: Saat generate otomatis, AI WAJIB memetakan seluruh alur aplikasi mulai dari halaman login hingga ke setiap halaman yang dicentang, memastikan PRD mencakup semua role dan halaman aktif.
 
 ### 4.3 References HTML (`references/`)
 
 - **Auto**: Jika `referencesCount = 0` di `data/install_config.json`
 - Generate sesuai `pageStructure` di `data/install_config.json`.
+- **Nama folder mengikuti struktur referensi**: Jika di `references/` folder setelah login bernama `pendaftar`, maka folder `public/`-nya juga `pendaftar`. Jangan memaksa nama tetap `client` atau `admin`.
 
 ---
 
@@ -120,10 +128,10 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
 
 1. Baca `CLAUDE.md`, `data/install_config.json`
 2. Audit keberadaan file/folder di `references/`:
-   - **Jika `references/` Kosong**: AI WAJIB men-generate file template HTML di `references/` serta menyusun `docs/prd.md` & `docs/branding.md` sesuai ide/konsep aplikasi baru.
-   - **Jika `references/` Berisi File/Folder**: AI WAJIB mengaudit seluruh file (HTML, PHP, CSS, JS, Gambar, Video, Font) dan alur tautan navigasi.
+   - **Jika `references/` Kosong**: AI WAJIB men-generate file HTML referensi di `references/` serta menyusun `docs/prd.md` & `docs/branding.md` sesuai konsep aplikasi baru.
+   - **Jika `references/` Berisi File/Folder**: AI WAJIB mengaudit seluruh file (HTML, PHP, CSS, JS, media, skema SQL) dan alur navigasi.
 3. Audit skema database pada file di `references/`:
-   - Cek apakah terdapat file query SQL (`.sql`) atau DDL/query SQL di dalam kode referensi.
+   - Cek apakah terdapat file query SQL (`.sql` atau DDL/query SQL di file `.php`).
    - **Ada SQL**: Rencanakan skema migrasi di `migrations/` & set `DB_MODE=mysql` (atau `auto`).
    - **Tidak Ada SQL**: Set `DB_MODE=json` & buat skema entitas di `data/*.json`.
 4. Audit struktur file core & root:
@@ -178,6 +186,8 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
 - [ ] i18n multi-bahasa berfungsi tanpa teks hardcode & selector dinamis
 - [ ] Logout redirect ke landing page
 - [ ] Auth state konsisten
+- [ ] Folder `public/install/` sudah dihapus (install wizard tidak lagi accessible)
+- [ ] Halaman yang tidak dicentang di Tahap 3B sudah dihapus dari `public/`
 
 ---
 
@@ -209,6 +219,39 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
 | `docs/branding.md` | Identitas visual |
 | `docs/audit_protocol.md` | Audit dasar |
 | `data/install_config.json` | Konfigurasi aktif wizard |
+
+---
+
+## 8. Proses Install — Alur Lengkap
+
+### 8.1 Tahap 1: Install (Auto-Detect)
+- Deteksi otomatis lingkungan server (PHP version, web server, domain, project path).
+- Ganti nama aplikasi jika perlu.
+- Semua persyaratan harus terpenuhi sebelum lanjut.
+
+### 8.2 Tahap 2: Referensi (Opsional)
+- Pilih YA (sudah punya referensi) atau TIDAK (mulai dari nol).
+- Jika YA: upload file HTML/CSS/JS/PHP ke `references/`.
+- Jika TIDAK: AI akan generate template referensi otomatis saat build.
+
+### 8.3 Tahap 3: Branding & Logo
+- Pilih mode branding: Otomatis (dari PRD) atau Manual (isi form).
+- Upload logo aplikasi.
+- **Tahap 3B — Struktur Halaman**: Centang halaman yang ingin dibuat.
+  - Minimal salah satu dari Landing Page atau Login harus aktif.
+  - Jika Login dicentang, minimal satu role wajib dipilih.
+  - **Jika halaman TIDAK dicentang → wizard akan menghapus file/folder terkait dari `public/` secara otomatis saat eksekusi.**
+
+### 8.4 Tahap 4: PRD
+- Pilih mode PRD: Otomatis (dari referensi) atau Manual (isi form 7 bagian).
+- Klik "Jalankan AI" untuk memulai proses build.
+
+### 8.5 Pasca-Execute
+1. Wizard menghapus folder `public/install/` (halaman install tidak lagi accessible).
+2. Wizard menghapus file/folder `public/` untuk halaman yang tidak dicentang.
+3. Wizard mengkonfigurasi `DB_MODE` berdasarkan deteksi otomatis dari `references/`.
+4. AI menjalankan Build Protocol (Tahap 1 → 2 → 3).
+5. Owner verifikasi di browser menggunakan checklist di Tahap 3.
 
 ---
 

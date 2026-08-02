@@ -41,14 +41,17 @@ Dokumen ini adalah rujukan wajib untuk setiap sesi Claude Code CLI di project Vi
 ## 2. LAPISAN 1 — Inti Aplikasi
 
 ### 2a. Pilar 1 — Frontend (SPA Shell, Golden References & Algoritma Deteksi i18n)
-- **SPA Shell Architecture**: Clean-URL folders (`login/`, `register/`, `manajemen`, `admin`, `client`) berisi shell tipis (`index.php`) yang dimuat Apache tanpa `mod_rewrite`.
-  - `public/index.php` berfungsi sebagai landing page atau redirect ke `/login/` tergantung konfigurasi Tahap 3B wizard.
+- **SPA Shell Architecture**: Clean-URL folders (`login/`, `register/`, `manajemen`, `admin`, `client`, dll.) berisi shell tipis (`index.php`) yang dimuat Apache tanpa `mod_rewrite`.
+  - `public/index.php` berfungsi sebagai landing page atau halaman login utama tergantung konfigurasi Tahap 3B wizard.
   - Jika Landing Page tidak dicentang di wizard, `public/index.php` WAJIB berisi redirect PHP (`header('Location: /login/'); exit;`).
   - Jika Landing Page dicentang:
     - Jika Login & Register dicentang → Landing Page **WAJIB** menampilkan tombol "Masuk" (Login) dan "Daftar" (Register).
     - Jika hanya Login yang dicentang → Landing Page menampilkan tombol "Masuk" saja (tanpa "Daftar").
     - Jika Login TIDAK dicentang (hanya Landing Page) → Landing Page **TIDAK PERLU** menampilkan tombol Masuk/Daftar (halaman landing page publik tanpa auth).
   - **Aturan Landing ↔ Login (Mutlak)**: Minimal salah satu dari Landing Page atau Login harus aktif. Jika Login aktif, minimal satu role dari {manajemen, admin, client} WAJIB ada.
+  - **Aturan Baru — Login di Index**: Jika hanya Login dan 1 halaman lain yang dicentang (tanpa Landing Page), login TETAP berada di `public/index.php` — **JANGAN redirect ke `public/login/`**. Halaman login adalah halaman utama (index).
+  - **Penghapusan Halaman Tidak Dicentang**: Jika sebuah halaman TIDAK dicentang di Tahap 3B, seluruh file dan folder terkait harus dihapus dari `public/`. Tidak boleh meninggalkan jejak apapun.
+  - **Nama Folder Dinamis**: Nama folder di `public/` dan `references/` HARUS mengikuti struktur yang ada di `references/`. Jika folder referensi bernama `pendaftar`, maka folder `public/`-nya juga `pendaftar`. Jangan memaksa nama tetap `client`, `admin`, atau `manajemen`.
 - **AJAX Navigation**: Perpindahan tab/state dalam 1 shell TIDAK BENTUK full-page reload. Gunakan AJAX ke `core/router.php`. Reload penuh hanya terjadi saat berpindah ANTAR shell.
 - **Golden References (`references/*.html`)**: Setiap shell `public/xxx/index.php` HARUS mengikuti struktur HTML, styling CSS, dan komponen visual SAMA PERSIS dengan template di `references/*.html`:
   - `public/index.php` → `references/landingpage.html` (atau `references/index.html`/`index.php` yang di-convert ke SPA Shell)

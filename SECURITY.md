@@ -67,7 +67,9 @@ Please include:
 #### Role Access & Entry Guards (Pilar 5)
 - [ ] **Pola 1 (Entry Point)**: `defined('APP_ENTRY') or define('APP_ENTRY', true);`
 - [ ] **Pola 2 (Module/Include)**: `if (!defined('APP_ENTRY')) { http_response_code(403); exit('Direct access forbidden'); }` *(Tanpa define!)*
-- [ ] Role Guard: `requireRole('manajemen'|'admin'|'client')` di setiap module/shell.
+- [ ] Role Guard: `requireRole()` di setiap module/shell (nama folder/role dinamis mengikuti struktur `references/`).
+- [ ] Halaman tidak dicentang di wizard Tahap 3B terhapus bersih dari `public/` tanpa menyisakan route bocor.
+- [ ] Folder `public/install/` (Setup Wizard) terhapus otomatis pasca vibe coding berjalan agar tidak menjadi celah akses publik.
 
 #### CSRF Protection (Pilar 4)
 - [ ] Token on **every** state-changing form (POST/PUT/DELETE)

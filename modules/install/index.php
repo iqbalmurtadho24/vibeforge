@@ -118,6 +118,27 @@ switch ($action) {
         handleDeleteRef($input);
         break;
 
+    // -----------------------------------------------------------------------
+    // cleanup_unchecked_pages — remove public/ folders for unchecked pages
+    // -----------------------------------------------------------------------
+    case 'cleanup_unchecked_pages':
+        handleCleanupUncheckedPages($input);
+        break;
+
+    // -----------------------------------------------------------------------
+    // remove_install_page — remove the install wizard page itself
+    // -----------------------------------------------------------------------
+    case 'remove_install_page':
+        handleRemoveInstallPage($input);
+        break;
+
+    // -----------------------------------------------------------------------
+    // detect_db_mode_from_references — scan references/ for SQL/MySQL config
+    // -----------------------------------------------------------------------
+    case 'detect_db_mode_from_references':
+        handleDetectDbModeFromReferences($input);
+        break;
+
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => "Unknown action: {$action}"]);
@@ -456,6 +477,297 @@ function handleDeleteRef(array $input): void
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => 'Failed to delete file']);
     }
+}
+
+/* -------------------------------------------------------------------------- */
+/* New Handlers for Install Flow Improvements                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Remove public/ folders and files for pages that are NOT checked in the
+ * wizard's Tahap 3B (Struktur Halaman). This ensures only active pages
+ * remain in the public/ directory.
+ */
+function handleCleanupUncheckedPages(array $input): void
+{
+    $pageStructure = $input['pageStructure'] ?? [];
+
+    // Normalize to booleans
+    $pages = [
+        'landing'    => !empty($pageStructure['landing']),
+        'login'      => !empty($pageStructure['login']),
+        'register'   => !empty($pageStructure['register']),
+        'manajemen'  => !empty($pageStructure['manajemen']),
+        'admin'      => !empty($pageStructure['admin']),
+        'client'     => !empty($pageStructure['client']),
+    ];
+
+    // Map page keys to their public/ subfolder names
+    // IMPORTANT: Use dynamic folder names from references/ structure, not hardcoded names.
+    // The folder name in public/ MUST match the folder name used in references/.
+    // For now, we use the page key as the folder name (backward compatible).
+    // In a future enhancement, this will be read from references/ directory structure.
+    $pageFolderMap = [
+        'landing'    => 'index',       // public/index.php (no subfolder)
+        'login'      => 'login',
+        'register'   => 'register',
+        'manajemen'  => 'manajemen',
+        'admin'      => 'admin',
+        'client'     => 'client',
+    ];
+
+    // Also map to related files that should be removed when a page is unchecked
+    $pageRelatedFiles = [
+        'manajemen'  => ['public/manajemen/index.php'],
+        'admin'      => ['public/admin/index.php'],
+        'client'     => ['public/client/index.php'],
+        'register'   => ['public/register/index.php'],
+        'login'      => ['public/login/index.php'],
+    ];
+
+    $removed = [];
+    $errors = [];
+
+    foreach ($pages as $pageKey => $isActive) {
+        if ($isActive) {
+            continue; // Skip active pages
+        }
+
+        // Remove subfolder for this page (if not landing — landing is public/index.php)
+        if ($pageKey !== 'landing' && isset($pageFolderMap[$pageKey])) {
+            $folderPath = ROOT_PATH . '/public/' . $pageFolderMap[$pageKey];
+            if (is_dir($folderPath)) {
+                $files = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($folderPath, RecursiveDirectoryIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::CHILD_FIRST
+                );
+                foreach ($files as $file) {
+                    if ($file->isDir()) {
+                        @rmdir($file->getRealPath());
+                    } else {
+                        @unlink($file->getRealPath());
+                    }
+                }
+                @rmdir($folderPath);
+                $removed[] = $folderPath;
+            }
+        }
+
+        // Remove related files
+        if (isset($pageRelatedFiles[$pageKey])) {
+            foreach ($pageRelatedFiles[$pageKey] as $relFile) {
+                $fullPath = ROOT_PATH . '/' . $relFile;
+                if (file_exists($fullPath)) {
+                    if (@unlink($fullPath)) {
+                        $removed[] = $fullPath;
+                    } else {
+                        $errors[] = "Failed to delete: {$relFile}";
+                    }
+                }
+            }
+        }
+    }
+
+    // If landing is unchecked but login is checked, ensure public/index.php
+    // contains a redirect to /login/ (per install.md rules)
+    if (!$pages['landing'] && $pages['login']) {
+        $indexPath = ROOT_PATH . '/public/index.php';
+        $redirectContent = '<?php' . "\n" .
+            '/**' . "\n" .
+            ' * Landing Page disabled — redirect to Login' . "\n" .
+            ' */' . "\n" .
+            'defined(\'APP_ENTRY\') or define(\'APP_ENTRY\', true);' . "\n" .
+            'header(\'Location: /login/\');' . "\n" .
+            'exit;' . "\n";
+
+        if (file_exists($indexPath)) {
+            $tmpFile = $indexPath . '.tmp';
+            if (@file_put_contents($tmpFile, $redirectContent) !== false) {
+                @rename($tmpFile, $indexPath);
+                $removed[] = $indexPath . ' (replaced with redirect)';
+            } else {
+                $errors[] = 'Failed to update public/index.php with redirect';
+            }
+        }
+    }
+
+    // If landing IS checked and login is also checked, ensure public/index.php
+    // is the landing page (not a redirect). This is handled by the build process.
+
+    echo json_encode([
+        'success' => true,
+        'removed' => $removed,
+        'errors' => $errors,
+        'message' => 'Cleanup complete: unchecked page folders and files removed.',
+    ]);
+}
+
+/**
+ * Remove the install wizard page itself (public/install/) after vibe coding
+ * has started. This is called once the AI build process begins.
+ */
+function handleRemoveInstallPage(array $input): void
+{
+    $installDir = ROOT_PATH . '/public/install';
+
+    if (!is_dir($installDir)) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Install directory already removed.',
+            'removed' => [],
+        ]);
+        return;
+    }
+
+    $removed = [];
+    $errors = [];
+
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($installDir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+
+    foreach ($files as $file) {
+        if ($file->isDir()) {
+            if (@rmdir($file->getRealPath())) {
+                $removed[] = $file->getRealPath();
+            } else {
+                $errors[] = 'Failed to remove directory: ' . $file->getRealPath();
+            }
+        } else {
+            if (@unlink($file->getRealPath())) {
+                $removed[] = $file->getRealPath();
+            } else {
+                $errors[] = 'Failed to remove file: ' . $file->getRealPath();
+            }
+        }
+    }
+
+    // Remove the install directory itself
+    if (@rmdir($installDir)) {
+        $removed[] = $installDir;
+    } else {
+        $errors[] = 'Failed to remove install directory: ' . $installDir;
+    }
+
+    echo json_encode([
+        'success' => true,
+        'removed' => $removed,
+        'errors' => $errors,
+        'message' => 'Install wizard page removed.',
+    ]);
+}
+
+/**
+ * Scan references/ folder for SQL/MySQL configuration files and detect
+ * whether the project should use DB_MODE=mysql or DB_MODE=json.
+ *
+ * Detection rules:
+ * 1. If any .sql file exists in references/ → DB_MODE=mysql
+ * 2. If any PHP file contains SQL queries (CREATE TABLE, INSERT INTO, SELECT, etc.)
+ *    in a database context → DB_MODE=mysql
+ * 3. If any PHP file contains MySQL connection config (mysqli_connect, PDO mysql,
+ *    mysql_connect, DB_HOST, DB_NAME) → DB_MODE=mysql
+ * 4. Otherwise → DB_MODE=json
+ */
+function handleDetectDbModeFromReferences(array $input): void
+{
+    $refDir = ROOT_PATH . '/references';
+    $dbMode = 'json'; // Default
+    $evidence = [];
+
+    if (!is_dir($refDir)) {
+        echo json_encode([
+            'success' => true,
+            'dbMode' => $dbMode,
+            'evidence' => ['No references/ folder found — defaulting to JSON mode.'],
+        ]);
+        return;
+    }
+
+    // Scan for .sql files
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($refDir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST
+    );
+
+    $sqlFiles = [];
+    $phpFiles = [];
+
+    foreach ($iterator as $item) {
+        if ($item->isFile()) {
+            $relativePath = str_replace(ROOT_PATH . '/', '', str_replace('\\', '/', $item->getPathname()));
+            $ext = strtolower(pathinfo($item->getFilename(), PATHINFO_EXTENSION));
+
+            if ($ext === 'sql') {
+                $sqlFiles[] = $relativePath;
+            } elseif ($ext === 'php' || $ext === 'inc' || $ext === 'phtml') {
+                $phpFiles[] = [
+                    'path' => $relativePath,
+                    'fullPath' => $item->getPathname(),
+                ];
+            }
+        }
+    }
+
+    // Rule 1: SQL files found
+    if (!empty($sqlFiles)) {
+        $dbMode = 'mysql';
+        $evidence[] = 'SQL files found in references/: ' . implode(', ', $sqlFiles);
+    }
+
+    // Rule 2 & 3: Scan PHP files for SQL/MySQL patterns
+    $mysqlPatterns = [
+        '/CREATE\s+TABLE/i',
+        '/INSERT\s+INTO/i',
+        '/SELECT\s+.*\s+FROM/i',
+        '/UPDATE\s+.*\s+SET/i',
+        '/DELETE\s+FROM/i',
+        '/ALTER\s+TABLE/i',
+        '/DROP\s+TABLE/i',
+        '/mysqli_connect/i',
+        '/new\s+PDO\s*\(.*mysql/i',
+        '/mysql_connect/i',
+        '/mysql_query/i',
+        '/DB_HOST/i',
+        '/DB_NAME/i',
+        '/database.*mysql/i',
+        '/pdo.*mysql/i',
+        '/mysql/i',
+    ];
+
+    foreach ($phpFiles as $phpFile) {
+        $content = @file_get_contents($phpFile['fullPath']);
+        if ($content === false) {
+            continue;
+        }
+
+        foreach ($mysqlPatterns as $pattern) {
+            if (preg_match($pattern, $content)) {
+                if (!in_array('SQL/MySQL patterns found in: ' . $phpFile['path'], $evidence)) {
+                    $evidence[] = 'SQL/MySQL patterns found in: ' . $phpFile['path'];
+                }
+                if ($dbMode !== 'mysql') {
+                    $dbMode = 'mysql';
+                }
+                break; // One match is enough for this file
+            }
+        }
+    }
+
+    // Also check for JSON database files (data/*.json) as evidence of JSON mode
+    // If references/ has no SQL and no MySQL patterns, keep DB_MODE=json
+    if ($dbMode === 'json') {
+        $evidence[] = 'No SQL files or MySQL patterns found in references/ — using JSON mode.';
+    }
+
+    echo json_encode([
+        'success' => true,
+        'dbMode' => $dbMode,
+        'evidence' => $evidence,
+        'sqlFiles' => $sqlFiles,
+        'phpFilesScanned' => count($phpFiles),
+    ]);
 }
 
 function handleGenerateInstallMd(array $input): void

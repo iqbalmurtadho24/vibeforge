@@ -20,9 +20,9 @@ Jika kedua kondisi di atas tidak berlaku, HENTIKAN audit addendum ini. Cukup gun
 - Nama aplikasi: `[Isi dari APP_DISPLAY_NAME / docs/prd.md]`
 - Nama file governance doc: `CLAUDE.md` (13 Pilar Software Architecture)
 - Nama file konsep/bisnis tambahan: `docs/prd.md`, `docs/branding.md`, `docs/install.md`
-- Arsitektur database multi-mode berlaku? [Ya - Dual Mode Repo: JSON & MySQL via `core/Repo.php`]
-- Jika Ya, sebutkan nama tiap mode: Mode 1 = `json`, Mode 2 = `mysql`, Mode 3 = `auto`
-- Apakah Bagian A (kesesuaian governance 13 Pilar) berlaku? [Ya]
+- Arsitektur database multi-mode berlaku? [Ya - Auto-Switch / Auto-Detect Dual Mode Repo: JSON & MySQL via `core/Repo.php` berdasarkan analisis file/query SQL di `references/`]
+- Jika Ya, sebutkan nama tiap mode: Mode 1 = `json` (Force JSON jika references tanpa SQL), Mode 2 = `mysql` (Force MySQL jika references ada SQL), Mode 3 = `auto` (Auto-Switch)
+- Apakah Bagian A (kesesuaian governance 13 Pilar, Login Index, Folder Dinamis, & Cleanup) berlaku? [Ya]
 - Apakah Bagian B (paritas multi-mode & i18n GeoIP) berlaku? [Ya]
 - Apakah proyek memakai Median.co (WebView-to-APK wrapper)? [Ya/Tidak - Cek `docs/prd.md`]
 - Apakah proyek memakai OneSignal / FCM (push notification)? [Ya/Tidak - Cek `docs/prd.md`]
@@ -48,10 +48,14 @@ Jika kedua kondisi di atas tidak berlaku, HENTIKAN audit addendum ini. Cukup gun
 Sebelum membandingkan kode, baca seluruh isi `CLAUDE.md`, `docs/prd.md`, `docs/branding.md`, dan `docs/install.md`. Buat daftar Aturan Eksplisit yang mencakup:
 
 1. Pemetaan 13 Pilar Software dalam 6 Lapisan (Inti, Keamanan, Tempat & Tenaga, Alur Kerja Aman, Performa & Skala, Keandalan).
-2. Definisi Role & Shell Mapping (`manajemen` -> `/manajemen/`, `admin` -> `/admin/`, `client` -> `/client/`).
-3. Aturan arsitektur SPA Shell, Router Proxy Pattern (`public/core/router.php`), dan Dual-Pattern Entry Guard (Pola 1 Entry `define()` vs Pola 2 Module strict check).
-4. Ketentuan dual-mode Repo (`core/Repo.php`), i18n GeoIP + fallback + DB preference, dan variabel CSS branding.
-5. Pembedaan `cache/debug.log` (dev debug) vs `data/audit_trail.json` (append-only audit log).
+2. Definisi Role & Shell Mapping Dinamis — nama folder di `public/` WAJIB mengikuti nama folder di `references/` (misal `pendaftar`, `peserta`), bukan memaksa `client`/`admin`/`manajemen`.
+3. Aturan Login di Index — jika hanya Login + 1 halaman aktif (tanpa Landing Page), login TETAP di `public/index.php` tanpa redirect ke `/login/`.
+4. Aturan Cleanup Tahap 3B — file dan folder `public/` untuk halaman yang tidak dicentang WAJIB dihapus bersih.
+5. Aturan Auto-Delete Install Page — folder `public/install/` WAJIB dihapus saat proses vibe coding/build AI berjalan.
+6. Aturan Auto-Detect DB Mode dari `references/` — jika terdapat file/query SQL di `references/`, WAJIB `DB_MODE=mysql` dan hapus seluruh konsep JSON. Jika tidak ada SQL, gunakan `DB_MODE=json`.
+7. Aturan Auto-Generate PRD & Branding — saat generate otomatis, WAJIB menganalisis struktur lengkap aplikasi dari alur login hingga halaman-halaman tujuan.
+8. Aturan arsitektur SPA Shell, Router Proxy Pattern (`public/core/router.php`), dan Dual-Pattern Entry Guard.
+9. Pembedaan `cache/debug.log` (dev debug) vs `data/audit_trail.json` (append-only audit log).
 
 ### Langkah 2: Verifikasi Kesesuaian Kode
 
@@ -95,16 +99,12 @@ Untuk setiap ketidaksesuaian, dokumentasikan:
 - [ ] Apakah error handling konsisten (tidak membocorkan informasi sensitif)?
 - [ ] Apakah transaksi atomic dijamin di kedua mode (file lock `.lock` + temporary write & `rename()` untuk JSON, PDO transaction untuk SQL)?
 
-### B.4 Paritas Deteksi Bahasa GeoIP & Smart Fallback i18n
+### B.5 Auto-Detect DB Mode & Auto-Cleanup Security Guard
 
-- [ ] Apakah `detectLanguage()` mengevaluasi 4 tingkatan prioritas:
-  1. Parameter URL (`?lang=xx`) → update session & simpan `language_preference` ke DB.
-  2. Active Session (`$_SESSION['language']`).
-  3. Database preference dari user logged-in.
-  4. IP Country Code GeoIP Mapping.
-- [ ] Apakah pengunjung dari 22 negara Liga Arab terdeteksi otomatis dan diarahkan ke Bahasa Arab (`'ar'`)?
-- [ ] Apakah IP negara terdaftar di manifest terarah ke kode bahasa yang sesuai (`id`, `ja`, `en`, `ar`)?
-- [ ] Apakah IP negara tidak terdaftar secara cerdas fallback ke Bahasa Arab (`'ar'`) jika dari negara Arab, atau ke Bahasa Inggris (`'en'`) untuk negara lainnya?
+- [ ] Apakah `DB_MODE` otomatis diset ke `mysql` ketika `references/` mengandung file `.sql` atau query MySQL di file `.php`?
+- [ ] Apakah seluruh entitas JSON (`data/*.json`) dihapus/diabaikan saat `DB_MODE=mysql` aktif, dan login langsung menggunakan database MySQL?
+- [ ] Apakah folder `public/install/` benar-benar terhapus setelah proses vibe coding berjalan agar wizard tidak lagi dapat diakses?
+- [ ] Apakah folder/file `public/` untuk halaman yang tidak dicentang di Tahap 3B benar-benar terhapus bersih tanpa menyisakan route bocor?
 
 ---
 
