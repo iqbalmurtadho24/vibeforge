@@ -38,7 +38,6 @@ if (-not (Test-IsAdmin)) {
     if (-not $scriptPath) { $scriptPath = $MyInvocation.MyCommand.Definition }
 
     # Resolve to absolute path so the elevated process can find the file
-<<<<<<< HEAD
     $resolvedPath = $null
     if ($scriptPath) {
         $resolvedPath = (Resolve-Path -Path $scriptPath -ErrorAction SilentlyContinue).Path
@@ -47,20 +46,15 @@ if (-not (Test-IsAdmin)) {
     if ($resolvedPath -and (Test-Path -Path $resolvedPath -ErrorAction SilentlyContinue)) {
         Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -File `"$resolvedPath`"" -Verb RunAs
     } else {
-        # Fallback: download and run remotely in the elevated window
-        Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -Command ""irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex""" -Verb RunAs
-=======
-    if ($scriptPath) {
-        $scriptPath = (Resolve-Path -Path $scriptPath -ErrorAction SilentlyContinue).Path
-    }
-
-    if ($scriptPath -and (Test-Path -Path $scriptPath -ErrorAction SilentlyContinue)) {
-        Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -File `"$scriptPath`" -Elevated" -Verb RunAs
-    } else {
-        # Fallback: download and run remotely in the elevated window
-        $remoteCmd = "Start-Process powershell.exe -ArgumentList '-NoExit -ExecutionPolicy Bypass -NoProfile -Command ""irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex""' -Verb RunAs"
-        Invoke-Expression $remoteCmd
->>>>>>> d29072fbcef103dfbb262621351b267bbaabede6
+        # Fallback: download script to temp file, then run it elevated
+        $tempScript = Join-Path $env:TEMP "setup-project.ps1"
+        try {
+            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1" -OutFile $tempScript -UseBasicParsing -ErrorAction Stop
+            Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -File `"$tempScript`"" -Verb RunAs
+        } catch {
+            Write-Warning "Gagal mengunduh script. Jalankan manual sebagai Administrator."
+            Write-Warning "Download dari: https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1"
+        }
     }
     exit 0
 }
