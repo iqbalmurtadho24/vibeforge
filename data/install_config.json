@@ -4,15 +4,15 @@
     "installPath": "D:/laragon/www/vibeforge",
     "projectName": "vibeforge",
     "pageStructure": {
-        "landing": true,
+        "landing": false,
         "login": true,
-        "register": true,
-        "manajemen": true,
-        "admin": true,
+        "register": false,
+        "manajemen": false,
+        "admin": false,
         "client": true
     },
-    "brandingMode": "manual",
+    "brandingMode": "auto",
     "prdMode": "manual",
     "referencesCount": 6,
-    "updated_at": "2026-08-01 15:49:38"
+    "updated_at": "2026-08-02 14:04:06"
 }

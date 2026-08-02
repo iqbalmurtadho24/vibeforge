@@ -41,7 +41,14 @@ Dokumen ini adalah rujukan wajib untuk setiap sesi Claude Code CLI di project Vi
 ## 2. LAPISAN 1 — Inti Aplikasi
 
 ### 2a. Pilar 1 — Frontend (SPA Shell, Golden References & Algoritma Deteksi i18n)
-- **SPA Shell Architecture**: Clean-URL folders (`login/`, `register/`, `manajemen/`, `admin/`, `client/`) berisi shell tipis (`index.php`) yang dimuat Apache tanpa `mod_rewrite`.
+- **SPA Shell Architecture**: Clean-URL folders (`login/`, `register/`, `manajemen`, `admin`, `client`) berisi shell tipis (`index.php`) yang dimuat Apache tanpa `mod_rewrite`.
+  - `public/index.php` berfungsi sebagai landing page atau redirect ke `/login/` tergantung konfigurasi Tahap 3B wizard.
+  - Jika Landing Page tidak dicentang di wizard, `public/index.php` WAJIB berisi redirect PHP (`header('Location: /login/'); exit;`).
+  - Jika Landing Page dicentang:
+    - Jika Login & Register dicentang → Landing Page **WAJIB** menampilkan tombol "Masuk" (Login) dan "Daftar" (Register).
+    - Jika hanya Login yang dicentang → Landing Page menampilkan tombol "Masuk" saja (tanpa "Daftar").
+    - Jika Login TIDAK dicentang (hanya Landing Page) → Landing Page **TIDAK PERLU** menampilkan tombol Masuk/Daftar (halaman landing page publik tanpa auth).
+  - **Aturan Landing ↔ Login (Mutlak)**: Minimal salah satu dari Landing Page atau Login harus aktif. Jika Login aktif, minimal satu role dari {manajemen, admin, client} WAJIB ada.
 - **AJAX Navigation**: Perpindahan tab/state dalam 1 shell TIDAK BENTUK full-page reload. Gunakan AJAX ke `core/router.php`. Reload penuh hanya terjadi saat berpindah ANTAR shell.
 - **Golden References (`references/*.html`)**: Setiap shell `public/xxx/index.php` HARUS mengikuti struktur HTML, styling CSS, dan komponen visual SAMA PERSIS dengan template di `references/*.html`:
   - `public/index.php` → `references/landingpage.html` (atau `references/index.html`/`index.php` yang di-convert ke SPA Shell)
@@ -58,9 +65,9 @@ Dokumen ini adalah rujukan wajib untuk setiap sesi Claude Code CLI di project Vi
      - Cek keberadaan file di `references/`. Jika kosong, AI WAJIB men-generate file HTML referensi terlebih dahulu di `references/` berdasarkan konsep di `docs/prd.md` & `docs/branding.md`.
      - Jika `references/` berisi file/folder, AI WAJIB mengganti seluruh branding dan UI bawaan Vibeforge di `public/` (`public/index.php`, `public/login/`, dll) serta memperbarui file root (`.env`, `.env.example`, `README.md`, `LICENSE`, `CHANGELOG.md`) dengan nama aplikasi, tagline, dan konfigurasi baru.
   6. **Deteksi Otomatis Skema Database (SQL vs JSON)**:
-     - AI WAJIB menelusuri seluruh file di `references/` untuk mencari ketersediaan file skema database SQL (`.sql` atau ddl di file `.php`).
-     - **Jika Ditemukan SQL**: AI WAJIB menyusun migrasi di `migrations/`, mengkonfigurasi `.env` dengan `DB_MODE=mysql` (atau `auto` yang mendeteksi tabel SQL), dan memastikan aplikasi menggunakan SQL secara nyata via `Repo::table()`.
-     - **Jika Tidak Ditemukan SQL**: AI WAJIB mengkonfigurasi `DB_MODE=json` (atau fallback JSON) dan membuat file data JSON di `data/*.json` dengan kepastian seluruh fitur CRUD berjalan nyata dan aman (Atomic Write + Lock).
+     - AI WAJIB menelusuri SELURUH file di `references/` untuk mencari ketersediaan file/query/skema database SQL (`.sql` atau DDL/query SQL di file `.php`).
+     - **Jika Ditemukan SQL/Query Database di `references/`**: DILARANG KERAS menggunakan skema/konsep JSON database (`data/*.json`). AI WAJIB menghapus seluruh konsep JSON, menyusun migrasi SQL di `migrations/`, mengkonfigurasi `.env` dengan `DB_MODE=mysql` (atau `auto`), dan langsung menampilkan/memproses data dari MySQL via `Repo::table()` sesuai query yang tertulis di `references/`. Seluruh fitur CRUD berjalan secara nyata terhadap database MySQL.
+     - **Jika Tidak Ditemukan SQL/Query Database Sama Sekali di `references/`**: AI WAJIB mengkonfigurasi `DB_MODE=json`, menghapus seluruh konsep/koneksi SQL/MySQL, dan membuat file database JSON selengkap-lengkapnya di `data/*.json` yang mendukung seluruh fitur CRUD secara nyata dengan file locking & atomic write (`.lock` + `.tmp` → `rename()`).
   7. **Auto-Generate PRD & Branding (Wizard Auto-Mode)**:
      - Jika `prdMode = "auto"` dan/atau `brandingMode = "auto"` di `data/install_config.json` (dari Wizard `/install/`), AI WAJIB menganalisis seluruh aset di `references/` (HTML, PHP, media, alur aplikasi, skema SQL) untuk memunculkan `docs/prd.md` dan `docs/branding.md` secara otomatis.
      - Penulisan `docs/prd.md` WAJIB mempertahankan format standar 7 bagian (Problem Statement, Goals, Target User, User Stories, FR, NFR, Scope) dan `docs/branding.md` (6 bagian: Nama/Tagline, Value Prop, Target/Tone, Palet Warna, Typography, Logo) sesuai template wizard.
@@ -91,8 +98,9 @@ Dokumen ini adalah rujukan wajib untuk setiap sesi Claude Code CLI di project Vi
 - **Data Access Layer Terpusat (`core/Repo.php`)**: Semua modul WAJIB mengakses data via `Repo::table('entitas')`. Dilarang query PDO atau baca/tulis JSON secara langsung di controller/module.
 - **Mode Auto-Switch (`DB_MODE`)**:
   - `auto` (Default): Deteksi otomatis PER ENTITAS. Coba PDO ke MySQL; jika tabel ada → Pakai **SQL**, jika tabel tidak ada / connection error → Fallback ke **JSON** (`data/{entitas}.json`).
-  - `json` (Force): Semua entitas paksa pakai JSON.
-  - `mysql` (Force): Semua entitas WAJIB SQL. Halt + log error jika koneksi/tabel tidak ada.
+  - `json` (Force): Semua entitas paksa pakai JSON (gunakan saat TIDAK ada SQL/query database di `references/`).
+  - `mysql` (Force): Semua entitas WAJIB SQL (gunakan saat ADA SQL/query database di `references/`). Halt + log error jika koneksi/tabel tidak ada.
+- **Aturan Mutlak SQL vs JSON**: Jika `references/` berisi file/query SQL/database, AI WAJIB menghapus seluruh konsep JSON dan menggunakan `DB_MODE=mysql`/`auto` dengan migrasi SQL di `migrations/`. Jika `references/` tidak berisi SQL sama sekali, AI WAJIB membuat database JSON selengkap mungkin di `data/*.json` dengan file locking & atomic write.
 - **User Preference Schema**: Kolom `theme_preference` dan `language_preference` tersimpan di `data/users.json` / tabel `users` MySQL.
 - **JSON Write Safety**: Mutex via file lock `{entitas}.json.lock` + Atomic Write (`.tmp` → `rename()`).
 

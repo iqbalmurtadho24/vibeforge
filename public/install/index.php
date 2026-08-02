@@ -310,6 +310,8 @@ require_once __DIR__ . '/header.php';
 
         // Block steps beyond 2 if references YA but folder empty
         var refsBlocked = hasReferences === true && refFiles.length === 0;
+        // Block step 4 if Tahap 3B page structure invalid
+        var structureInvalid = !isPageStructureValid();
 
         var dots = document.querySelectorAll('.step-dot');
         var connectors = document.querySelectorAll('.step-connector');
@@ -322,11 +324,18 @@ require_once __DIR__ . '/header.php';
             if (refsBlocked && i + 1 > 2) {
                 dot.classList.add('opacity-40', 'pointer-events-none');
             }
+            // Disable step 4 dot if page structure invalid
+            if (structureInvalid && i + 1 > 3) {
+                dot.classList.add('opacity-40', 'pointer-events-none');
+            }
         });
         connectors.forEach(function(c, i) {
             c.className = 'step-connector';
             if (i + 1 < currentStep) c.classList.add('completed');
             if (refsBlocked && i + 1 >= 2) {
+                c.classList.add('opacity-40');
+            }
+            if (structureInvalid && i + 1 >= 3) {
                 c.classList.add('opacity-40');
             }
         });
@@ -350,13 +359,6 @@ require_once __DIR__ . '/header.php';
 
         executeBtn.classList.toggle('hidden', !isLast);
 
-        // Disable next if refs blocked on step 2
-        if (currentStep === 2 && refsBlocked) {
-            nextBtn.classList.add('opacity-40', 'pointer-events-none');
-        } else {
-            nextBtn.classList.remove('opacity-40', 'pointer-events-none');
-        }
-
         // Step 1: centered CTA, steps 2-3: between layout, step 4: centered
         if (navContainer) {
             navContainer.style.justifyContent = (isFirst || isLast) ? 'center' : 'space-between';
@@ -373,6 +375,16 @@ require_once __DIR__ . '/header.php';
         } else {
             nextBtn.innerHTML = 'SELANJUTNYA <i class="ph ph-arrow-right text-sm"></i>';
             nextBtn.className = 'px-6 py-3 bg-gradient-brand text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all shadow-md glow-orange-sm flex items-center gap-2';
+        }
+
+        // Disable next button: refs blocked on step 2, or page structure invalid on step 3
+        // (applied AFTER className reset above so the disable classes are not wiped)
+        if ((currentStep === 2 && refsBlocked) || (currentStep === 3 && structureInvalid)) {
+            nextBtn.classList.add('opacity-40', 'pointer-events-none');
+            nextBtn.setAttribute('disabled', 'disabled');
+        } else {
+            nextBtn.classList.remove('opacity-40', 'pointer-events-none');
+            nextBtn.removeAttribute('disabled');
         }
 
         // Save status indicator
@@ -400,6 +412,7 @@ require_once __DIR__ . '/header.php';
                 break;
             case 'branding':
                 content.innerHTML = renderBrandingStep();
+                updateStructureWarning();
                 // Only init Monaco when manual mode with branding template (not form fields)
                 // Form fields are used for manual branding now, so no Monaco needed
                 break;
@@ -416,6 +429,11 @@ require_once __DIR__ . '/header.php';
         // Block if references step: YA selected but no files uploaded
         if (currentStep === 2 && hasReferences === true && refFiles.length === 0) {
             showToast('Referensi Kosong!', 'Upload minimal 1 file referensi, atau pilih TIDAK.', true);
+            return;
+        }
+        // Block if Tahap 3B page structure invalid
+        if (currentStep === 3 && !isPageStructureValid()) {
+            showToast('Struktur Halaman Invalid!', getPageStructureError(), true);
             return;
         }
         if (currentStep < totalSteps) {
@@ -440,6 +458,11 @@ require_once __DIR__ . '/header.php';
             // Block if references step incomplete
             if (hasReferences === true && refFiles.length === 0 && stepId > 2) {
                 showToast('Referensi Kosong!', 'Upload minimal 1 file referensi sebelum lanjut.', true);
+                return;
+            }
+            // Block jumping past step 3 if page structure invalid
+            if (stepId > 3 && !isPageStructureValid()) {
+                showToast('Struktur Halaman Invalid!', getPageStructureError(), true);
                 return;
             }
             saveCurrentStep();
@@ -1047,22 +1070,22 @@ require_once __DIR__ . '/header.php';
                 '<h3 class="font-heading font-bold text-sm text-[var(--text-primary)]">Struktur Halaman</h3>' +
                 '<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">TAHAP 3B</span>' +
             '</div>' +
-            '<p class="text-xs text-[var(--text-secondary)] mb-4">Centang halaman yang mau dibuat. Yang tidak dicentang tidak akan dibuat sama sekali, walau PRD menyebutnya.</p>' +
+            '<p class="text-xs text-[var(--text-secondary)] mb-4">Centang halaman yang mau dibuat. Minimal salah satu dari <strong>Landing Page</strong> atau <strong>Login</strong> harus aktif.</p>' +
             '<div class="space-y-3">' +
                 // Landing Page
                 '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors cursor-pointer">' +
                     '<input type="checkbox" id="pageLanding" ' + (pageStructure.landing ? 'checked' : '') + ' onchange="updatePageStructure(\'landing\', this.checked)" class="w-4 h-4 rounded border-[var(--border-default)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">' +
                     '<div class="flex-1 min-w-0">' +
                         '<div class="flex items-center gap-2"><i class="ph ph-browser text-base text-[var(--brand-primary)]"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Landing Page</span></div>' +
-                        '<span class="text-[10px] text-[var(--text-muted)]">Tidak dicentang = domain lokal langsung mengarah ke halaman Login.</span>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Tidak dicentang = domain lokal langsung mengarah (redirect) ke halaman Login. Jika dicentang tanpa Login, role halaman tidak wajib.</span>' +
                     '</div>' +
                 '</label>' +
-                // Login (wajib)
-                '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-emerald-500/30 cursor-not-allowed opacity-80">' +
-                    '<input type="checkbox" checked disabled class="w-4 h-4 rounded border-emerald-500 text-emerald-500">' +
+                // Login
+                '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors cursor-pointer">' +
+                    '<input type="checkbox" id="pageLogin" ' + (pageStructure.login ? 'checked' : '') + ' onchange="updatePageStructure(\'login\', this.checked)" class="w-4 h-4 rounded border-[var(--border-default)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">' +
                     '<div class="flex-1 min-w-0">' +
-                        '<div class="flex items-center gap-2"><i class="ph ph-sign-in text-base text-emerald-400"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Login</span><span class="font-mono text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">WAJIB</span></div>' +
-                        '<span class="text-[10px] text-[var(--text-muted)]">Halaman login selalu ada.</span>' +
+                        '<div class="flex items-center gap-2"><i class="ph ph-sign-in text-base text-[var(--brand-primary)]"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Login</span></div>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Jika dicentang, wajib memilih minimal 1 role (Manajemen, Admin, atau Client).</span>' +
                     '</div>' +
                 '</label>' +
                 // Register
@@ -1070,15 +1093,15 @@ require_once __DIR__ . '/header.php';
                     '<input type="checkbox" id="pageRegister" ' + (pageStructure.register ? 'checked' : '') + ' onchange="updatePageStructure(\'register\', this.checked)" class="w-4 h-4 rounded border-[var(--border-default)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">' +
                     '<div class="flex-1 min-w-0">' +
                         '<div class="flex items-center gap-2"><i class="ph ph-user-plus text-base text-[var(--brand-primary)]"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Register</span></div>' +
-                        '<span class="text-[10px] text-[var(--text-muted)]">Tidak dicentang = akun baru hanya dibuat lewat Super Admin.</span>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Jika Login & Register dicentang, tombol Masuk & Daftar akan ditampilkan pada Landing Page.</span>' +
                     '</div>' +
                 '</label>' +
-                // Manajemen (wajib)
-                '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-emerald-500/30 cursor-not-allowed opacity-80">' +
-                    '<input type="checkbox" checked disabled class="w-4 h-4 rounded border-emerald-500 text-emerald-500">' +
+                // Manajemen
+                '<label class="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-default)] hover:border-[var(--brand-primary)] transition-colors cursor-pointer">' +
+                    '<input type="checkbox" id="pageManajemen" ' + (pageStructure.manajemen ? 'checked' : '') + ' onchange="updatePageStructure(\'manajemen\', this.checked)" class="w-4 h-4 rounded border-[var(--border-default)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">' +
                     '<div class="flex-1 min-w-0">' +
-                        '<div class="flex items-center gap-2"><i class="ph ph-crown text-base text-emerald-400"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Halaman Manajemen / Super Admin</span><span class="font-mono text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">WAJIB</span></div>' +
-                        '<span class="text-[10px] text-[var(--text-muted)]">Dashboard Super Admin selalu ada.</span>' +
+                        '<div class="flex items-center gap-2"><i class="ph ph-crown text-base text-[var(--brand-primary)]"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Halaman Manajemen / Super Admin</span></div>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Dashboard Super Admin / Pengelola Utama.</span>' +
                     '</div>' +
                 '</label>' +
                 // Admin
@@ -1086,7 +1109,7 @@ require_once __DIR__ . '/header.php';
                     '<input type="checkbox" id="pageAdmin" ' + (pageStructure.admin ? 'checked' : '') + ' onchange="updatePageStructure(\'admin\', this.checked)" class="w-4 h-4 rounded border-[var(--border-default)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">' +
                     '<div class="flex-1 min-w-0">' +
                         '<div class="flex items-center gap-2"><i class="ph ph-rocket-launch text-base text-[var(--brand-primary)]"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Halaman Admin (Biasa)</span></div>' +
-                        '<span class="text-[10px] text-[var(--text-muted)]">Tidak dicentang = hanya ada Super Admin, tidak ada level "admin biasa" terpisah.</span>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Dashboard Admin Biasa / Creator.</span>' +
                     '</div>' +
                 '</label>' +
                 // Client
@@ -1094,10 +1117,11 @@ require_once __DIR__ . '/header.php';
                     '<input type="checkbox" id="pageClient" ' + (pageStructure.client ? 'checked' : '') + ' onchange="updatePageStructure(\'client\', this.checked)" class="w-4 h-4 rounded border-[var(--border-default)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]">' +
                     '<div class="flex-1 min-w-0">' +
                         '<div class="flex items-center gap-2"><i class="ph ph-headphones text-base text-[var(--brand-primary)]"></i><span class="font-mono text-xs font-bold text-[var(--text-primary)]">Halaman Client</span></div>' +
-                        '<span class="text-[10px] text-[var(--text-muted)]">Tidak dicentang = tidak ada halaman client terpisah.</span>' +
+                        '<span class="text-[10px] text-[var(--text-muted)]">Portal Client / Consumer.</span>' +
                     '</div>' +
                 '</label>' +
             '</div>' +
+            '<div id="structureWarning" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-mono flex items-start gap-2"></div>' +
         '</div>';
 
         return '<div class="space-y-8">' +
@@ -1131,6 +1155,36 @@ require_once __DIR__ . '/header.php';
 
     function updatePageStructure(key, checked) {
         pageStructure[key] = checked;
+        updateStructureWarning();
+        updateStepUI();
+    }
+
+    function isPageStructureValid() {
+        if (!pageStructure.landing && !pageStructure.login) return false;
+        if (pageStructure.login && !pageStructure.manajemen && !pageStructure.admin && !pageStructure.client) return false;
+        return true;
+    }
+
+    function getPageStructureError() {
+        if (!pageStructure.landing && !pageStructure.login) {
+            return 'Minimal salah satu dari Landing Page atau Login harus dicentang.';
+        }
+        if (pageStructure.login && !pageStructure.manajemen && !pageStructure.admin && !pageStructure.client) {
+            return 'Karena Halaman Login dicentang, minimal satu role (Manajemen, Admin, atau Client) harus dipilih.';
+        }
+        return '';
+    }
+
+    function updateStructureWarning() {
+        var el = document.getElementById('structureWarning');
+        if (!el) return;
+        var err = getPageStructureError();
+        if (err) {
+            el.innerHTML = '<i class="ph ph-warning-circle text-base shrink-0 mt-0.5"></i><span>' + err + ' Tombol lanjut dinonaktifkan sampai struktur halaman valid.</span>';
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
     }
 
     // Sync color picker with hex input

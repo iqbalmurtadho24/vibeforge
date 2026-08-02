@@ -1,1 +1,1 @@
-{"landing":true,"login":true,"register":true,"manajemen":true,"admin":true,"client":true}
+{"landing":false,"login":true,"register":false,"manajemen":false,"admin":false,"client":true}

@@ -48,7 +48,7 @@ Vibeforge memetakan 13 Pilar Software (6 Lapisan) secara tepat ke dalam struktur
 |---|---|---|
 | **1. Inti Aplikasi** | **1. Frontend** | SPA Shell (`public/*/index.php`), Golden HTML References (`references/*.html`), Dynamic Branding (`branding.css`), i18n GeoIP + Fallback + DB Preference, Responsive Nav & Scroll Spy |
 | | **2. API & Backend Logic** | Router Proxy (`public/core/router.php` → `core/router.php`), Controllers (`modules/*/*.php`), Helper (`include/helper.php`) |
-| | **3. Database & Storage** | Data Access Layer Terpusat (`core/Repo.php` Auto-Switch SQL/JSON), Mutex Lock (`.lock`) + Atomic Write, Storage `language_preference` per user, Uploads (`public/uploads/`) |
+| | **3. Database & Storage** | Data Access Layer Terpusat (`core/Repo.php` Auto-Switch SQL/JSON), Mutex Lock (`.lock`) + Atomic Write (temp+rename), Language Preference Storage (`language_preference` in `users.json`/MySQL), File Storage (`public/uploads/`). **Aturan Mutlak**: Jika `references/` berisi SQL → `DB_MODE=mysql`, hapus konsep JSON. Jika tidak ada SQL → `DB_MODE=json`, buat JSON DB selengkapnya. |
 | **2. Keamanan** | **4. Authentication & Session** | Password Hashing Argon2ID, Session Core (`core/session.php`), Remember-Me Selector+Validator (`core/remember.php`), Re-auth Middleware |
 | | **5. Role-Based Access (RBAC)** | Role-to-Shell Mapping (`manajemen`, `admin`, `client`), Guard `requireRole()`, Dual-Pattern Entry Guard (Pola 1 Entry vs Pola 2 Module) |
 | **3. Tempat & Tenaga** | **6. Hosting & Deployment** | Document Root Apache `public/`, Laragon/XAMPP Vhost, Manual FTP Drag-Drop Deploy, Header Security (`public/.htaccess`) |
@@ -58,20 +58,21 @@ Vibeforge memetakan 13 Pilar Software (6 Lapisan) secara tepat ke dalam struktur
 | | **10. Cache & CDN** | Asset CDN Rules (Tailwind, Phosphor Icons, Google Fonts), CSP Header, In-Memory Locale Cache (`t()`) |
 | | **11. Load Balancer & Scaling** | Auto-Switch Dual Mode (`json` → `mysql` per-entitas), Prepared Statements PDO, Stateless Server Session |
 | **6. Keandalan** | **12. Error Tracking & Logging** | Debug Log (`cache/debug.log` saat `APP_DEBUG=true`) vs Audit Trail (`data/audit_trail.json` append-only, permanen) |
-| | **13. Availability & Recovery** | Atomic JSON Writes (temp+rename), Production Guard (`DB_MODE=json` + Prod Block), Session Lifespan & Cookie Protection |
+| | **13. Availability & Recovery** | Atomic JSON Writes (temp+rename), Production Guard (`DB_MODE=json` + Prod Block), Session Lifespan & Cookie Protection. **Strict SQL Mode**: Jika `references/` berisi SQL, `DB_MODE=mysql` wajib dan JSON DB dilarang. |
 
 ---
 
 ## Fitur Utama
 
 ### SPA Shell Architecture
-- **Landing Page** (`public/index.php`) — Hero, fitur, demo, install guide
+- **Landing Page** (`public/index.php`) — Hero, fitur, demo, install guide. Jika Landing Page dicentang TANPA Login, halaman ini adalah landing page publik tanpa tombol Masuk/Daftar.
 - **Auth Shells** — `/login/`, `/register/`, `/logout/` (SPA via AJAX)
 - **Dashboard Shells** (role-based):
   - `/manajemen/` — Super Admin (overview, users, system, audit)
   - `/admin/` — Creator (upload karya, analitik, royalti)
   - `/client/` — Client (eksplorasi konten, player)
 - **Router Proxy Pattern** — Doc root `public/`, AJAX ke `public/core/router.php` → `core/router.php`
+- **Aturan Landing ↔ Login**: Minimal salah satu dari Landing Page atau Login harus aktif. Jika Login aktif, minimal satu role (Manajemen, Admin, Client) wajib ada. Jika hanya Landing Page yang aktif, role halaman tidak wajib dan tombol Auth disembunyikan.
 
 ### Internationalization (i18n) Tingkat Lanjut
 - **GeoIP & Smart Fallback**: Deteksi otomatis negara IP pengunjung (Negara Liga Arab → Bahasa Arab `ar`, Mapped Countries → `id`/`ja`/`en`). IP negara yang tidak terdaftar akan otomatis diarahkan ke Bahasa Arab (`ar`) jika berasal dari kawasan Arab, atau Bahasa Inggris (`en`) sebagai standar universal.
@@ -100,6 +101,12 @@ Baca dan jalankan docs/install.md
 
 ---
 
+### Aturan Database (SQL vs JSON)
+- **Jika `references/` berisi file/query SQL**: AI WAJIB menggunakan `DB_MODE=mysql`/`auto`, membuat migrasi di `migrations/`, dan menampilkan data langsung dari MySQL via `Repo::table()`. Konsep JSON database (`data/*.json`) **dilarang keras**.
+- **Jika `references/` TIDAK berisi SQL sama sekali**: AI WAJIB menggunakan `DB_MODE=json`, membuat file database JSON selengkap-lengkapnya di `data/*.json` dengan dukungan penuh CRUD, file locking, dan atomic write.
+
+---
+
 ## Struktur Project
 
 ```
@@ -113,13 +120,13 @@ vibeforge/
 ├── .gitignore
 │
 ├── public/                      # DOCUMENT ROOT APACHE
-│   ├── index.php                # Landing page
-│   ├── login/index.php
+│   ├── index.php                # Landing page (atau redirect ke /login/ jika Landing Page tidak dicentang)
+│   ├── login/index.php          # Login shell (wajib jika Landing Page tidak dicentang)
 │   ├── register/index.php
 │   ├── logout/index.php
-│   ├── manajemen/index.php      # Super Admin
-│   ├── admin/index.php          # Creator
-│   ├── client/index.php         # Client
+│   ├── manajemen/index.php      # Super Admin (wajib jika Login dicentang)
+│   ├── admin/index.php          # Creator (wajib jika Login dicentang)
+│   ├── client/index.php         # Client (wajib jika Login dicentang)
 │   ├── core/router.php          # Router proxy (WAJIB!)
 │   ├── install/                 # Setup Wizard
 │   ├── assets/css/branding.css  # CSS variables
@@ -131,13 +138,15 @@ vibeforge/
 ├── include/                     # config.php, helper.php (t(), escape(), detectLanguage())
 ├── modules/                     # Modul AJAX per role (auth/, install/, dll)
 ├── data/                        # JSON dummy (users.json dengan language_preference) & audit_trail.json
+│   └── *.json                   # Database JSON (DB_MODE=json, hanya jika TIDAK ada SQL di references/)
 ├── cache/                       # debug.log (APP_DEBUG only)
 ├── locales/                     # i18n manifest & translation files
 │   ├── languages.json           # Manifest bahasa
 │   ├── id.json / en.json / ar.json / ja.json
 ├── docs/                        # Dokumentasi spesifik aplikasi (prd.md, branding.md, install.md)
-├── references/                  # Template visual (golden reference references/*.html)
-└── migrations/                  # SQL (production only)
+├── references/                  # Template visual (golden reference references/*.html) & opsional skema SQL
+│   └── *.sql                    # Skema/query database SQL (jika ada → DB_MODE=mysql wajib, JSON DB dilarang)
+└── migrations/                  # SQL (production only, jika DB_MODE=mysql)
 ```
 
 ---

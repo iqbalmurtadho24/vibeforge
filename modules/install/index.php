@@ -478,28 +478,52 @@ function handleGenerateInstallMd(array $input): void
         'client'     => !empty($pageStructure['client']),
     ];
 
+    // Server-side validation rules
+    if (!$pages['landing'] && !$pages['login']) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Minimal salah satu dari Landing Page atau Login harus dicentang.']);
+        return;
+    }
+
+    $hasAnyRole = $pages['manajemen'] || $pages['admin'] || $pages['client'];
+    if ($pages['login'] && !$hasAnyRole) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Karena Halaman Login dicentang, minimal satu role (Manajemen, Admin, atau Client) harus dipilih.']);
+        return;
+    }
+
     // Build active pages list
     $activePages = array_keys(array_filter($pages));
     $activePagesStr = implode(', ', $activePages);
     $inactivePages = array_keys(array_filter($pages, function($v) { return !$v; }));
     $inactivePagesStr = !empty($inactivePages) ? implode(', ', $inactivePages) : '—';
 
-    // Build shell list for Tahap 2
-    $shellList = [];
-    if ($pages['landing'])   $shellList[] = '`public/index.php` (landing page)';
-    if ($pages['login'])     $shellList[] = '`public/login/index.php`';
-    if ($pages['register'])  $shellList[] = '`public/register/index.php`';
-    if ($pages['manajemen']) $shellList[] = '`public/manajemen/index.php`';
-    if ($pages['admin'])     $shellList[] = '`public/admin/index.php`';
-    if ($pages['client'])    $shellList[] = '`public/client/index.php`';
-    $shellListStr = implode("\n   - ", $shellList);
+    // Build demo users table dynamically
+    $demoUsersRows = [];
+    if ($pages['manajemen']) {
+        $demoUsersRows[] = "| Super Admin (Manajemen) | `admin@{$projectName}.com` | `password123` |";
+    }
+    if ($pages['admin']) {
+        $demoUsersRows[] = "| Creator (Admin) | `admin@{$projectName}.id` | `password123` |";
+    }
+    if ($pages['client']) {
+        $demoUsersRows[] = "| Client (User/Pendengar) | `client@{$projectName}.com` | `password123` |";
+    }
+    $demoUsersTableStr = implode("\n", $demoUsersRows);
 
     // Build validation criteria per page
     $validationCriteria = "";
     if ($pages['landing']) {
         $validationCriteria .= "- Landing page sudah berganti mengikuti hasil branding/referensi, bukan landing page bawaan template lama.\n";
+        if (!$pages['login']) {
+            $validationCriteria .= "- Landing Page dicentang TANPA Login → Landing Page TIDAK PERLU menampilkan tombol Masuk / Daftar (tombol Auth disembunyikan/dihapus), dan halaman role (Manajemen, Admin, Client) tidak wajib.\n";
+        } else if ($pages['register']) {
+            $validationCriteria .= "- Landing Page & Login & Register dicentang → Landing Page WAJIB menampilkan tombol \"Masuk\" dan \"Daftar\".\n";
+        } else {
+            $validationCriteria .= "- Landing Page & Login dicentang TANPA Register → Landing Page WAJIB menampilkan tombol \"Masuk\" saja (tanpa tombol Daftar).\n";
+        }
     } else {
-        $validationCriteria .= "- Landing Page TIDAK dicentang → verifikasi domain root langsung redirect ke Login, bukan 404 atau halaman kosong.\n";
+        $validationCriteria .= "- Landing Page TIDAK dicentang → AI WAJIB bikin `public/index.php` berisi redirect PHP ke `/login/`, dan landing page reference tidak perlu di-generate.\n";
     }
     if ($pages['login']) {
         $validationCriteria .= "- Halaman Login sudah disesuaikan (bukan placeholder generik) sesuai referensi/branding.\n";
@@ -511,14 +535,18 @@ function handleGenerateInstallMd(array $input): void
     }
     if ($pages['manajemen']) {
         $validationCriteria .= "- Halaman Manajemen benar-benar bisa diakses setelah login, bukan cuma shell kosong.\n";
+    } else {
+        $validationCriteria .= "- Halaman Manajemen TIDAK dicentang → verifikasi tidak ada folder/route manajemen (super admin) yang ke-generate.\n";
     }
     if ($pages['admin']) {
         $validationCriteria .= "- Halaman Admin benar-benar bisa diakses setelah login, bukan cuma shell kosong.\n";
     } else {
-        $validationCriteria .= "- Halaman Admin TIDAK dicentang → verifikasi tidak ada folder/route admin biasa yang ke-generate, hanya Manajemen (Super Admin).\n";
+        $validationCriteria .= "- Halaman Admin TIDAK dicentang → verifikasi tidak ada folder/route admin biasa yang ke-generate.\n";
     }
     if ($pages['client']) {
         $validationCriteria .= "- Halaman Client benar-benar bisa diakses setelah login, bukan cuma shell kosong.\n";
+    } else {
+        $validationCriteria .= "- Halaman Client TIDAK dicentang → verifikasi tidak ada folder/route client yang ke-generate.\n";
     }
     $validationCriteria .= "- CRUD di tiap modul yang relevan **harus berfungsi nyata** (create/read/update/delete tidak boleh cuma UI tanpa backend), diuji baik untuk skenario storage SQL maupun JSON sesuai hasil deteksi `DB_MODE`.\n";
 
@@ -546,11 +574,13 @@ function handleGenerateInstallMd(array $input): void
         foreach ($refFiles as $file) {
             $referencesSection .= "- `{$file}`\n";
         }
-        $referencesSection .= "\n> **Instruksi AI (Referensi & Transformasi)**:\n" .
+        $referencesSection .= "\n> **Instruksi AI (Referensi, Database & Transformasi)**:\n" .
             "> 1. Baca SELURUH file/folder media & skrip di `references/` terlebih dahulu.\n" .
             "> 2. Gunakan sebagai acuan untuk menyusun `docs/prd.md` dan `docs/branding.md` (apabila mode auto).\n" .
             "> 3. GANTI total tampilan `public/index.php` dan shell `public/*.php` serta perbarui file root (`.env`, `.env.example`, `README.md`, `LICENSE`, `CHANGELOG.md`) sesuai branding baru.\n" .
-            "> 4. Jika terdapat file SQL/query di `references/`, gunakan mode `DB_MODE=mysql` (atau `auto`) dengan migrasi di `migrations/`. Jika tidak ada SQL, gunakan `DB_MODE=json` (`data/*.json`).\n\n";
+            "> 4. **Aturan Mutlak Konfigurasi Database (SQL vs JSON)**:\n" .
+            ">    - **Jika ditemukan file skema/query SQL di `references/`**: DILARANG KERAS menggunakan skema/konsep JSON database (`data/*.json`). AI WAJIB menghapus seluruh konsep JSON, mengkonfigurasi `DB_MODE=mysql` (atau `auto`), membuat migrasi SQL di `migrations/`, dan langsung menampilkan/memuat data dari database MySQL via `Repo::table()` sesuai query yang tertulis.\n" .
+            ">    - **Jika TIDAK ada file/query SQL sama sekali di `references/`**: AI WAJIB mengkonfigurasi `DB_MODE=json` dan membuatkan file database JSON selengkap-lengkapnya di `data/*.json` yang mendukung seluruh fitur CRUD secara nyata dengan file locking & atomic write.\n\n";
     } else {
         $referencesSection .= "Tidak ada file referensi di-upload. AI WAJIB men-generate file HTML referensi terlebih dahulu di `references/` sebelum membangun aplikasi.\n\n";
     }
@@ -656,6 +686,13 @@ Halaman yang dicentang di Tahap 3B wizard (hanya ini yang dibangun):
 | Admin | **{$pages['admin']}** | `public/admin/index.php` |
 | Client | **{$pages['client']}** | `public/client/index.php` |
 
+**Aturan Landing ↔ Login**:
+- Minimal salah satu dari Landing Page atau Login harus dicentang.
+- Jika Landing Page dicentang TANPA Login, halaman role (Manajemen, Admin, Client) tidak wajib, dan desain Landing Page TIDAK PERLU memiliki tombol Masuk/Daftar.
+- Jika Login dicentang, minimal satu role dari {manajemen, admin, client} WAJIB dicentang.
+- Jika Login & Register dicentang, Landing Page WAJIB menampilkan tombol Masuk & Daftar. Jika hanya Login yang dicentang, tampilkan tombol Masuk saja.
+- Jika Landing Page TIDAK dicentang, `public/index.php` WAJIB berisi redirect PHP (`header('Location: /login/'); exit;`).
+
 **Halaman aktif**: {$activePagesStr}
 **Halaman non-aktif**: {$inactivePagesStr}
 
@@ -717,8 +754,8 @@ Setiap AI Coding Assistant (Claude Code CLI) WAJIB mengikuti urutan 3 Tahap Ekse
    - `locales/id.json`, `locales/en.json`, `locales/ar.json`
    - Flag assets di `public/assets/flags/`
 5. **Implementasi Database & CRUD Nyata**:
-   - Jika ditemukan file/query SQL di `references/`, bangun tabel MySQL di database dan jalankan query via `Repo::table()`.
-   - Jika tidak ada SQL di `references/`, gunakan mode JSON (`data/*.json`) dengan file locking & atomic write.
+   - **Jika ditemukan file/query SQL/database di `references/`**: DILARANG KERAS menggunakan JSON database. Konfigurasi `DB_MODE=mysql`/`auto`, bangun migrasi SQL di `migrations/`, jalankan query via `Repo::table()`. Hapus/abaikan seluruh konsep JSON.
+   - **Jika TIDAK ada file/query SQL sama sekali di `references/`**: Konfigurasi `DB_MODE=json`, buatkan database JSON selengkap-lengkapnya di `data/*.json` dengan file locking & atomic write, pastikan seluruh fitur CRUD berfungsi nyata.
    - Pastikan seluruh fitur CRUD (Create, Read, Update, Delete) berfungsi secara nyata sesuai spesifikasi di `docs/prd.md`.
 
 ---
@@ -760,9 +797,7 @@ Setiap AI Coding Assistant (Claude Code CLI) WAJIB mengikuti urutan 3 Tahap Ekse
 
 | Role | Email Demo | Password Demo |
 |------|------------|---------------|
-| Super Admin (Manajemen) | `admin@{$projectName}.com` | `password123` |
-| Creator (Admin) | `admin@{$projectName}.id` | `password123` |
-| Client (Pendengar) | `client@{$projectName}.com` | `password123` |
+{$demoUsersTableStr}
 
 ---
 

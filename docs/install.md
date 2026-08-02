@@ -48,15 +48,21 @@ Konfigurasi aktif ada di `data/install_config.json`. Untuk referensi cepat:
 
 ## 2. Struktur Halaman Aktif
 
-Halaman yang dicentang di wizard Tahap 3B (hanya ini yang dibangun).
+Halaman yang dicentang di wizard Tahap 3B (hanya ini yang dibangun). Lihat `data/install_config.json` → `pageStructure` untuk daftar aktual.
 
-Lihat `data/install_config.json` → `pageStructure` untuk daftar aktual.
+**Aturan Landing ↔ Login**:
+- Minimal salah satu dari Landing Page atau Login harus dicentang.
+- Jika Landing Page dicentang TANPA Login, halaman role (Manajemen, Admin, Client) **tidak wajib**, dan Landing Page **TIDAK PERLU** menampilkan tombol Masuk/Daftar.
+- Jika Login dicentang, minimal satu role dari {manajemen, admin, client} **WAJIB** dicentang.
+- Jika Login & Register dicentang, Landing Page **WAJIB** menampilkan tombol Masuk & Daftar.
+- Jika hanya Login yang dicentang, tampilkan tombol Masuk saja di Landing Page.
+- Jika Landing Page TIDAK dicentang, `public/index.php` **WAJIB** berisi redirect PHP (`header('Location: /login/'); exit;`).
 
 | Shell Folder | Allowed Role | Template Reference |
 |-------------|-------------|------------------|
-| `public/index.php` | - | `references/landingpage.html` |
-| `public/login/index.php` | - | `references/login.html` |
-| `public/register/index.php` | - | `references/register.html` |
+| `public/index.php` | Landing page atau redirect ke login | `references/landingpage.html` |
+| `public/login/index.php` | Login (tergantung wizard) | `references/login.html` |
+| `public/register/index.php` | Register (tergantung wizard) | `references/register.html` |
 | `public/manajemen/index.php` | `manajemen` | `references/modul_manajemen.html` |
 | `public/admin/index.php` | `admin` | `references/modul_admin.html` |
 | `public/client/index.php` | `client` | `references/modul_client.html` |
@@ -73,10 +79,15 @@ Lihat `data/install_config.json` → `referencesCount` untuk jumlah file referen
 **Jika `referencesCount = 0`:**
 - AI WAJIB generate file HTML/template referensi di `references/` secara otomatis saat TAHAP 2 berdasarkan `docs/prd.md` dan `docs/branding.md`.
 - File ini menjadi golden template untuk styling dan struktur.
+- Karena tidak ada SQL/database reference, AI WAJIB menggunakan `DB_MODE=json` dan membuatkan file database JSON selengkap-lengkapnya di `data/*.json` yang mendukung seluruh fitur CRUD secara nyata dengan file locking & atomic write.
 
 **Jika `referencesCount > 0`:**
 - File referensi sudah di-upload via wizard.
 - AI audit seluruh file referensi (termasuk alur tautan dan halaman utama seperti `index.html`/`index.php`) -> generate `docs/prd.md` dan `docs/branding.md`.
+
+**Aturan Mutlak Konfigurasi Database (SQL vs JSON)**:
+- **Jika ditemukan file skema/query SQL di `references/`**: DILARANG KERAS menggunakan skema/konsep JSON database (`data/*.json`). AI WAJIB menghapus seluruh konsep JSON, mengkonfigurasi `DB_MODE=mysql` (atau `auto`), membuat migrasi SQL di `migrations/`, dan langsung menampilkan/memuat data dari database MySQL via `Repo::table()` sesuai query yang tertulis di `references/`.
+- **Jika TIDAK ada file/query SQL sama sekali di `references/`**: AI WAJIB mengkonfigurasi `DB_MODE=json` dan membuatkan file database JSON selengkap-lengkapnya di `data/*.json` yang mendukung seluruh fitur CRUD secara nyata dengan file locking & atomic write.
 
 ---
 
@@ -137,7 +148,7 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
 2. **Kepatuhan Arsitektur 13 Pilar Software (WAJIB)**:
    - **Entry Guard Pattern (CLAUDE.md §3b)**: `defined('APP_ENTRY') or define('APP_ENTRY', true);` untuk entry point, dan `if (!defined('APP_ENTRY')) { http_response_code(403); exit('Direct access forbidden'); }` untuk file module/include.
    - **Router Proxy Pattern (CLAUDE.md §2b)**: Semua AJAX request dipicu ke `public/core/router.php` -> `core/router.php`.
-   - **Repo Pattern Dual-Mode (CLAUDE.md §2c)**: Akses data terpusat via `Repo::table('entitas')` (Auto-Switch SQL/JSON).
+   - **Repo Pattern Dual-Mode (CLAUDE.md §2c)**: Akses data terpusat via `Repo::table('entitas')`. Jika `references/` berisi SQL → `DB_MODE=mysql`, jika tidak ada SQL → `DB_MODE=json`. DILARANG mencampur kedua mode dalam satu proyek.
    - **SPA Shell Architecture (CLAUDE.md §2a)**: Navigasi intra-shell via AJAX tanpa full-page reload.
    - **Standar i18n & Multi-Bahasa (CLAUDE.md §2a)**:
      - DILARANG hardcode string bahasa di file `public/*.php` atau `modules/*/*.php`.
@@ -149,8 +160,8 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
    - Generate demo users dengan Argon2ID (`password_hash('password123', PASSWORD_ARGON2ID)`) tersimpan di `data/users.json` / MySQL (CLAUDE.md §4b).
    - Setup i18n files (`locales/languages.json` & `locales/*.json`).
 4. **Implementasi Database & CRUD Nyata**:
-   - Jika ditemukan file/query SQL di `references/`, bangun tabel MySQL di database dan jalankan query via `Repo::table()`.
-   - Jika tidak ada SQL di `references/`, gunakan mode JSON (`data/*.json`) dengan file locking & atomic write.
+   - **Jika ditemukan file/query SQL/database di `references/`**: DILARANG KERAS menggunakan JSON database (`data/*.json`). Konfigurasi `DB_MODE=mysql`/`auto`, bangun migrasi SQL di `migrations/`, jalankan query via `Repo::table()`. Seluruh fitur CRUD berjalan terhadap MySQL.
+   - **Jika TIDAK ada file/query SQL sama sekali di `references/`**: Konfigurasi `DB_MODE=json`, buatkan database JSON selengkap-lengkapnya di `data/*.json` dengan file locking & atomic write, pastikan seluruh fitur CRUD berfungsi nyata.
    - Pastikan seluruh fitur CRUD (Create, Read, Update, Delete) berfungsi secara nyata sesuai spesifikasi di `docs/prd.md`.
 
 ---
