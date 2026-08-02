@@ -37,11 +37,17 @@ if (-not (Test-IsAdmin)) {
     $scriptPath = $PSCommandPath
     if (-not $scriptPath) { $scriptPath = $MyInvocation.MyCommand.Definition }
 
-    if ($scriptPath -and (Test-Path -Path $scriptPath -ErrorAction SilentlyContinue)) {
-        Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -File `"$scriptPath`" -Elevated" -Verb RunAs
+    # Resolve to absolute path so the elevated process can find the file
+    $resolvedPath = $null
+    if ($scriptPath) {
+        $resolvedPath = (Resolve-Path -Path $scriptPath -ErrorAction SilentlyContinue).Path
+    }
+
+    if ($resolvedPath -and (Test-Path -Path $resolvedPath -ErrorAction SilentlyContinue)) {
+        Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -File `"$resolvedPath`"" -Verb RunAs
     } else {
-        $remoteCmd = "irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex"
-        Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -Command `"$remoteCmd`"" -Verb RunAs
+        # Fallback: download and run remotely in the elevated window
+        Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -Command ""irm https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1 | iex""" -Verb RunAs
     }
     exit 0
 }
