@@ -34,27 +34,23 @@ if (-not (Test-IsAdmin)) {
         Start-Sleep -Seconds 1
     }
 
-    $scriptPath = $PSCommandPath
-    if (-not $scriptPath) { $scriptPath = $MyInvocation.MyCommand.Definition }
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-    # Resolve to absolute path so the elevated process can find the file
-    $resolvedPath = $null
-    if ($scriptPath) {
-        $resolvedPath = (Resolve-Path -Path $scriptPath -ErrorAction SilentlyContinue).Path
+    $scriptFile = $PSCommandPath
+    if (-not $scriptFile -or -not (Test-Path -Path $scriptFile -ErrorAction SilentlyContinue)) {
+        $scriptFile = Join-Path $env:TEMP "vibeforge-setup.ps1"
+        try {
+            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1" -OutFile $scriptFile -UseBasicParsing -ErrorAction Stop
+        } catch {
+            Write-Warning "Gagal mengunduh script setup: $_"
+        }
     }
 
-    if ($resolvedPath -and (Test-Path -Path $resolvedPath -ErrorAction SilentlyContinue)) {
-        Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -File `"$resolvedPath`"" -Verb RunAs
+    if (Test-Path -Path $scriptFile -ErrorAction SilentlyContinue) {
+        $escapedPath = $scriptFile.Replace("'", "''")
+        Start-Process powershell.exe -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-NoProfile", "-Command", "& '$escapedPath'" -Verb RunAs
     } else {
-        # Fallback: download script to temp file, then run it elevated
-        $tempScript = Join-Path $env:TEMP "setup-project.ps1"
-        try {
-            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1" -OutFile $tempScript -UseBasicParsing -ErrorAction Stop
-            Start-Process powershell.exe -ArgumentList "-NoExit -ExecutionPolicy Bypass -NoProfile -File `"$tempScript`"" -Verb RunAs
-        } catch {
-            Write-Warning "Gagal mengunduh script. Jalankan manual sebagai Administrator."
-            Write-Warning "Download dari: https://raw.githubusercontent.com/iqbalmurtadho24/vibeforge/main/scripts/setup-project.ps1"
-        }
+        Write-Error "File script tidak ditemukan dan gagal diunduh."
     }
     exit 0
 }
