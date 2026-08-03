@@ -146,6 +146,13 @@ switch ($action) {
         handleDetectReferencesStructure();
         break;
 
+    // -----------------------------------------------------------------------
+    // generate_auth_controllers — create login.php and logout.php based on detected schema
+    // -----------------------------------------------------------------------
+    case 'generate_auth_controllers':
+        handleGenerateAuthControllers();
+        break;
+
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => "Unknown action: {$action}"]);
@@ -489,6 +496,8 @@ function handleDeleteRef(array $input): void
 /**
  * Helper: Detect references directory structure and extract dynamic page folder mappings.
  * Returns map of page key -> public subfolder name, SQL detection status, and DB_MODE.
+ *
+ * ENHANCED: Multi-database & legacy schema detection for SIS Ar-Rohmah-style projects.
  */
 function getReferencesStructure(): array
 {
@@ -505,6 +514,19 @@ function getReferencesStructure(): array
     $detectedPages = [];
     $hasSql = false;
     $sqlFiles = [];
+
+    // === ENHANCED: Multi-database detection ===
+    $databases = [];
+    $userTables = [];
+    $authConfig = [
+        'database' => null,
+        'table' => null,
+        'usernameField' => null,
+        'passwordField' => null,
+        'passwordHash' => true,
+        'idField' => 'id',
+        'additionalFields' => [],
+    ];
 
     if (is_dir($refDir)) {
         $iterator = new RecursiveIteratorIterator(
@@ -525,8 +547,65 @@ function getReferencesStructure(): array
                 // Check for SQL content in PHP files
                 if ($ext === 'php' || $ext === 'inc') {
                     $content = @file_get_contents($item->getPathname());
-                    if ($content && preg_match('/CREATE\s+TABLE|INSERT\s+INTO|SELECT\s+.*\s+FROM|mysqli_connect|PDO\s*\(.*mysql/i', $content)) {
-                        $hasSql = true;
+                    if ($content) {
+                        // === Multi-database detection ===
+                        // Detect mysqli_connect($host, $user, $pass, 'database_name')
+                        if (preg_match_all('/mysqli_connect\s*\(\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*[\'"]?([a-zA-Z0-9_]+)[\'"]?/i', $content, $dbMatches)) {
+                            foreach ($dbMatches[1] as $dbName) {
+                                if (!empty($dbName) && !in_array($dbName, $databases)) {
+                                    $databases[] = $dbName;
+                                }
+                            }
+                        }
+
+                        // Detect PDO connection with database name
+                        if (preg_match_all('/PDO\s*\([^)]*[\'"]database[=:]?\s*([a-zA-Z0-9_]+)[\'"]/i', $content, $pdoMatches)) {
+                            foreach ($pdoMatches[1] as $dbName) {
+                                if (!empty($dbName) && !in_array($dbName, $databases)) {
+                                    $databases[] = $dbName;
+                                }
+                            }
+                        }
+
+                        // === Legacy user table detection ===
+                        // Common legacy table names: nopendaftaran, users, admin, operator, member, siswa, psb
+                        $legacyUserTables = ['nopendaftaran', 'users', 'admin', 'operator', 'member', 'siswa', 'psb', 'pendaftar', 'user'];
+                        foreach ($legacyUserTables as $tableName) {
+                            // Look for table references in queries
+                            if (preg_match('/(?:FROM|INTO|INSERT\s+INTO|UPDATE)\s+`?' . $tableName . '`?/i', $content)) {
+                                if (!isset($userTables[$tableName])) {
+                                    $userTables[$tableName] = [];
+                                }
+
+                                // Try to detect field names from SELECT queries
+                                if (preg_match('/SELECT\s+(.*?)\s+FROM\s+`?' . $tableName . '`?/is', $content, $selectMatch)) {
+                                    $fields = preg_split('/,\s*/', $selectMatch[1]);
+                                    foreach ($fields as $field) {
+                                        $field = trim($field);
+                                        // Skip aggregate functions and aliases
+                                        if (!preg_match('/\(/', $field) && !str_pos($field, ' AS ')) {
+                                            $userTables[$tableName][] = preg_replace('/`/', '', $field);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Detect password hashing status
+                        if (preg_match('/password_hash\s*\(/i', $content)) {
+                            $authConfig['passwordHash'] = true;
+                        }
+                        if (preg_match('/\$row\s*\[\s*[\'"]password[\'"]\s*\]/i', $content)) {
+                            // Check if comparing directly (plaintext) or with password_verify
+                            if (!preg_match('/password_verify\s*\(/i', $content)) {
+                                $authConfig['passwordHash'] = false;
+                            }
+                        }
+
+                        // Detect SQL patterns
+                        if (preg_match('/CREATE\s+TABLE|INSERT\s+INTO|SELECT\s+.*\s+FROM|mysqli_connect|PDO\s*\(.*mysql/i', $content)) {
+                            $hasSql = true;
+                        }
                     }
                 }
 
@@ -546,7 +625,65 @@ function getReferencesStructure(): array
         }
     }
 
-    $dbMode = $hasSql ? 'mysql' : 'json';
+    // === Determine auth config from detected user tables ===
+    // Priority: nopendaftaran > users > other legacy tables
+    $authPriority = ['nopendaftaran', 'users', 'psb', 'pendaftar', 'admin', 'operator', 'member', 'siswa', 'user'];
+    foreach ($authPriority as $tableName) {
+        if (isset($userTables[$tableName]) && !empty($userTables[$tableName])) {
+            $authConfig['table'] = $tableName;
+
+            // Detect common username field patterns
+            $usernameFields = ['nopendaftaran', 'username', 'email', 'user', 'login', 'name', 'nama'];
+            foreach ($usernameFields as $field) {
+                foreach ($userTables[$tableName] as $detectedField) {
+                    if (strtolower($detectedField) === $field) {
+                        $authConfig['usernameField'] = $detectedField;
+                        break 2;
+                    }
+                }
+            }
+            if (!$authConfig['usernameField']) {
+                // Default to first field as username
+                $authConfig['usernameField'] = $userTables[$tableName][0] ?? 'id';
+            }
+
+            // Detect password field
+            foreach ($userTables[$tableName] as $field) {
+                if (stripos($field, 'password') !== false || stripos($field, 'passwd') !== false || stripos($field, 'pwd') !== false) {
+                    $authConfig['passwordField'] = $field;
+                    break;
+                }
+            }
+            if (!$authConfig['passwordField']) {
+                $authConfig['passwordField'] = 'password';
+            }
+
+            // Detect ID field
+            foreach ($userTables[$tableName] as $field) {
+                if ($field === 'Id' || $field === 'id' || $field === 'ID' || $field === 'user_id') {
+                    $authConfig['idField'] = $field;
+                    break;
+                }
+            }
+
+            // Collect additional fields
+            $skipFields = [$authConfig['usernameField'], $authConfig['passwordField'], $authConfig['idField'], 'password'];
+            foreach ($userTables[$tableName] as $field) {
+                if (!in_array($field, $skipFields)) {
+                    $authConfig['additionalFields'][] = $field;
+                }
+            }
+
+            break; // Stop at first priority match
+        }
+    }
+
+    // Set primary database if we found multi-database setup
+    if (!empty($databases)) {
+        $authConfig['database'] = $databases[0]; // First database is usually the main one
+    }
+
+    $dbMode = $hasSql ? 'auto' : 'json'; // Use 'auto' for legacy SQL, not strict 'mysql'
 
     return [
         'folderMap' => $folderMap,
@@ -554,7 +691,14 @@ function getReferencesStructure(): array
         'hasSql' => $hasSql,
         'sqlFiles' => $sqlFiles,
         'dbMode' => $dbMode,
+        'databases' => $databases,
+        'userTables' => array_keys($userTables),
+        'authConfig' => $authConfig,
     ];
+}
+
+function str_pos(string $haystack, string $needle): bool {
+    return strpos($haystack, $needle) !== false;
 }
 
 function handleDetectReferencesStructure(): void
@@ -567,6 +711,9 @@ function handleDetectReferencesStructure(): void
         'hasSql' => $structure['hasSql'],
         'sqlFiles' => $structure['sqlFiles'],
         'dbMode' => $structure['dbMode'],
+        'databases' => $structure['databases'],
+        'userTables' => $structure['userTables'],
+        'authConfig' => $structure['authConfig'],
     ]);
 }
 
@@ -1316,6 +1463,11 @@ MD;
             'registerActive' => $pages['register'],
             'loginPage' => (!$pages['landing'] && $pages['login']) ? 'public/index.php' : 'public/login/index.php',
         ],
+        // === ENHANCED: Multi-database & legacy auth config ===
+        'databases' => $detectedStructure['databases'],
+        'userTables' => $detectedStructure['userTables'],
+        'auth' => $detectedStructure['authConfig'],
+        'frameworkTables' => ['login_attempts', 'remember_tokens', 'audit_trail', 'sessions'],
         'updated_at' => date('Y-m-d H:i:s'),
     ];
 
@@ -1502,5 +1654,284 @@ function handleCheckFolder(array $input): void
         'success' => true,
         'exists'  => $exists,
         'path'    => str_replace('/', '\\', $targetDir)
+    ]);
+}
+
+/**
+ * Generate auth controllers (login.php and logout.php) based on detected schema.
+ * This is called after wizard completes to ensure auth works with legacy databases.
+ */
+function handleGenerateAuthControllers(): void
+{
+    $structure = getReferencesStructure();
+    $auth = $structure['authConfig'];
+    $folderMap = $structure['folderMap'];
+    $dbMode = $structure['dbMode'];
+    $hasSql = $structure['hasSql'];
+
+    $generated = [];
+
+    // === Generate logout.php (always needed) ===
+    $logoutPath = ROOT_PATH . '/modules/auth/logout.php';
+    $logoutDir = dirname($logoutPath);
+    if (!is_dir($logoutDir)) {
+        mkdir($logoutDir, 0755, true);
+    }
+
+    $logoutContent = '<?php
+/**
+ * Vibeforge - Auth Logout Controller
+ * Generated by installer based on detected schema
+ */
+if (!defined("APP_ENTRY")) { http_response_code(403); exit("Direct access forbidden"); }
+if (!defined("ROOT_PATH")) { define("ROOT_PATH", dirname(__DIR__, 2)); }
+require_once ROOT_PATH . "/include/config.php";
+require_once ROOT_PATH . "/core/session.php";
+
+// 1. Clear remember token
+if (function_exists("clearRememberToken")) { clearRememberToken(); }
+
+// 2. Hancurkan session
+$_SESSION = [];
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), "", time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+}
+session_destroy();
+
+// 3. Redirect ke landing page
+header("Location: /");
+exit;
+';
+
+    if (@file_put_contents($logoutPath, $logoutContent)) {
+        $generated[] = 'modules/auth/logout.php';
+    }
+
+    // === Generate login.php based on detected schema ===
+    $loginPath = ROOT_PATH . '/modules/auth/login.php';
+    $loginDir = dirname($loginPath);
+    if (!is_dir($loginDir)) {
+        mkdir($loginDir, 0755, true);
+    }
+
+    // Get dashboard URL from folder map
+    $clientFolder = $folderMap['client'] ?? 'client';
+    $dashboardUrl = '/' . $clientFolder . '/';
+
+    // Build login controller based on detected auth config
+    if ($hasSql && !empty($auth['table'])) {
+        // === Legacy/External MySQL database login ===
+        $dbName = addslashes($auth['database'] ?? '');
+        $table = addslashes($auth['table']);
+        $userField = addslashes($auth['usernameField'] ?? 'username');
+        $passField = addslashes($auth['passwordField'] ?? 'password');
+        $idField = addslashes($auth['idField'] ?? 'id');
+        $additionalFields = !empty($auth['additionalFields']) ? ', ' . implode(', ', array_map('addslashes', $auth['additionalFields'])) : '';
+        $useHash = $auth['passwordHash'] ? 'true' : 'false';
+        $escDashboard = addslashes($dashboardUrl);
+
+        $loginContent = "<?php
+/**
+ * Vibeforge - Auth Login Controller (Legacy Database Mode)
+ * Generated by installer — table={$table}, database={$dbName}
+ */
+if (!defined(\"APP_ENTRY\")) { http_response_code(403); exit(\"Direct access forbidden\"); }
+if (!defined(\"ROOT_PATH\")) { define(\"ROOT_PATH\", dirname(__DIR__, 2)); }
+require_once ROOT_PATH . \"/include/config.php\";
+require_once ROOT_PATH . \"/include/helper.php\";
+require_once ROOT_PATH . \"/core/session.php\";
+require_once ROOT_PATH . \"/core/csrf.php\";
+
+// External DB config
+if (!defined(\"DB_EXTERNAL_HOST\")) { define(\"DB_EXTERNAL_HOST\", \"localhost\"); }
+if (!defined(\"DB_EXTERNAL_USER\")) { define(\"DB_EXTERNAL_USER\", \"root\"); }
+if (!defined(\"DB_EXTERNAL_PASS\")) { define(\"DB_EXTERNAL_PASS\", \"\"); }
+if (!defined(\"DB_EXTERNAL_NAME\")) { define(\"DB_EXTERNAL_NAME\", \"{$dbName}\"); }
+
+header(\"Content-Type: application/json\");
+
+if (\$_SERVER[\"REQUEST_METHOD\"] !== \"POST\") {
+    http_response_code(405);
+    echo json_encode([\"success\" => false, \"error\" => \"Method not allowed\"]);
+    exit;
+}
+
+\$csrfInput = \$_POST[\"csrf_token\"] ?? \"\";
+if (!verifyCsrfToken(\$csrfInput)) {
+    http_response_code(403);
+    echo json_encode([\"success\" => false, \"error\" => \"Token keamanan tidak valid\"]);
+    exit;
+}
+
+// Rate limiting
+\$clientIp = \$_SERVER[\"REMOTE_ADDR\"] ?? \"0.0.0.0\";
+\$rateFile = ROOT_PATH . \"/data/rate_\" . md5(\"login:\" . \$clientIp) . \".json\";
+\$rateData = [\"count\" => 0, \"window\" => time() + 3600];
+if (file_exists(\$rateFile)) {
+    \$rateData = json_decode(file_get_contents(\$rateFile), true) ?: \$rateData;
+    if (\$rateData[\"window\"] < time()) { \$rateData = [\"count\" => 0, \"window\" => time() + 3600]; }
+}
+if (\$rateData[\"count\"] >= 10) {
+    echo json_encode([\"success\" => false, \"error\" => \"Terlalu banyak percobaan login.\"]);
+    exit;
+}
+
+\$username = trim(\$_POST[\"username\"] ?? \"\");
+\$password = \$_POST[\"password\"] ?? \"\";
+
+if (empty(\$username) || empty(\$password)) {
+    echo json_encode([\"success\" => false, \"error\" => \"Username dan password harus diisi\"]);
+    exit;
+}
+
+try {
+    \$conn = @mysqli_connect(DB_EXTERNAL_HOST, DB_EXTERNAL_USER, DB_EXTERNAL_PASS, DB_EXTERNAL_NAME);
+    if (!\$conn) { throw new Exception(\"Koneksi database gagal\"); }
+
+    \$usernameSafe = mysqli_real_escape_string(\$conn, \$username);
+    \$query = \"SELECT {$idField} as id, {$userField} as username, {$passField} as password{$additionalFields} FROM {$table} WHERE {$userField} = '\" . \$usernameSafe . \"' LIMIT 1\";
+    \$result = mysqli_query(\$conn, \$query);
+
+    if (!\$result || mysqli_num_rows(\$result) === 0) {
+        mysqli_close(\$conn);
+        echo json_encode([\"success\" => false, \"error\" => \"Username atau password salah\"]);
+        exit;
+    }
+
+    \$user = mysqli_fetch_assoc(\$result);
+    mysqli_close(\$conn);
+
+    \$passwordOk = {$useHash} ? password_verify(\$password, \$user[\"password\"]) : (\$password === \$user[\"password\"]);
+
+    if (!\$passwordOk) {
+        echo json_encode([\"success\" => false, \"error\" => \"Username atau password salah\"]);
+        exit;
+    }
+
+    \$rateData[\"count\"]++;
+    file_put_contents(\$rateFile, json_encode(\$rateData));
+
+    \$_SESSION[\"user_id\"] = \$user[\"id\"];
+    \$_SESSION[\"username\"] = \$user[\"username\"];
+    \$_SESSION[\"role\"] = \"client\";
+    \$_SESSION[\"logged_in\"] = true;
+    \$_SESSION[\"login_time\"] = time();
+
+    \$skipFields = [\"id\", \"username\", \"password\", \"password_hash\"];
+    foreach (\$user as \$k => \$v) { if (!in_array(\$k, \$skipFields)) { \$_SESSION[\$k] = \$v; } }
+
+    echo json_encode([\"success\" => true, \"redirect\" => \"{$escDashboard}\", \"user\" => [\"id\" => \$user[\"id\"], \"username\" => \$user[\"username\"]]]);
+
+} catch (Exception \$e) {
+    error_log(\"[Login Error] \" . \$e->getMessage());
+    echo json_encode([\"success\" => false, \"error\" => \"Terjadi kesalahan sistem.\"]);
+}
+";
+
+    } else {
+        // === JSON mode or default Vibeforge login ===
+        $loginContent = '<?php
+/**
+ * Vibeforge - Auth Login Controller (JSON/Default Mode)
+ * Generated by installer
+ */
+if (!defined("APP_ENTRY")) { http_response_code(403); exit("Direct access forbidden"); }
+if (!defined("ROOT_PATH")) { define("ROOT_PATH", dirname(__DIR__, 2)); }
+require_once ROOT_PATH . "/include/config.php";
+require_once ROOT_PATH . "/include/helper.php";
+require_once ROOT_PATH . "/core/session.php";
+require_once ROOT_PATH . "/core/csrf.php";
+require_once ROOT_PATH . "/core/Repo.php";
+
+header("Content-Type: application/json");
+
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    http_response_code(405);
+    echo json_encode(["success" => false, "error" => "Method not allowed"]);
+    exit;
+}
+
+$csrfInput = $_POST["csrf_token"] ?? "";
+if (!verifyCsrfToken($csrfInput)) {
+    http_response_code(403);
+    echo json_encode(["success" => false, "error" => "Token keamanan tidak valid"]);
+    exit;
+}
+
+// Rate limiting
+$clientIp = $_SERVER["REMOTE_ADDR"] ?? "0.0.0.0";
+$rateFile = ROOT_PATH . "/data/rate_" . md5("login:" . $clientIp) . ".json";
+$rateData = ["count" => 0, "window" => time() + 3600];
+if (file_exists($rateFile)) {
+    $rateData = json_decode(file_get_contents($rateFile), true) ?: $rateData;
+    if ($rateData["window"] < time()) { $rateData = ["count" => 0, "window" => time() + 3600]; }
+}
+if ($rateData["count"] >= 10) {
+    echo json_encode(["success" => false, "error" => "Terlalu banyak percobaan login."]);
+    exit;
+}
+
+$email = trim($_POST["email"] ?? $_POST["username"] ?? "");
+$password = $_POST["password"] ?? "";
+
+if (empty($email) || empty($password)) {
+    echo json_encode(["success" => false, "error" => "Email dan password harus diisi"]);
+    exit;
+}
+
+try {
+    $users = Repo::table("users");
+    $user = null;
+    foreach ($users as $u) {
+        if (($u["email"] ?? "") === $email || ($u["username"] ?? "") === $email) {
+            $user = $u;
+            break;
+        }
+    }
+
+    if (!$user) {
+        echo json_encode(["success" => false, "error" => "Email atau password salah"]);
+        exit;
+    }
+
+    if (!password_verify($password, $user["password"] ?? "")) {
+        echo json_encode(["success" => false, "error" => "Email atau password salah"]);
+        exit;
+    }
+
+    $rateData["count"]++;
+    file_put_contents($rateFile, json_encode($rateData));
+
+    $_SESSION["user_id"] = $user["id"];
+    $_SESSION["email"] = $user["email"];
+    $_SESSION["username"] = $user["username"] ?? $user["email"];
+    $_SESSION["role"] = $user["role"] ?? "client";
+    $_SESSION["logged_in"] = true;
+    $_SESSION["login_time"] = time();
+
+    $roleToDashboard = ["manajemen" => "/manajemen/", "admin" => "/admin/", "client" => "/client/"];
+    $dashboardUrl = $roleToDashboard[$_SESSION["role"]] ?? "/client/";
+
+    echo json_encode(["success" => true, "redirect" => $dashboardUrl, "user" => ["id" => $user["id"], "email" => $user["email"], "role" => $_SESSION["role"]]]);
+
+} catch (Exception $e) {
+    error_log("[Login Error] " . $e->getMessage());
+    echo json_encode(["success" => false, "error" => "Terjadi kesalahan sistem."]);
+}
+';
+
+    }
+
+    if (@file_put_contents($loginPath, $loginContent)) {
+        $generated[] = 'modules/auth/login.php';
+    }
+
+    echo json_encode([
+        'success' => true,
+        'generated' => $generated,
+        'authConfig' => $auth,
+        'dbMode' => $dbMode,
+        'message' => 'Auth controllers generated successfully'
     ]);
 }

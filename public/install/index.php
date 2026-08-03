@@ -761,6 +761,22 @@ require_once __DIR__ . '/header.php';
                                 '</div>' +
                                 '<span class="text-[10px] text-gray-400">' + (hasSqlDetected ? 'SQL File/Query Ditemukan' : 'Tidak Ada SQL (JSON File Storage)') + '</span>' +
                             '</div>' +
+                            // === Auth & Multi-DB Detection Banner ===
+                            '<div id="authDetectionBanner" class="mb-4 p-3 rounded-xl ' + (hasSqlDetected ? 'bg-emerald-500/5 border border-emerald-500/20' : 'hidden') + '">' +
+                                '<div class="flex items-start gap-2">' +
+                                    '<i class="ph ph-shield-check text-lg text-emerald-400 mt-0.5 shrink-0"></i>' +
+                                    '<div class="flex-1 min-w-0">' +
+                                        '<p class="font-mono text-[10px] font-bold text-emerald-400 mb-1">AUTH DETECTION AKTIF</p>' +
+                                        '<div id="authDetectionDetails" class="space-y-1 text-[10px] text-gray-400 font-mono">' +
+                                            '<p>Table: <span id="detectedUserTable" class="text-amber-400">Mendeteksi...</span></p>' +
+                                            '<p>Username Field: <span id="detectedUsernameField" class="text-amber-400">—</span></p>' +
+                                            '<p>Password Field: <span id="detectedPasswordField" class="text-amber-400">—</span></p>' +
+                                            '<p>Password Hash: <span id="detectedPasswordHash" class="text-amber-400">—</span></p>' +
+                                            '<p>Databases: <span id="detectedDatabases" class="text-amber-400">—</span></p>' +
+                                        '</div>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
                             '<div id="refListContainer" class="space-y-2 max-h-64 overflow-y-auto hide-scrollbar">' +
                                 '<p class="text-xs text-[var(--text-muted)] text-center py-4">Belum ada file referensi</p>' +
                             '</div>' +
@@ -1887,6 +1903,26 @@ require_once __DIR__ . '/header.php';
                 })
             });
 
+            // === GENERATE AUTH CONTROLLERS (login.php & logout.php) ===
+            // This creates proper auth based on detected schema (multi-database, legacy tables)
+            var authResponse = await fetch('/core/router.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    module: 'install',
+                    action: 'generate_auth_controllers',
+                    csrf_token: csrfToken
+                })
+            });
+            var authData = await authResponse.json();
+            if (authData.success) {
+                authData.generated.forEach(function(f) { savedFiles.add(f); });
+                // Log auth detection for debugging
+                if (authData.authConfig && authData.authConfig.table) {
+                    console.log('[Auth Controller] Detected table:', authData.authConfig.table, 'Database:', authData.authConfig.database);
+                }
+            }
+
             // === HAPUS FOLDER INSTALL/ INI SETELAH VIBE CODING BERJALAN ===
             await fetch('/core/router.php', {
                 method: 'POST',
@@ -2125,7 +2161,7 @@ require_once __DIR__ . '/header.php';
         })
         .catch(function() {});
 
-        // Detect SQL & dynamic structure
+        // Detect SQL, dynamic structure, AND auth config
         fetch('/core/router.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2137,6 +2173,33 @@ require_once __DIR__ . '/header.php';
                 dbModeDetected = data.dbMode || 'json';
                 hasSqlDetected = !!data.hasSql;
                 dynamicFolderMap = data.folderMap || dynamicFolderMap;
+
+                // Update auth detection UI if elements exist
+                if (hasSqlDetected) {
+                    var authBanner = document.getElementById('authDetectionBanner');
+                    if (authBanner) authBanner.classList.remove('hidden');
+
+                    var authConfig = data.authConfig;
+                    if (authConfig) {
+                        var userTableEl = document.getElementById('detectedUserTable');
+                        var usernameFieldEl = document.getElementById('detectedUsernameField');
+                        var passwordFieldEl = document.getElementById('detectedPasswordField');
+                        var passwordHashEl = document.getElementById('detectedPasswordHash');
+                        var databasesEl = document.getElementById('detectedDatabases');
+
+                        if (userTableEl) userTableEl.textContent = authConfig.table || 'Tidak terdeteksi';
+                        if (usernameFieldEl) usernameFieldEl.textContent = authConfig.usernameField || '—';
+                        if (passwordFieldEl) passwordFieldEl.textContent = authConfig.passwordField || '—';
+                        if (passwordHashEl) {
+                            passwordHashEl.textContent = authConfig.passwordHash ? 'Ya (Argon2ID/Hash)' : 'Tidak (Plaintext)';
+                            passwordHashEl.className = authConfig.passwordHash ? 'text-emerald-400' : 'text-red-400';
+                        }
+                        if (databasesEl) {
+                            var dbs = data.databases || [];
+                            databasesEl.textContent = dbs.length > 0 ? dbs.join(', ') : 'Default';
+                        }
+                    }
+                }
             }
         })
         .catch(function() {});
