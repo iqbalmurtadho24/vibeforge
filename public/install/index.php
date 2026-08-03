@@ -157,9 +157,17 @@ require_once __DIR__ . '/header.php';
                 <p class="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-wider">// Claude Code Command:</p>
                 <div class="flex items-center gap-2 bg-gray-900 p-2.5 rounded-lg border border-gray-800">
                     <code class="text-orange-400 font-mono text-xs flex-1 truncate" id="modalCommandText">baca dan jalankan @docs/install.md</code>
-                    <button onclick="copyAndLaunchClaude()" class="px-3 py-1.5 bg-gradient-brand text-white rounded text-[11px] font-bold transition-all hover:opacity-90 shrink-0 flex items-center gap-1.5 shadow-md"><i class="ph ph-copy"></i> Copy & Jalankan</button>
+                    <button id="copyLaunchBtn" onclick="copyAndLaunchClaude()" class="px-3 py-1.5 bg-gradient-brand text-white rounded text-[11px] font-bold transition-all hover:opacity-90 shrink-0 flex items-center gap-1.5 shadow-md"><i class="ph ph-copy"></i> Copy & Jalankan</button>
                 </div>
                 <p class="text-[10px] text-gray-500 mt-2 leading-relaxed">Command akan disalin ke clipboard, lalu PowerShell terbuka otomatis dengan <code class="text-gray-400">claude</code> siap dijalankan — tinggal paste (Ctrl+V) dan Enter.</p>
+                <div id="redirectNotice" class="hidden mt-3 p-3 bg-orange-500/10 border border-orange-500/30 rounded-xl text-center">
+                    <p class="text-xs font-mono text-orange-400 font-bold flex items-center justify-center gap-2">
+                        <i class="ph ph-terminal-window text-base animate-pulse"></i> Terminal PowerShell Claude sedang dibuka!
+                    </p>
+                    <p class="text-[11px] font-mono text-gray-300 mt-1">
+                        Mengalihkan ke Beranda dalam <span id="countdownSec" class="text-white font-extrabold text-sm">3</span> detik...
+                    </p>
+                </div>
             </div>
             <a href="/" class="w-full py-3 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl font-mono text-xs font-bold text-[var(--text-primary)] hover:border-[var(--brand-primary)] transition-all inline-flex items-center justify-center gap-2">
                 <i class="ph ph-house text-base"></i> KEMBALI KE BERANDA
@@ -1963,6 +1971,19 @@ require_once __DIR__ . '/header.php';
             showToast('Disalin!', 'Command disalin ke clipboard');
         }
 
+        var redirectNotice = document.getElementById('redirectNotice');
+        var countdownSec = document.getElementById('countdownSec');
+        var copyLaunchBtn = document.getElementById('copyLaunchBtn');
+
+        if (copyLaunchBtn) {
+            copyLaunchBtn.disabled = true;
+            copyLaunchBtn.classList.add('opacity-50', 'pointer-events-none');
+        }
+
+        if (redirectNotice) {
+            redirectNotice.classList.remove('hidden');
+        }
+
         // Launch PowerShell with claude in project directory
         try {
             await fetch('/core/router.php', {
@@ -1981,7 +2002,16 @@ require_once __DIR__ . '/header.php';
             console.error('Launch terminal error:', err);
         }
 
-        closeSuccessModal();
+        // Countdown 3 detik lalu redirect ke / (public/index.php)
+        var timeLeft = 3;
+        var countdownInterval = setInterval(function() {
+            timeLeft--;
+            if (countdownSec) countdownSec.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = '/';
+            }
+        }, 1000);
     }
 
     // =====================================================
