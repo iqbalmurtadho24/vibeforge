@@ -49,9 +49,9 @@ Dokumen ini adalah rujukan wajib untuk setiap sesi Claude Code CLI di project Vi
     - Jika hanya Login yang dicentang → Landing Page menampilkan tombol "Masuk" saja (tanpa "Daftar").
     - Jika Login TIDAK dicentang (hanya Landing Page) → Landing Page **TIDAK PERLU** menampilkan tombol Masuk/Daftar (halaman landing page publik tanpa auth).
   - **Aturan Landing ↔ Login (Mutlak)**: Minimal salah satu dari Landing Page atau Login harus aktif. Jika Login aktif, minimal satu role dari {manajemen, admin, client} WAJIB ada.
-  - **Aturan Baru — Login di Index**: Jika hanya Login dan 1 halaman lain yang dicentang (tanpa Landing Page), login TETAP berada di `public/index.php` — **JANGAN redirect ke `public/login/`**. Halaman login adalah halaman utama (index).
+  - **Aturan Login di Index (CLAUDE.md Pilar 1 §2a — WAJIB)**: Jika Landing Page TIDAK dicentang dan Login dicentang, `public/index.php` WAJIB menjadi **halaman login shell utama** (bukan redirect ke `/login/`). Folder `public/login/` harus dihapus. Halaman login adalah entry point utama aplikasi.
   - **Penghapusan Halaman Tidak Dicentang**: Jika sebuah halaman TIDAK dicentang di Tahap 3B, seluruh file dan folder terkait harus dihapus dari `public/`. Tidak boleh meninggalkan jejak apapun.
-  - **Nama Folder Dinamis**: Nama folder di `public/` dan `references/` HARUS mengikuti struktur yang ada di `references/`. Jika folder referensi bernama `pendaftar`, maka folder `public/`-nya juga `pendaftar`. Jangan memaksa nama tetap `client`, `admin`, atau `manajemen`.
+  - **Nama Folder Dinamis (WAJIB)**: Nama folder di `public/` HARUS dibaca dari `data/install_config.json` field `dynamicFolderMap`. Jika folder referensi bernama `pendaftar`, maka folder `public/`-nya juga `pendaftar`. Mapping dibaca dari hasil deteksi wizard, bukan hardcoded `client`, `admin`, atau `manajemen`.
 - **AJAX Navigation**: Perpindahan tab/state dalam 1 shell TIDAK BENTUK full-page reload. Gunakan AJAX ke `core/router.php`. Reload penuh hanya terjadi saat berpindah ANTAR shell.
 - **Golden References (`references/*.html`)**: Setiap shell `public/xxx/index.php` HARUS mengikuti struktur HTML, styling CSS, dan komponen visual SAMA PERSIS dengan template di `references/*.html`:
   - `public/index.php` → `references/landingpage.html` (atau `references/index.html`/`index.php` yang di-convert ke SPA Shell)
@@ -103,7 +103,10 @@ Dokumen ini adalah rujukan wajib untuk setiap sesi Claude Code CLI di project Vi
   - `auto` (Default): Deteksi otomatis PER ENTITAS. Coba PDO ke MySQL; jika tabel ada → Pakai **SQL**, jika tabel tidak ada / connection error → Fallback ke **JSON** (`data/{entitas}.json`).
   - `json` (Force): Semua entitas paksa pakai JSON (gunakan saat TIDAK ada SQL/query database di `references/`).
   - `mysql` (Force): Semua entitas WAJIB SQL (gunakan saat ADA SQL/query database di `references/`). Halt + log error jika koneksi/tabel tidak ada.
-- **Aturan Mutlak SQL vs JSON**: Jika `references/` berisi file/query SQL/database, AI WAJIB menghapus seluruh konsep JSON dan menggunakan `DB_MODE=mysql`/`auto` dengan migrasi SQL di `migrations/`. Jika `references/` tidak berisi SQL sama sekali, AI WAJIB membuat database JSON selengkap mungkin di `data/*.json` dengan file locking & atomic write.
+- **Aturan Mutlak SQL vs JSON**: 
+  - Jika `references/` berisi file/query SQL/database, AI WAJIB menghapus seluruh konsep JSON dan menggunakan `DB_MODE=mysql`/`auto` dengan migrasi SQL di `migrations/`. **SKIP pembuatan `data/users.json`** — demo users dibuat via migrasi SQL.
+  - Jika `references/` tidak berisi SQL sama sekali, AI WAJIB membuat database JSON selengkap mungkin di `data/*.json` dengan file locking & atomic write. Generate demo users di `data/users.json` dengan password Argon2ID.
+  - **Deteksi otomatis di wizard**: Field `dbMode`, `hasSql`, dan `dynamicFolderMap` di `data/install_config.json` menyimpan hasil deteksi wizard. AI WAJIB membaca file ini di TAHAP 1 audit untuk menentukan strategi database.
 - **User Preference Schema**: Kolom `theme_preference` dan `language_preference` tersimpan di `data/users.json` / tabel `users` MySQL.
 - **JSON Write Safety**: Mutex via file lock `{entitas}.json.lock` + Atomic Write (`.tmp` → `rename()`).
 

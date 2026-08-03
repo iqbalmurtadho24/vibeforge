@@ -198,6 +198,9 @@ require_once __DIR__ . '/header.php';
     var brandingMode = 'manual'; // 'auto' | 'manual' — for Tahap 3 when YA
     var prdMode = 'manual'; // 'auto' | 'manual' — for Tahap 4 when YA
     var pageStructure = { landing: true, login: true, register: true, manajemen: true, admin: true, client: true };
+    var dbModeDetected = 'json';
+    var hasSqlDetected = false;
+    var dynamicFolderMap = { landing: 'index', login: 'login', register: 'register', manajemen: 'manajemen', admin: 'admin', client: 'client' };
 
     // Auto-detected environment data from PHP
     var envData = {
@@ -742,6 +745,13 @@ require_once __DIR__ . '/header.php';
                             '<div class="flex items-center justify-between mb-4">' +
                                 '<h3 class="font-heading font-bold text-sm text-[var(--text-primary)]">File Referensi Saat Ini</h3>' +
                                 '<span class="font-mono text-[10px] text-[var(--text-muted)]" id="refCountLabel">0 file</span>' +
+                            '</div>' +
+                            '<div id="dbModeBanner" class="mb-4 p-3 rounded-xl bg-gray-900 border border-gray-800 text-xs font-mono flex items-center justify-between">' +
+                                '<div class="flex items-center gap-2">' +
+                                    '<i class="ph ph-database text-lg ' + (hasSqlDetected ? 'text-emerald-400' : 'text-amber-400') + '"></i>' +
+                                    '<span>Database Mode: <strong class="' + (hasSqlDetected ? 'text-emerald-400' : 'text-amber-400') + '">' + dbModeDetected.toUpperCase() + '</strong></span>' +
+                                '</div>' +
+                                '<span class="text-[10px] text-gray-400">' + (hasSqlDetected ? 'SQL File/Query Ditemukan' : 'Tidak Ada SQL (JSON File Storage)') + '</span>' +
                             '</div>' +
                             '<div id="refListContainer" class="space-y-2 max-h-64 overflow-y-auto hide-scrollbar">' +
                                 '<p class="text-xs text-[var(--text-muted)] text-center py-4">Belum ada file referensi</p>' +
@@ -2081,6 +2091,22 @@ require_once __DIR__ . '/header.php';
             if (refFiles.length > 0) {
                 hasReferences = true;
                 updateStepUI();
+            }
+        })
+        .catch(function() {});
+
+        // Detect SQL & dynamic structure
+        fetch('/core/router.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ module: 'install', action: 'detect_references_structure', csrf_token: csrfToken })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                dbModeDetected = data.dbMode || 'json';
+                hasSqlDetected = !!data.hasSql;
+                dynamicFolderMap = data.folderMap || dynamicFolderMap;
             }
         })
         .catch(function() {});

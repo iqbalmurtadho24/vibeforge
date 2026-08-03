@@ -132,8 +132,15 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
    - **Jika `references/` Berisi File/Folder**: AI WAJIB mengaudit seluruh file (HTML, PHP, CSS, JS, media, skema SQL) dan alur navigasi.
 3. Audit skema database pada file di `references/`:
    - Cek apakah terdapat file query SQL (`.sql` atau DDL/query SQL di file `.php`).
-   - **Ada SQL**: Rencanakan skema migrasi di `migrations/` & set `DB_MODE=mysql` (atau `auto`).
-   - **Tidak Ada SQL**: Set `DB_MODE=json` & buat skema entitas di `data/*.json`.
+   - **Ada SQL**: Rencanakan skema migrasi di `migrations/` & set `DB_MODE=mysql` (atau `auto`). **SKIP pembuatan `data/users.json`** — demo users akan dibuat via migrasi SQL. Login langsung dari MySQL via `Repo::table()`.
+   - **Tidak Ada SQL**: Set `DB_MODE=json` & buat skema entitas di `data/*.json` dengan file locking (`.lock`) & atomic write (`.tmp` → `rename()`). Generate demo users di `data/users.json` dengan password Argon2ID.
+4. Baca `data/install_config.json`:
+   - Field `dbMode` menunjukkan hasil deteksi otomatis dari wizard (`json` atau `mysql`).
+   - Field `dynamicFolderMap` menunjukkan mapping nama folder `public/` ← `references/` (contoh: `{ "client": "pendaftar" }` artinya folder `public/pendaftar/` untuk role client).
+   - Field `landingLoginRules` menunjukkan aturan Landing ↔ Login:
+     - Jika `landingActive: false` & `loginActive: true` → `public/index.php` adalah halaman login utama (BUKAN redirect ke `/login/`).
+     - Jika `landingActive: true` & `loginActive: true` → `public/index.php` adalah landing page dengan tombol Masuk & Daftar.
+     - Jika `landingActive: true` & `loginActive: false` → Landing page tanpa tombol auth.
 4. Audit struktur file core & root:
    - `include/config.php`, `include/helper.php`
    - `core/router.php`, `core/session.php`, `core/csrf.php`, `core/Repo.php`
@@ -165,7 +172,8 @@ Setiap AI Coding Assistant WAJIB mengikuti 3 Tahap secara linear:
      - Render dinamis di JS via payload `window._i18n = { key: <?= json_encode(t('key')) ?> }`.
      - Dropdown bahasa wajib dikelilingi loop dinamis `getAvailableLanguages()`.
 3. **Demo Users & Security Setup**:
-   - Generate demo users dengan Argon2ID (`password_hash('password123', PASSWORD_ARGON2ID)`) tersimpan di `data/users.json` / MySQL (CLAUDE.md §4b).
+   - **Jika `data/install_config.json` field `dbMode === 'json'`**: Generate demo users dengan Argon2ID (`password_hash('password123', PASSWORD_ARGON2ID)`) tersimpan di `data/users.json`.
+   - **Jika `data/install_config.json` field `dbMode === 'mysql'`**: SKIP pembuatan `data/users.json` — demo users sudah dibuat via migrasi SQL di `migrations/`. Login langsung dari MySQL via `Repo::table('users')`.
    - Setup i18n files (`locales/languages.json` & `locales/*.json`).
 4. **Implementasi Database & CRUD Nyata**:
    - **Jika ditemukan file/query SQL/database di `references/`**: DILARANG KERAS menggunakan JSON database (`data/*.json`). Konfigurasi `DB_MODE=mysql`/`auto`, bangun migrasi SQL di `migrations/`, jalankan query via `Repo::table()`. Seluruh fitur CRUD berjalan terhadap MySQL.

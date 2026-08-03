@@ -139,6 +139,13 @@ switch ($action) {
         handleDetectDbModeFromReferences($input);
         break;
 
+    // -----------------------------------------------------------------------
+    // detect_references_structure — scan references/ for dynamic page folders
+    // -----------------------------------------------------------------------
+    case 'detect_references_structure':
+        handleDetectReferencesStructure();
+        break;
+
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => "Unknown action: {$action}"]);
@@ -479,14 +486,103 @@ function handleDeleteRef(array $input): void
     }
 }
 
-/* -------------------------------------------------------------------------- */
-/* New Handlers for Install Flow Improvements                                 */
-/* -------------------------------------------------------------------------- */
+/**
+ * Helper: Detect references directory structure and extract dynamic page folder mappings.
+ * Returns map of page key -> public subfolder name, SQL detection status, and DB_MODE.
+ */
+function getReferencesStructure(): array
+{
+    $refDir = ROOT_PATH . '/references';
+    $folderMap = [
+        'landing'    => 'index',
+        'login'      => 'login',
+        'register'   => 'register',
+        'manajemen'  => 'manajemen',
+        'admin'      => 'admin',
+        'client'     => 'client',
+    ];
+
+    $detectedPages = [];
+    $hasSql = false;
+    $sqlFiles = [];
+
+    if (is_dir($refDir)) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($refDir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            if ($item->isFile()) {
+                $filename = strtolower($item->getFilename());
+                $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+                if ($ext === 'sql') {
+                    $hasSql = true;
+                    $sqlFiles[] = $item->getFilename();
+                }
+
+                // Check for SQL content in PHP files
+                if ($ext === 'php' || $ext === 'inc') {
+                    $content = @file_get_contents($item->getPathname());
+                    if ($content && preg_match('/CREATE\s+TABLE|INSERT\s+INTO|SELECT\s+.*\s+FROM|mysqli_connect|PDO\s*\(.*mysql/i', $content)) {
+                        $hasSql = true;
+                    }
+                }
+
+                // Extract dynamic folder names from HTML/PHP reference filenames
+                // e.g. modul_pendaftar.html -> folder 'pendaftar' for client role
+                if (str_starts_with($filename, 'modul_')) {
+                    $roleName = preg_replace('/^modul_|\.(html|php)$/', '', $filename);
+                    if ($roleName === 'manajemen' || $roleName === 'admin' || $roleName === 'client') {
+                        $folderMap[$roleName] = $roleName;
+                    } else {
+                        // Custom dynamic role folder name
+                        $folderMap['client'] = $roleName;
+                    }
+                    $detectedPages[] = $roleName;
+                }
+            }
+        }
+    }
+
+    $dbMode = $hasSql ? 'mysql' : 'json';
+
+    return [
+        'folderMap' => $folderMap,
+        'detectedPages' => $detectedPages,
+        'hasSql' => $hasSql,
+        'sqlFiles' => $sqlFiles,
+        'dbMode' => $dbMode,
+    ];
+}
+
+function handleDetectReferencesStructure(): void
+{
+    $structure = getReferencesStructure();
+    echo json_encode([
+        'success' => true,
+        'folderMap' => $structure['folderMap'],
+        'detectedPages' => $structure['detectedPages'],
+        'hasSql' => $structure['hasSql'],
+        'sqlFiles' => $structure['sqlFiles'],
+        'dbMode' => $structure['dbMode'],
+    ]);
+}
 
 /**
  * Remove public/ folders and files for pages that are NOT checked in the
  * wizard's Tahap 3B (Struktur Halaman). This ensures only active pages
  * remain in the public/ directory.
+ *
+ * Rules:
+ * 1. Read dynamic folder names from references/ directory structure.
+ * 2. If Landing is UNCHECKED and Login is CHECKED:
+ *    - public/index.php is generated as the primary Login Page (NOT a redirect to /login/).
+ *    - Remove public/login/ folder if it exists.
+ * 3. If Landing is UNCHECKED and Login is UNCHECKED: Invalid state.
+ * 4. If Landing is CHECKED and Login is CHECKED: Landing displays Login & Register buttons.
+ * 5. If Landing is CHECKED and Login is UNCHECKED: Landing displays NO auth buttons.
  */
 function handleCleanupUncheckedPages(array $input): void
 {
@@ -502,28 +598,17 @@ function handleCleanupUncheckedPages(array $input): void
         'client'     => !empty($pageStructure['client']),
     ];
 
-    // Map page keys to their public/ subfolder names
-    // IMPORTANT: Use dynamic folder names from references/ structure, not hardcoded names.
-    // The folder name in public/ MUST match the folder name used in references/.
-    // For now, we use the page key as the folder name (backward compatible).
-    // In a future enhancement, this will be read from references/ directory structure.
-    $pageFolderMap = [
-        'landing'    => 'index',       // public/index.php (no subfolder)
-        'login'      => 'login',
-        'register'   => 'register',
-        'manajemen'  => 'manajemen',
-        'admin'      => 'admin',
-        'client'     => 'client',
-    ];
+    // Detect dynamic folder map from references/ directory
+    $detectedStructure = getReferencesStructure();
+    $pageFolderMap = $detectedStructure['folderMap'];
 
-    // Also map to related files that should be removed when a page is unchecked
-    $pageRelatedFiles = [
-        'manajemen'  => ['public/manajemen/index.php'],
-        'admin'      => ['public/admin/index.php'],
-        'client'     => ['public/client/index.php'],
-        'register'   => ['public/register/index.php'],
-        'login'      => ['public/login/index.php'],
-    ];
+    // Map related files to remove for unchecked pages
+    $pageRelatedFiles = [];
+    foreach ($pageFolderMap as $key => $folder) {
+        if ($key !== 'landing') {
+            $pageRelatedFiles[$key] = ["public/{$folder}/index.php"];
+        }
+    }
 
     $removed = [];
     $errors = [];
@@ -535,7 +620,8 @@ function handleCleanupUncheckedPages(array $input): void
 
         // Remove subfolder for this page (if not landing — landing is public/index.php)
         if ($pageKey !== 'landing' && isset($pageFolderMap[$pageKey])) {
-            $folderPath = ROOT_PATH . '/public/' . $pageFolderMap[$pageKey];
+            $folderName = $pageFolderMap[$pageKey];
+            $folderPath = ROOT_PATH . '/public/' . $folderName;
             if (is_dir($folderPath)) {
                 $files = new RecursiveIteratorIterator(
                     new RecursiveDirectoryIterator($folderPath, RecursiveDirectoryIterator::SKIP_DOTS),
@@ -568,37 +654,109 @@ function handleCleanupUncheckedPages(array $input): void
         }
     }
 
-    // If landing is unchecked but login is checked, ensure public/index.php
-    // contains a redirect to /login/ (per install.md rules)
+    // =========================================================================
+    // Rule: Login di Index (CLAUDE.md Pilar 1 §2a)
+    // Jika Landing TIDAK dicentang & Login DICENTANG:
+    // Halaman Login TETAP berada di public/index.php — JANGAN redirect ke /login/.
+    // Hapus folder public/login/ jika ada.
+    // =========================================================================
     if (!$pages['landing'] && $pages['login']) {
-        $indexPath = ROOT_PATH . '/public/index.php';
-        $redirectContent = '<?php' . "\n" .
-            '/**' . "\n" .
-            ' * Landing Page disabled — redirect to Login' . "\n" .
-            ' */' . "\n" .
-            'defined(\'APP_ENTRY\') or define(\'APP_ENTRY\', true);' . "\n" .
-            'header(\'Location: /login/\');' . "\n" .
-            'exit;' . "\n";
+        $loginFolder = ROOT_PATH . '/public/' . ($pageFolderMap['login'] ?? 'login');
+        if (is_dir($loginFolder)) {
+            $files = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($loginFolder, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($files as $file) {
+                if ($file->isDir()) {
+                    @rmdir($file->getRealPath());
+                } else {
+                    @unlink($file->getRealPath());
+                }
+            }
+            @rmdir($loginFolder);
+            $removed[] = $loginFolder . ' (removed — login moved to public/index.php)';
+        }
 
-        if (file_exists($indexPath)) {
+        // Write Login SPA shell directly to public/index.php
+        $indexPath = ROOT_PATH . '/public/index.php';
+        $loginReferencePath = ROOT_PATH . '/references/login.html';
+
+        if (file_exists($loginReferencePath)) {
+            $loginContent = file_get_contents($loginReferencePath);
             $tmpFile = $indexPath . '.tmp';
-            if (@file_put_contents($tmpFile, $redirectContent) !== false) {
+            if (@file_put_contents($tmpFile, $loginContent) !== false) {
                 @rename($tmpFile, $indexPath);
-                $removed[] = $indexPath . ' (replaced with redirect)';
-            } else {
-                $errors[] = 'Failed to update public/index.php with redirect';
+                $removed[] = $indexPath . ' (updated to Login Page directly from references/login.html)';
+            }
+        } else {
+            // Fallback lightweight Login shell if login.html is missing
+            $loginShellContent = <<<'PHP'
+<?php
+/**
+ * Vibeforge Login Page (Index Shell)
+ * Landing Page disabled — Login is primary entry point
+ */
+defined('APP_ENTRY') or define('APP_ENTRY', true);
+
+require_once __DIR__ . '/../include/config.php';
+require_once __DIR__ . '/../include/helper.php';
+require_once __DIR__ . '/../core/session.php';
+require_once __DIR__ . '/../core/csrf.php';
+
+initSession();
+
+if (isLoggedIn()) {
+    header('Location: ' . getDashboardUrl());
+    exit;
+}
+
+$csrfToken = generateCsrfToken();
+$currentLang = $_SESSION['language'] ?? detectLanguage();
+?>
+<!DOCTYPE html>
+<html lang="<?= $currentLang ?>" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= escape(APP_DISPLAY_NAME) ?> - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/branding.css">
+</head>
+<body class="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-[var(--bg-card)] p-8 rounded-2xl border border-[var(--border-default)] shadow-2xl">
+        <h1 class="text-2xl font-bold mb-6 text-center text-gradient"><?= escape(APP_DISPLAY_NAME) ?></h1>
+        <form action="/core/router.php" method="POST" class="space-y-4">
+            <input type="hidden" name="module" value="auth">
+            <input type="hidden" name="action" value="login">
+            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+            <div>
+                <label class="block text-xs font-mono mb-1 text-[var(--text-secondary)]">Email</label>
+                <input type="email" name="email" required class="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-mono mb-1 text-[var(--text-secondary)]">Password</label>
+                <input type="password" name="password" required class="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg text-sm">
+            </div>
+            <button type="submit" class="w-full py-2.5 bg-gradient-brand text-white font-bold rounded-lg text-sm">Masuk</button>
+        </form>
+    </div>
+</body>
+</html>
+PHP;
+            $tmpFile = $indexPath . '.tmp';
+            if (@file_put_contents($tmpFile, $loginShellContent) !== false) {
+                @rename($tmpFile, $indexPath);
+                $removed[] = $indexPath . ' (updated to Login Page directly)';
             }
         }
     }
-
-    // If landing IS checked and login is also checked, ensure public/index.php
-    // is the landing page (not a redirect). This is handled by the build process.
 
     echo json_encode([
         'success' => true,
         'removed' => $removed,
         'errors' => $errors,
-        'message' => 'Cleanup complete: unchecked page folders and files removed.',
+        'message' => 'Cleanup complete: unchecked page folders removed, dynamic folder map applied.',
     ]);
 }
 
@@ -1138,6 +1296,8 @@ Setiap AI Coding Assistant (Claude Code CLI) WAJIB mengikuti urutan 3 Tahap Ekse
 MD;
 
     // SIMPAN KONFIGURASI ke data/install_config.json (bukan overwrite install.md)
+    $detectedStructure = getReferencesStructure();
+
     $configData = [
         'serverType' => $serverType,
         'drive' => $drive,
@@ -1147,6 +1307,15 @@ MD;
         'brandingMode' => $brandingMode,
         'prdMode' => $prdMode,
         'referencesCount' => count($refFiles),
+        'dbMode' => $detectedStructure['dbMode'],
+        'hasSql' => $detectedStructure['hasSql'],
+        'dynamicFolderMap' => $detectedStructure['folderMap'],
+        'landingLoginRules' => [
+            'landingActive' => $pages['landing'],
+            'loginActive' => $pages['login'],
+            'registerActive' => $pages['register'],
+            'loginPage' => (!$pages['landing'] && $pages['login']) ? 'public/index.php' : 'public/login/index.php',
+        ],
         'updated_at' => date('Y-m-d H:i:s'),
     ];
 
